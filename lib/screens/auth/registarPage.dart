@@ -27,7 +27,7 @@ class _RegisterPageState extends State<RegisterPage> {
       var response = await authApi.criarConta(nome, email);
       if (response.statusCode == 201) {
         Fluttertoast.showToast(
-          msg: "Registro bem-sucedido!",
+          msg: "Registo bem-sucedido!",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.CENTER,
           backgroundColor: Colors.green,
@@ -35,10 +35,19 @@ class _RegisterPageState extends State<RegisterPage> {
           fontSize: 16.0,
         );
         Navigator.pushReplacementNamed(context, '/login');
-      } else {
+      } else if (response.statusCode == 400) {
         var error = jsonDecode(response.body)['error'];
         Fluttertoast.showToast(
           msg: error,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      } else {
+        Fluttertoast.showToast(
+          msg: "Erro desconhecido. Por favor, tente novamente.",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.CENTER,
           backgroundColor: Colors.red,

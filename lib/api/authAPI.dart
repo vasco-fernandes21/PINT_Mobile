@@ -5,8 +5,12 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class AuthApi {
   final String apiUrl = dotenv.env['API_URL']!;
 
-  Future<http.Response> login(String email, String password) {
-    return http.post(
+  // Variáveis globais para armazenar os tokens
+  String? token;
+  String? recoveryToken;
+
+  Future<Map<String, dynamic>> login(String email, String password) async {
+    final response = await http.post(
       Uri.parse('$apiUrl/login/mobile'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -16,6 +20,17 @@ class AuthApi {
         'password': password,
       }),
     );
+
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      token = data['token'];
+      recoveryToken = data['recoveryToken'];
+      print('Token: $token');
+      print('Recovery Token: $recoveryToken');
+      return {'statusCode': response.statusCode, 'body': data};
+    } else {
+      throw Exception('Failed to login');
+    }
   }
 
   Future<http.Response> criarConta(String nome, String email) {
@@ -65,15 +80,17 @@ class AuthApi {
     );
   }
 
-  Future<http.Response> resetarPasse(String token, String novaPass) {
-    return http.post(
-      Uri.parse('$apiUrl/reset-passe'),
+  Future<http.Response> resetarPasse(String recoveryToken, String novaPass) async {
+    final url = Uri.parse('$apiUrl/reset-passe');
+
+    return await http.post(
+      url,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(<String, String>{
-        'token': token,
         'novaPass': novaPass,
+        'token': recoveryToken,  // Add recoveryToken to the request body
       }),
     );
   }

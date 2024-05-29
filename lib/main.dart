@@ -4,6 +4,7 @@ import 'screens/auth/loginPage.dart';
 import 'screens/auth/registarPage.dart';
 import 'screens/auth/recuperarPage.dart';
 import 'screens/homePage.dart';
+import 'screens/auth/novapassPage.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env.dev"); 
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
         '/registar': (context) => RegisterPage(), // Define the '/registar' route
         '/recuperar': (context) => RecuperarPage(), // Define the '/recuperar' route
         '/': (context) => HomePage(), // Define the '/' route
+        '/novapass': (context) => NovaPassPage(), // Define the '/novapass' route
       },
     );
   }

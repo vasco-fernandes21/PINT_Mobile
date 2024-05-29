@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../api/authAPI.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
 
 class LoginPage extends StatefulWidget {
   @override
@@ -16,38 +14,68 @@ class _LoginPageState extends State<LoginPage> {
   String _email = '';
   String _password = '';
 
-  void _submit() {
+  void _submit() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      _login(_email, _password);
-    }
-  }
+      try {
+        var response = await authApi.login(_email, _password);
+        if (response != null && response.containsKey('statusCode')) {
+          print('Response Status Code: ${response['statusCode']}');
+          if (response['statusCode'] == 200 && response.containsKey('body')) {
+            var data = response['body'];
+            print('Response Data: $data');
+            var recoveryToken = data['recoveryToken'];
 
-  Future<void> _login(String email, String password) async {
-    var response = await authApi.login(email, password);
-    if (response.statusCode == 200) {
-      var data = jsonDecode(response.body);
-      var id = data['id']; // Aqui estamos assumindo que o id está no campo 'id' da resposta
-      var nome = data['nome']; // Aqui estamos assumindo que o nome está no campo 'name' da resposta
-      Fluttertoast.showToast(
-        msg: "Login realizado com sucesso",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-      Navigator.pushReplacementNamed(context, '/');
-    } else {
-      var error = jsonDecode(response.body)['error'];
-      Fluttertoast.showToast(
-        msg: error,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+            if (recoveryToken != null && recoveryToken.isNotEmpty) {
+              // If recoveryToken is present, redirect to password reset page
+              Navigator.pushReplacementNamed(context, '/novapass', arguments: {'recoveryToken': recoveryToken});
+            } else {
+              Fluttertoast.showToast(
+                msg: "Login realizado com sucesso",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.CENTER,
+                backgroundColor: Colors.green,
+                textColor: Colors.white,
+                fontSize: 16.0,
+              );
+              Navigator.pushReplacementNamed(context, '/');
+            }
+          } else {
+            var error = response['body'] != null && response['body'].containsKey('error')
+                ? response['body']['error']
+                : 'Unknown error';
+            print('Error: $error');
+            Fluttertoast.showToast(
+              msg: error,
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              backgroundColor: Colors.red,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+          }
+        } else {
+          print('Response is null or does not contain statusCode');
+          Fluttertoast.showToast(
+            msg: 'Erro na resposta do servidor',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        }
+      } catch (e) {
+        print('Exception: $e');
+        Fluttertoast.showToast(
+          msg: 'Erro inesperado',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      }
     }
   }
 
