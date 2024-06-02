@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import '../../api/authAPI.dart';
-import 'dart:convert';
+import '../../api/api.dart'; // Certifique-se de que o caminho está correto
 
 class NovaPassPage extends StatefulWidget {
   @override
@@ -10,7 +9,7 @@ class NovaPassPage extends StatefulWidget {
 }
 
 class _NovaPassPageState extends State<NovaPassPage> {
-  final AuthApi authApi = AuthApi();
+  final ApiClient api = ApiClient();
   final _formKey = GlobalKey<FormState>();
   String _password = '';
   String _confirmPassword = '';
@@ -29,17 +28,20 @@ class _NovaPassPageState extends State<NovaPassPage> {
         );
         return;
       }
-      _changePassword(_password, _confirmPassword);
+      _changePassword(_password);
     }
   }
 
-  Future<void> _changePassword(String password, String confirmPassword) async {
-    var arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
-    var recoveryToken = arguments['recoveryToken'];
+  Future<void> _changePassword(String password) async {
+    try {
+      var arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+      var recoveryToken = arguments['recoveryToken'];
 
-    var response = await authApi.resetarPasse(recoveryToken, password);
+      var response = await api.post('/reset-passe', body: {
+        'novaPass': password,
+        'token': recoveryToken,
+      });
 
-    if (response.statusCode == 200) {
       Fluttertoast.showToast(
         msg: "Palavra-passe redefinida com sucesso",
         toastLength: Toast.LENGTH_SHORT,
@@ -49,10 +51,9 @@ class _NovaPassPageState extends State<NovaPassPage> {
         fontSize: 16.0,
       );
       Navigator.pushReplacementNamed(context, '/');
-    } else {
-      var error = jsonDecode(response.body)['error'];
+    } catch (e) {
       Fluttertoast.showToast(
-        msg: error,
+        msg: e.toString(),
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.CENTER,
         backgroundColor: Colors.red,

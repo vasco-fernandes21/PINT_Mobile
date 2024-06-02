@@ -24,10 +24,9 @@ class _LoginPageState extends State<LoginPage> {
           if (response['statusCode'] == 200 && response.containsKey('body')) {
             var data = response['body'];
             print('Response Data: $data');
-            var recoveryToken = data['recoveryToken'];
+            var recoveryToken = data['recoveryToken'] ?? '';
 
-            if (recoveryToken != null && recoveryToken.isNotEmpty) {
-              // If recoveryToken is present, redirect to password reset page
+            if (recoveryToken.isNotEmpty) {
               Navigator.pushReplacementNamed(context, '/novapass', arguments: {'recoveryToken': recoveryToken});
             } else {
               Fluttertoast.showToast(
