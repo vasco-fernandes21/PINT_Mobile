@@ -1,97 +1,60 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart'; 
+import 'package:shared_preferences/shared_preferences.dart';
+import 'api.dart';
 
 class AuthApi {
-  final String apiUrl = dotenv.env['API_URL']!;
-
-  // Variáveis globais para armazenar os tokens
-  String? token;
-  String? recoveryToken;
+  final ApiClient api = ApiClient();
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final response = await http.post(
-      Uri.parse('$apiUrl/login/mobile'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'email': email,
-        'password': password,
-      }),
-    );
+    final response = await api.post('/login/mobile', body: {
+      'email': email,
+      'password': password,
+    });
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      token = data['token'];
-      recoveryToken = data['recoveryToken'];
-      print('Token: $token');
-      print('Recovery Token: $recoveryToken');
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', data['token']);
+      if (data['recoveryToken'] != null) {
+        await prefs.setString('recoveryToken', data['recoveryToken']);
+      }
+      print('Token: ${data['token']}');
+      print('Recovery Token: ${data['recoveryToken']}');
       return {'statusCode': response.statusCode, 'body': data};
     } else {
-      throw Exception('Failed to login');
+      var errorData = jsonDecode(response.body);
+      throw Exception(errorData['error'] ?? 'Failed to login');
     }
   }
 
   Future<http.Response> criarConta(String nome, String email) {
-    return http.post(
-      Uri.parse('$apiUrl/registar'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'nome': nome,
-        'email': email,
-      }),
-    );
+    return api.post('/registar', body: {
+      'nome': nome,
+      'email': email,
+    });
   }
 
   Future<http.Response> listarUtilizadores() {
-    return http.get(
-      Uri.parse('$apiUrl/listar'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
+    return api.get('/listar');
   }
 
   Future<http.Response> googleLogin(String token) {
-    return http.post(
-      Uri.parse('$apiUrl/login/google'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'token': token,
-      }),
-    );
+    return api.post('/login/google', body: {
+      'token': token,
+    });
   }
-
 
   Future<http.Response> recuperarPasse(String email) {
-    return http.post(
-      Uri.parse('$apiUrl/recuperar-passe'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'email': email,
-      }),
-    );
+    return api.post('/recuperar-passe', body: {
+      'email': email,
+    });
   }
 
-  Future<http.Response> resetarPasse(String recoveryToken, String novaPass) async {
-    final url = Uri.parse('$apiUrl/reset-passe');
-
-    return await http.post(
-      url,
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'novaPass': novaPass,
-        'token': recoveryToken,  // Add recoveryToken to the request body
-      }),
-    );
+  Future<http.Response> resetarPasse(String recoveryToken, String novaPass) {
+    return api.post('/reset-passe', body: {
+      'novaPass': novaPass,
+      'token': recoveryToken,
+    });
   }
 }
