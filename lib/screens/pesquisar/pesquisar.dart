@@ -14,8 +14,6 @@ class Pesquisar extends StatefulWidget {
 
 class _PesquisarState extends State<Pesquisar> {
   List<Map<String, dynamic>> areas = [];
-  Map<String, dynamic>? Area;
-  int selectedAreaId = 0;
   bool isLoading = true;
 
   
@@ -113,7 +111,7 @@ class _PesquisarState extends State<Pesquisar> {
                             ),
                         ),
                         Icon(
-                            Icons.sports_soccer,
+                            Icons.food_bank,
                             color: Colors.white,
                             size: 70
                           ),

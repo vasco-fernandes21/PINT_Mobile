@@ -5,6 +5,7 @@ import 'screens/pesquisar/pesquisar.dart';
 import 'screens/notificacoes/notificacoes.dart';
 import 'screens/perfil/perfil.dart';
 import 'screens/criar/criarEvento.dart';
+import 'screens/criar/criarEstabelecimento.dart';
 import 'screens/pesquisar/EstabelecimentosPorArea.dart';
 
 class NavBar extends StatelessWidget {
@@ -20,26 +21,26 @@ class NavBar extends StatelessWidget {
         BottomNavigationBarItem(
           icon: Icon(Icons.home_outlined),
           activeIcon:  Icon(Icons.home),
-          label: 'Home',
+          label: '',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.search),
-          label: 'Search',
+          label: '',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.add_circle_outline),
           activeIcon:  Icon(Icons.add_circle),
-          label: 'Add',
+          label: '',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.notifications_outlined),
           activeIcon:  Icon(Icons.notifications),
-          label: 'Notifications',
+          label: '',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),
           activeIcon:  Icon(Icons.person),
-          label: 'Profile',
+          label: '',
         ),
       ],
       currentIndex: index,
@@ -62,12 +63,46 @@ class NavBar extends StatelessWidget {
                   );
             break;
           case 2:
-            Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CriarEvento(postoID: postoID),
-                    ),
-                  );
+showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Escolha uma opção', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold,)),
+                content: SingleChildScrollView(
+                  child: ListBody(
+                    children: <Widget>[
+                      GestureDetector(
+                        child: Text('Criar Evento'),
+                        onTap: () {
+                          Navigator.pop(context); // Fechar o popup
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CriarEventosPage(postoID: postoID),
+                            ),
+                          );
+                        },
+                      ),
+                      Padding(padding: EdgeInsets.all(8.0)),
+                      GestureDetector(
+                        child: Text('Criar Estabelecimento'),
+                        onTap: () {
+                          Navigator.pop(context); // Fechar o popup
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CriarEstabelecimentoPage(postoID: postoID),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+          break;
             break;
           case 3:
             Navigator.push(

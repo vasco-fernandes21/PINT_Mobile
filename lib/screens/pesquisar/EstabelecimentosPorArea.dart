@@ -130,7 +130,7 @@ class _AreaEstabelecimentosState extends State<AreaEstabelecimentos> {
                         onTap: () => { Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => EstabelecimentoPage(estabelecimentoID: estab['id'], NomeEstabelecimento: estab['nome']),
+                      builder: (context) => EstabelecimentoPage(estabelecimentoID: estab['id'], NomeEstabelecimento: estab['nome'], postoID: widget.postoID),
                     ),
                   )},
                         child: Card(
@@ -162,14 +162,14 @@ class _AreaEstabelecimentosState extends State<AreaEstabelecimentos> {
                                   children: [
                                     Text(
                                       estab['nome'],
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    SizedBox(height: 5),
+                                    const SizedBox(height: 5),
                                     Text(estab['subarea']),
-                                    SizedBox(height: 5),
+                                    const SizedBox(height: 5),
                                     Text(estab['morada']),
                                   ],
                                 ),
