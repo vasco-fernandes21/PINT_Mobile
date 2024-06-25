@@ -7,6 +7,7 @@ import 'screens/home/homePage.dart';
 import 'screens/auth/novapassPage.dart';
 import 'screens/selectPosto.dart';
 import 'navbar.dart';
+import 'screens/mapa.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env.dev"); 
@@ -40,7 +41,8 @@ class MyApp extends StatelessWidget {
         '/recuperar': (context) => RecuperarPage(), // Define the '/recuperar' route
         //'/': (context) => NavBar(postoID: 1), // Define the '/' route
         '/novapass': (context) => NovaPassPage(), // Define the '/novapass' route
-        '/selecionarposto': (context) => SelectPosto()
+        '/selecionarposto': (context) => SelectPosto(),
+        '/mapa': (context) => MapSample()
       },
     );
   }

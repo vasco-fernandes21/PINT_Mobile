@@ -24,6 +24,7 @@ dependencies:
   readmore: ^3.0.0
   rating_summary: ^1.0.2+1
   flutter_rating_bar: ^4.0.1
+  google_maps_flutter: ^2.7.0
 
 dev_dependencies:
   flutter_test:

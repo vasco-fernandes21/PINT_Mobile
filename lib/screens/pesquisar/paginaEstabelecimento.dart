@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -6,6 +7,9 @@ import 'package:pint/api/postosAreasAPI.dart';
 import 'package:pint/navbar.dart';
 import 'package:readmore/readmore.dart';
 import 'package:rating_summary/rating_summary.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 
 class EstabelecimentoPage extends StatefulWidget {
   final int postoID;
@@ -30,6 +34,8 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
   int currentPage = 1;
   int itemsPerPage = 3;
   TextEditingController _avaliacaoController = TextEditingController();
+  final Completer<GoogleMapController> _controller =
+      Completer<GoogleMapController>();
 
   @override
   void initState() {
@@ -111,6 +117,9 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
         .length;
   }
 
+  static const CameraPosition _kLake =
+      CameraPosition(target: LatLng(40.6698912, -7.9306995), zoom: 15);
+
   @override
   Widget build(BuildContext context) {
     int totalPages = (avaliacoes.length / itemsPerPage).ceil();
@@ -148,10 +157,10 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                                       size: 50,
                                     ),
                                   ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             Text(
                               estabelecimento!['nome'],
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -163,7 +172,7 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             ReadMoreText(
                               estabelecimento?['descricao'],
                               trimMode: TrimMode.Line,
@@ -221,8 +230,8 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                                   Map<String, dynamic> avaliacao =
                                       avaliacoes[index];
                                   return ListTile(
-                                    leading: Icon(Icons.star,
-                                        color: Colors.amber),
+                                    leading:
+                                        Icon(Icons.star, color: Colors.amber),
                                     title: Text(
                                         '${avaliacao['utilizador']['nome']}'),
                                     subtitle: Text(
@@ -233,8 +242,17 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                                 }
                               },
                             ),
+                            RatingBarIndicator(
+                              rating: 3.4,
+                              itemCount: 5,
+                              itemSize: 30,
+                              itemBuilder: (context, _) => Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                              ),
+                            ),
                             const SizedBox(height: 10),
-                            Row(
+                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: List.generate(
                                 totalPages,
@@ -247,13 +265,12 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                                   child: Text((pageIndex + 1).toString()),
                                   style: ButtonStyle(
                                     backgroundColor:
-                                        MaterialStateProperty.all<Color>(
+                                        WidgetStateProperty.all<Color>(
                                             Colors.grey[200]!),
-                                    foregroundColor:
-                                        MaterialStateProperty.all(
-                                            currentPage == pageIndex + 1
-                                                ? Colors.blue
-                                                : Colors.black),
+                                    foregroundColor: WidgetStateProperty.all(
+                                        currentPage == pageIndex + 1
+                                            ? Colors.blue
+                                            : Colors.black),
                                   ),
                                 ),
                               ),
@@ -294,6 +311,51 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
+                            Text(
+                              'Morada: ${estabelecimento?['morada']}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                              ),
+                            ),
+                            Text(
+                              'Telefone: ${estabelecimento?['telemovel']}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                              ),
+                            ),
+                            Text(
+                              'Email: ${estabelecimento?['email']}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            const Text(
+                              'Localização',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 200,
+                              child: GoogleMap(
+                                initialCameraPosition: _kLake,
+                                markers: {
+                                  Marker(
+                                    markerId: MarkerId('restaurant'),
+                                    position: LatLng(40.6698912, -7.9306995),
+                                  ),
+                                },
+                                mapType: MapType.normal,
+                                onMapCreated: (GoogleMapController controller) {
+                                  _controller.complete(controller);
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 15),
                           ],
                         ),
                       ),
