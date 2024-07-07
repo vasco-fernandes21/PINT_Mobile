@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'api.dart';
 
@@ -56,4 +55,10 @@ class EventosAPI {
   String endpoint = '/eventos/$eventoId';
   return api.get(endpoint);
   }
+
+  Future<http.Response> listarEventosPorPosto(int idPosto) {
+    String endpoint ='/eventos/mobile?idPosto=$idPosto';
+    return api.get(endpoint);
+  }
+
 }
