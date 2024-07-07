@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:pint/calendario.dart';
 import 'package:pint/utils/colors.dart';
 import 'screens/auth/loginPage.dart';
 import 'screens/auth/registarPage.dart';
@@ -45,7 +46,7 @@ class MyApp extends StatelessWidget {
           )
         )
       ),
-      home: isLoggedIn == true ? SelectPosto() : LoginPage(), 
+      home: Calendario(), 
       routes: {
         '/login': (context) => LoginPage(), // Define the '/login' route
         '/registar': (context) => RegisterPage(), // Define the '/registar' route
@@ -57,3 +58,4 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
