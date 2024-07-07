@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:pint/utils/colors.dart';
 import 'screens/home/homePage.dart';
 import 'screens/pesquisar/pesquisar.dart';
 import 'screens/notificacoes/notificacoes.dart';
@@ -103,7 +104,6 @@ showDialog(
             },
           );
           break;
-            break;
           case 3:
             Navigator.push(
                     context,
@@ -124,7 +124,7 @@ showDialog(
       },
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white70,
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: primaryColor,
         showSelectedLabels: false,
         showUnselectedLabels: false,
         type: BottomNavigationBarType.fixed,

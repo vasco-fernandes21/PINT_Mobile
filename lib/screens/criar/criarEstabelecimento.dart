@@ -1,9 +1,18 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pint/api/EstabelecimentosAPI.dart';
+import 'package:pint/models/area.dart';
+import 'package:pint/models/subarea.dart';
 import 'package:pint/navbar.dart';
-import 'package:pint/api/postosAreasAPI.dart';
+import 'package:pint/utils/colors.dart';
+import 'package:pint/utils/fetch_functions.dart';
+import 'package:pint/utils/form_validators.dart';
+import 'package:pint/widgets/dropdown_input.dart';
+import 'package:pint/widgets/image_input.dart';
+import 'package:pint/widgets/text_input.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CriarEstabelecimentoPage extends StatefulWidget {
   final int postoID;
@@ -15,147 +24,93 @@ class CriarEstabelecimentoPage extends StatefulWidget {
 }
 
 class _CriarEstabelecimentoPageState extends State<CriarEstabelecimentoPage> {
-  List<Map<String, dynamic>> areas = [];
-  List<Map<String, dynamic>> subareas = [];
+  List<Area> areas = [];
+  List<Subarea> subareas = [];
   int? selectedAreaId;
   int? selectedSubareaId;
   bool _isSubareaEnabled = false;
   File? _selectedImage;
+  bool isImageNull = false;
 
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _nomeController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _moradaController = TextEditingController();
   final TextEditingController _telemovelController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  
 
   @override
   void initState() {
     super.initState();
-    fetchAreas();
+    loadAreas();
   }
 
-  void fetchAreas() async {
-    final api_areas = PostosAreasAPI();
-    final response = await api_areas.listarAreas();
-
-    if (response.statusCode == 200) {
-      try {
-        // Decodificar a resposta JSON
-        Map<String, dynamic> jsonResponse = json.decode(response.body);
-
-        // Verificar se a chave 'data' existe na resposta
-        if (jsonResponse.containsKey('data')) {
-          // Acessar a lista de postos dentro de 'data'
-          List<dynamic> areasData = jsonResponse['data'];
-
-          setState(() {
-            areas = areasData
-                .map<Map<String, dynamic>>((item) => {
-                      'id': item['id'],
-                      'nome': item['nome'],
-                    })
-                .toList();
-            //isLoading = false;
-          });
-        } else {
-          // Se 'data' não estiver presente na resposta
-          //isLoading =false;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text('Dados de postos não encontrados na resposta')),
-          );
-        }
-      } catch (e) {
-        // Capturar e mostrar erros de decodificação JSON
-        //isLoading =false;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao processar os dados: $e')),
-        );
-      }
-    } else {
-      // Tratar erros de status HTTP
-      //isLoading =false;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Erro ao carregar dados: ${response.statusCode}')),
-      );
-    }
+    void loadAreas() async {
+    final fetchedAreas = await fetchAreas(context);
+    setState(() {
+      areas = fetchedAreas;
+    });
+  }
+  
+    void loadSubareas(int areaId) async {
+    final fetchedSubareas = await fetchSubareas(context, areaId);
+    setState(() {
+      subareas = fetchedSubareas;
+    });
   }
 
-  void fetchSubareas(int areaID) async {
-    final api_areas = PostosAreasAPI();
-    final response = await api_areas.listarSubareasPorArea(areaID);
-
-    if (response.statusCode == 200) {
-      try {
-        // Decodificar a resposta JSON
-        Map<String, dynamic> jsonResponse = json.decode(response.body);
-
-        // Verificar se a chave 'data' existe na resposta
-        if (jsonResponse.containsKey('data')) {
-          // Acessar a lista de subáreas dentro de 'data'
-          List<dynamic> subareasData = jsonResponse['data'];
-
-          setState(() {
-            subareas = subareasData
-                .map<Map<String, dynamic>>((item) => {
-                      'id': item['id'],
-                      'nome': item['nome'],
-                    })
-                .toList();
-            //isLoading = false;
-          });
-        } else {
-          // Se 'data' não estiver presente na resposta
-          setState(() {
-            subareas = [];
-            //isLoading = false;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text('Dados de subáreas não encontrados na resposta')),
-          );
-        }
-      } catch (e) {
-        // Capturar e mostrar erros de decodificação JSON
-        setState(() {
-          subareas = [];
-          //isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao processar os dados: $e')),
-        );
-      }
-    } else {
-      // Tratar erros de status HTTP
-      setState(() {
-        subareas = [];
-        //isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Erro ao carregar dados: ${response.statusCode}')),
-      );
-    }
-  }
-
-  Future<void> _pickImage() async {
+    Future<void> _pickImage() async {
     final pickedFile =
         await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _selectedImage = File(pickedFile.path);
+        isImageNull = false;
       });
     }
   }
 
-  Future<void> _createEsatabelecimento() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      // Todos os campos obrigatórios são válidos.
-      // Submeter o formulário.
+Future<void> _createEstabelecimento() async {
+  
+  if(_selectedImage == null){
+    setState(() {
+        isImageNull = true;
+      });
+    return;
+  }
+  if (_formKey.currentState?.validate() ?? false) {
+    final api_estabelecimentos = EstabelecimentosAPI();
+    
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+
+    // Chame a função criarEstabelecimento
+    final response = await api_estabelecimentos.criarEstabelecimento(
+      nome: _nomeController.text,
+      descricao: _descriptionController.text,
+      morada: _moradaController.text,
+      telemovel:  _telemovelController.text.isNotEmpty ? int.tryParse(_telemovelController.text) : null,
+      email: _emailController.text.isNotEmpty ? _emailController.text : null,
+      areaId: selectedAreaId!,
+      subareaId: selectedSubareaId!,
+      idPosto: widget.postoID,
+      foto: _selectedImage!,
+      authToken: prefs.getString('token')
+    );
+
+    // Manipule a resposta da API
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      // Sucesso
+     Fluttertoast.showToast(msg: 'Estabelecimento enviado para aprovação' , backgroundColor: successColor, toastLength: Toast.LENGTH_LONG, fontSize: 11,);
+      Navigator.pop(context);  // Volte para a tela anterior ou vá para outra tela
+    } else {
+      // Erro
+      Fluttertoast.showToast(msg: 'Erro ao criar estabelecimento', fontSize: 12, backgroundColor: errorColor); 
     }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -167,178 +122,72 @@ class _CriarEstabelecimentoPageState extends State<CriarEstabelecimentoPage> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: SingleChildScrollView(
+            child: Column(
             children: [
               const SizedBox(height: 15),
-              Container(
-                width: 380,
-                child: TextFormField(
-                  controller: _titleController,
-                  decoration: InputDecoration(
-                    labelText: 'Nome do Estabelecimento',
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor, insira o título';
+              TextInput(controller: _nomeController, label: 'Nome do Estabelecimento', keyboardType: TextInputType.text, errorMessage: 'Por favor, insira o nome'),
+              const SizedBox(height: 15),
+              DropdownInput<int>(
+                value: selectedAreaId,
+                 items: areas.map((area) {
+                  return DropdownMenuItem<int>(
+                    value: area.id,
+                    child: Text(area.nome, overflow: TextOverflow.ellipsis,),
+                  );
+                }).toList(),
+                  onChanged: (int? newValue) {
+                  setState(() {
+                    selectedAreaId = newValue;
+                    selectedSubareaId = null;
+                    subareas = [];
+                    if (newValue != null) {
+                      loadSubareas(newValue);
                     }
-                    return null;
-                  },
-                ),
-              ),
+                  });
+                },
+                   label: 'Área',
+                   validator: (value) => validateNotEmpty(value?.toString(), errorMessage: 'Por favor, selecione uma área'),
+              ), 
               const SizedBox(height: 15),
-              Container(
-                width: 380,
-                child: DropdownButtonFormField<int>(
-                  value: selectedAreaId,
-                  onChanged: (int? newValue) {
-                    setState(() {
-                      selectedAreaId = newValue;
-                      selectedSubareaId = null;
-                      subareas = [];
-                      if (newValue != null) {
-                        fetchSubareas(newValue);
-                      }
-                    });
-                  },
-                  items: areas
-                      .map<DropdownMenuItem<int>>((Map<String, dynamic> area) {
-                    return DropdownMenuItem<int>(
-                      value: area['id'],
-                      child: Text(area['nome']),
-                    );
-                  }).toList(),
-                  decoration: InputDecoration(
-                    labelText: 'Área',
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
+              DropdownInput<int>(
+                value: selectedSubareaId, 
+                items:subareas.map((subarea) {
+                  return DropdownMenuItem<int>(
+                    value: subarea.id,
+                    child: Text(subarea.nome, overflow: TextOverflow.ellipsis,),
+                  );
+                }).toList(),
+                onChanged: (int? newValue) {
+                  setState(() {
+                    selectedSubareaId = newValue;
+                  });
+                },
+                label: 'Subárea',
+                validator: (value) => validateNotEmpty(value?.toString(), errorMessage: 'Por favor, selecione uma subárea'),
                 ),
-              ),
               const SizedBox(height: 15),
-              Container(
-                width: 380,
-                child: DropdownButtonFormField<int>(
-                  isExpanded: true,
-                  value: selectedSubareaId,
-                  onChanged: (int? newValue) {
-                    setState(() {
-                      selectedSubareaId = newValue;
-                    });
-                  },
-                  items: subareas.map<DropdownMenuItem<int>>(
-                      (Map<String, dynamic> subarea) {
-                    return DropdownMenuItem<int>(
-                      value: subarea['id'],
-                      child: Text(
-                        subarea['nome'],
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    );
-                  }).toList(),
-                  decoration: InputDecoration(
-                    labelText: 'Subárea',
-                    labelStyle: TextStyle(
-                      color: selectedAreaId == null
-                          ? Colors.grey
-                          : Colors.grey[800],
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-              ),
+              TextInput(controller: _descriptionController, label: 'Descrição', keyboardType: TextInputType.text, errorMessage: 'Por favor, insira a descrição'),
               const SizedBox(height: 15),
-              Container(
-                width: 380,
-                child: TextFormField(
-                  controller: _descriptionController,
-                  decoration: InputDecoration(
-                    labelText: 'Descrição',
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-              ),
+              TextInput(controller: _telemovelController, label: 'Telemóvel', keyboardType: TextInputType.phone, errorMessage: '', isFieldRequired: false,),
               const SizedBox(height: 15),
-              Container(
-                width: 380,
-                child: TextFormField(
-                  controller: _telemovelController,
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    labelText: 'Telemóvel',
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-              ),
+              TextInput(controller: _emailController, label: 'Email', keyboardType: TextInputType.emailAddress, errorMessage: '', isFieldRequired: false,),
               const SizedBox(height: 15),
-              Container(
-                width: 380,
-                child: TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-              ),
+              TextInput(controller: _moradaController, label: 'Morada', keyboardType: TextInputType.streetAddress, errorMessage: 'Por favor, insira a morada'),
               const SizedBox(height: 15),
-              Container(
-                width: 380,
-                child: TextFormField(
-                  controller: _moradaController,
-                  keyboardType: TextInputType.streetAddress,
-                  decoration: InputDecoration(
-                    labelText: 'Morada',
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-              ),
+              ImageInput(selectedImage: _selectedImage, onPickImage: _pickImage, validator: isImageNull,),         
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _createEsatabelecimento,
-                child: const Text('Criar Evento'),
+                onPressed: _createEstabelecimento,
+                child: const Text('Criar Estabelecimento'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1D324F),
+                  backgroundColor: primaryColor,
                   foregroundColor: Colors.white,
                 ),
               ),
               const SizedBox(height: 15),
             ],
+          ),
           ),
         ),
       ),

@@ -9,4 +9,12 @@ class AvaliacoesAPI {
     
   }
 
+    Future<http.Response> criarAvaliacaoEstabelecimento(int estabelecimentoId, int idUtilizador, int? classificacao, String? comentario) {
+    return api.post('/avaliacao/estabelecimentos/criar/$estabelecimentoId', body: {
+      'idUtilizador': idUtilizador,
+      'classificacao': classificacao,
+      'comentario': comentario
+    });
+  }
+
 }

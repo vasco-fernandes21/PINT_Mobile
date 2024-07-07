@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../api/authAPI.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pint/screens/selectPosto.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -11,14 +12,15 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final AuthApi authApi = AuthApi();
   final _formKey = GlobalKey<FormState>();
-  String _email = '';
-  String _password = '';
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   void _submit() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       try {
-        var response = await authApi.login(_email, _password);
+        var response = await authApi.login(
+            _emailController.text, _passwordController.text);
         if (response != null && response.containsKey('statusCode')) {
           print('Response Status Code: ${response['statusCode']}');
           if (response['statusCode'] == 200 && response.containsKey('body')) {
@@ -27,7 +29,8 @@ class _LoginPageState extends State<LoginPage> {
             var recoveryToken = data['recoveryToken'] ?? '';
 
             if (recoveryToken.isNotEmpty) {
-              Navigator.pushReplacementNamed(context, '/novapass', arguments: {'recoveryToken': recoveryToken});
+              Navigator.pushReplacementNamed(context, '/novapass',
+                  arguments: {'recoveryToken': recoveryToken});
             } else {
               Fluttertoast.showToast(
                 msg: "Login realizado com sucesso",
@@ -37,10 +40,15 @@ class _LoginPageState extends State<LoginPage> {
                 textColor: Colors.white,
                 fontSize: 16.0,
               );
-              Navigator.pushReplacementNamed(context, '/');
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SelectPosto(),
+                  ));
             }
           } else {
-            var error = response['body'] != null && response['body'].containsKey('error')
+            var error = response['body'] != null &&
+                    response['body'].containsKey('error')
                 ? response['body']['error']
                 : 'Unknown error';
             print('Error: $error');
@@ -83,126 +91,145 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 17),
         child: Form(
           key: _formKey,
-          child: Column(
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(top: 100), // Ajuste este valor para controlar o espaço no topo
-                child: SvgPicture.asset(
-                  'assets/images/softinsa.svg',
-                  width: 200,
-                  height: 200,
-                ),
-              ),
-              Container(
-                width: 380, // Ajuste este valor para controlar a largura do TextFormField
-                margin: EdgeInsets.symmetric(vertical: 5), // Adiciona margem vertical entre os campos
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
+          child: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                SizedBox(height: 100),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal:
+                          15), // Ajuste este valor para controlar o espaço no topo
+                  child: SvgPicture.asset(
+                    'assets/images/softinsa.svg',
+                    height: 90,
+                    fit: BoxFit.fitHeight,
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor, insira o seu email.';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _email = value!;
-                  },
                 ),
-              ),
-              SizedBox(height: 10),
-              Container(
-                width: 380, // Ajuste este valor para controlar a largura do TextFormField
-                margin: EdgeInsets.symmetric(vertical: 5), // Adiciona margem vertical entre os campos
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor, insira a sua palavra-passe.';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _password = value!;
-                  },
-                ),
-              ),
-              SizedBox(height: 12), // Adiciona um espaço entre os botões
-              Container(
-                width: 380,
-                margin: EdgeInsets.symmetric(vertical: 10), // Adiciona margem vertical entre o botão e os campos
-                child: Column(
-                  children: [
-                    SizedBox(
-                      width: 380, // Define a largura do botão
-                      child: ElevatedButton(
-                        onPressed: _submit,
-                        child: Text('ENTRAR'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF1D324F), // Define a cor de fundo do botão
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10), // Radius da borda
-                          ),
-                          padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15), // Padding
-                          textStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.bold), // Tamanho do texto
-                          foregroundColor: Colors.white, // Cor do texto
-                        ),
+                SizedBox(
+                    height:
+                        20), // Adiciona espaço entre o logo e o primeiro campo
+                Container(
+                  width: 380,
+                  child: TextFormField(
+                    keyboardType: TextInputType.emailAddress,
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
                       ),
                     ),
-                    SizedBox(height: 10), // Adiciona um espaço entre os botões
-                    SizedBox(
-                      width: 380, // Define a largura do botão
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Navigate to the registration page
-                          Navigator.pushNamed(context, '/registar');
-                        },
-                        child: Text('CRIAR CONTA'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF1D324F), // Define a cor de fundo do botão
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10), // Radius da borda
-                          ),
-                          padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15), // Padding
-                          textStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.bold), // Tamanho do texto
-                          foregroundColor: Colors.white, // Cor do texto
-                        ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor, insira o seu email.';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                SizedBox(height: 15),
+                Container(
+                  width: 380,
+                  child: TextFormField(
+                    keyboardType: TextInputType.visiblePassword,
+                    controller: _passwordController,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
                       ),
                     ),
-                  ],
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor, insira a sua palavra-passe.';
+                      }
+                      return null;
+                    },
+                  ),
                 ),
-              ),
-              Spacer(), // Adds a flexible space before the TextButton
-              Container(
-                margin: EdgeInsets.only(bottom: 20), // Adds a bottom margin
-                child: TextButton(
-                  onPressed: () {
-                    // Navigate to the password recovery page
-                    Navigator.pushNamed(context, '/recuperar');
-                  },
-                  child: Text('Esqueceu a palavra-passe?'),
+                const SizedBox(height: 15),
+                Container(
+                  width:
+                      380, // Adiciona margem vertical entre o botão e os campos
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        width: 380, // Define a largura do botão
+                        height: 40,
+                        child: ElevatedButton(
+                          onPressed: _submit,
+                          child: Text('ENTRAR'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(
+                                0xFF1D324F), // Define a cor de fundo do botão
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(10), // Radius da borda
+                            ),
+                            // Padding
+                            textStyle: TextStyle(
+                                fontSize: 15,
+                                fontWeight:
+                                    FontWeight.bold), // Tamanho do texto
+                            foregroundColor: Colors.white, // Cor do texto
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                          height: 10), // Adiciona um espaço entre os botões
+                      SizedBox(
+                        width: 380,
+                        height: 40, // Define a largura do botão
+                        child: ElevatedButton(
+                          onPressed: () {
+                            // Navigate to the registration page
+                            Navigator.pushNamed(context, '/registar');
+                          },
+                          child: Text('CRIAR CONTA'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(
+                                0xFF1D324F), // Define a cor de fundo do botão
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(10), // Radius da borda
+                            ),
+                            // Padding
+                            textStyle: TextStyle(
+                                fontSize: 15,
+                                fontWeight:
+                                    FontWeight.bold), // Tamanho do texto
+                            foregroundColor: Colors.white, // Cor do texto
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                // Adds a flexible space before the TextButton
+                Container(
+                  child: TextButton(
+                    onPressed: () {
+                      // Navigate to the password recovery page
+                      Navigator.pushNamed(context, '/recuperar');
+                    },
+                    child: const Text(
+                      'Esqueceste-te da palavra-passe?',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

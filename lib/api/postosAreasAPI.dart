@@ -17,15 +17,4 @@ class PostosAreasAPI {
   return api.get(endpoint);
   }
 
-  Future<http.Response> listarEstabelecimentosPorArea(int idPosto, int areaId) {
-  String endpoint = '/estabelecimentos/mobile?idPosto=$idPosto&&areaId=$areaId';
-  return api.get(endpoint);
-  }
-
-  Future<http.Response> listarEstabelecimento(int idEstabelecimento) {
-  String endpoint = '/estabelecimentos/$idEstabelecimento';
-  return api.get(endpoint);
-  }
-
-
 }

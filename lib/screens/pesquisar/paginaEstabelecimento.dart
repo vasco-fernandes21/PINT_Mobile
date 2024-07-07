@@ -2,14 +2,27 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pint/api/AvaliacoesAPI.dart';
 import 'package:pint/api/postosAreasAPI.dart';
+import 'package:pint/models/avaliacao.dart';
+import 'package:pint/models/estabelecimento.dart';
 import 'package:pint/navbar.dart';
+import 'package:pint/utils/colors.dart';
+import 'package:pint/utils/fetch_functions.dart';
+import 'package:pint/widgets/alert_confirmation.dart';
+import 'package:pint/widgets/avaliacao_input.dart';
+import 'package:pint/widgets/show_avaliacoes.dart';
+import 'package:pint/widgets/sumario_avaliacoes.dart';
 import 'package:readmore/readmore.dart';
 import 'package:rating_summary/rating_summary.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:pint/api/api.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EstabelecimentoPage extends StatefulWidget {
   final int postoID;
@@ -27,98 +40,143 @@ class EstabelecimentoPage extends StatefulWidget {
 
 class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
   bool isLoading = true;
-  Map<String, dynamic>? estabelecimento;
-  List<dynamic> avaliacoes = [];
+  Estabelecimento? estabelecimento;
+  List<Avaliacao> avaliacoes = [];
   int numAvaliacoes = 1;
   double mediaAvaliacoes = 0;
+  bool isRatingNull = false;
   int currentPage = 1;
   int itemsPerPage = 3;
-  TextEditingController _avaliacaoController = TextEditingController();
+  final TextEditingController _avaliacaoController = TextEditingController();
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
+
+  CameraPosition? _localizacao;
+
+  double? latitude;
+  double? longitude;
+
+  late final _ratingController;
+  int? _rating;
+
+  final api = ApiClient();
 
   @override
   void initState() {
     super.initState();
-    fetchEstabelecimento();
+    loadEstabelecimento();
   }
 
-  void fetchEstabelecimento() async {
-    final api = PostosAreasAPI();
-    final response = await api.listarEstabelecimento(widget.estabelecimentoID);
-
-    if (response.statusCode == 200) {
-      try {
-        Map<String, dynamic> jsonResponse = json.decode(response.body);
-        setState(() {
-          estabelecimento = jsonResponse['data'];
-          isLoading = false;
-        });
-        fetchAvaliacoes();
-      } catch (e) {
-        setState(() {
-          isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao processar os dados: $e')),
-        );
-      }
-    } else {
+  void loadEstabelecimento() async {
+    try {
+      final fetchedEstabelecimentos =
+          await fetchEstabelecimento(widget.estabelecimentoID);
+      setState(() {
+        estabelecimento = fetchedEstabelecimentos;
+      });
+      setLatitudeLongitude(estabelecimento!.morada);
+      loadAvaliacoes();
+    } catch (e) {
       setState(() {
         isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('Erro ao carregar dados: ${response.statusCode}')),
+          content: Text(e.toString()),
+        ),
       );
     }
   }
 
-  void fetchAvaliacoes() async {
-    final api_avaliacoes = AvaliacoesAPI();
-    final response = await api_avaliacoes
-        .getAvaliacoesEstabelecimento(widget.estabelecimentoID);
-
-    if (response.statusCode == 200) {
-      try {
-        Map<String, dynamic> jsonResponse = json.decode(response.body);
-        setState(() {
-          avaliacoes = jsonResponse['data'];
-          mediaAvaliacoes = jsonResponse['media'] != null
-              ? (jsonResponse['media'] is String
-                  ? double.tryParse(jsonResponse['media']) ?? 0.0
-                  : jsonResponse['media'] as double)
-              : 0.0;
-          isLoading = false;
-        });
+  void loadAvaliacoes() async {
+    try {
+      final response = await fetchAvaliacoes(widget.estabelecimentoID);
+      setState(() {
+        avaliacoes = response['avaliacoes'] as List<Avaliacao>;
         numAvaliacoes = avaliacoes.length;
-      } catch (e) {
-        setState(() {
-          isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao processar os dados: $e')),
-        );
-      }
-    } else {
+        mediaAvaliacoes = response['mediaAvaliacoes'] as double;
+        
+      });
+      setLatitudeLongitude(estabelecimento!.morada);
+    } catch (e) {
       setState(() {
         isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
+      /*ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('Erro ao carregar dados: ${response.statusCode}')),
-      );
+          content: Text(e.toString()),
+        ),
+      );*/
     }
   }
 
   int ContarAvaliacoesPorEstrela(int estrelas) {
     return avaliacoes
-        .where((avaliacao) => avaliacao['classificacao'] == estrelas)
+        .where((avaliacao) => avaliacao.classificacao == estrelas)
         .length;
   }
 
-  static const CameraPosition _kLake =
-      CameraPosition(target: LatLng(40.6698912, -7.9306995), zoom: 15);
+  Future<void> setLatitudeLongitude(String morada) async {
+    try {
+      List<Location> locations = await locationFromAddress(morada);
+      if (locations.isNotEmpty) {
+        setState(() {
+          latitude = locations.first.latitude;
+          longitude = locations.first.longitude;
+          isLoading = false;
+        });
+
+        _localizacao =
+            CameraPosition(target: LatLng(latitude!, longitude!), zoom: 15);
+      }
+    } catch (e) {
+      print('Erro ao obter localização: $e');
+      isLoading = false;
+    }
+  }
+
+  void _alertaConfirmacao(BuildContext context) {
+    if (_rating == null) {
+      setState(() {
+        isRatingNull = true;
+      });
+      return;
+    }
+    ConfirmationAlert.show(
+        context: context,
+        onConfirm: _createAvaliacao,
+        desc: 'Tens a certeza que queres criar uma avaliação?');
+  }
+
+  Future<void> _createAvaliacao() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    int estabelecimentoId = widget.estabelecimentoID;
+    int idUtilizador =
+        1; // Substitua pelo ID real do utilizador assssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+    int? classificacao = _rating;
+    String? comentario =
+        _avaliacaoController.text.isNotEmpty ? _avaliacaoController.text : null;
+
+    // Chame a função para criar a avaliação
+    final api_avaliacoes = AvaliacoesAPI();
+    final response = await api_avaliacoes.criarAvaliacaoEstabelecimento(
+        estabelecimentoId, idUtilizador, classificacao, comentario);
+
+    if (response.statusCode == 200) {
+      // Sucesso
+      Fluttertoast.showToast(
+          msg: 'Avaliação enviada com sucesso!',
+          backgroundColor: successColor,
+          fontSize: 12);
+    } else {
+      // Falha
+      Fluttertoast.showToast(
+          msg: 'Falha ao enviar a avaliação.',
+          backgroundColor: errorColor,
+          fontSize: 12);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -140,9 +198,9 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            estabelecimento!['foto'] != null
+                            estabelecimento!.foto != null
                                 ? Image.network(
-                                    'http://192.168.1.13:3001/uploads/estabelecimentos/${estabelecimento!['foto']}',
+                                    '${api.baseUrl}/uploads/estabelecimentos/${estabelecimento!.foto}',
                                     width: double.infinity,
                                     height: 200,
                                     fit: BoxFit.cover,
@@ -159,7 +217,7 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                                   ),
                             const SizedBox(height: 10),
                             Text(
-                              estabelecimento!['nome'],
+                              estabelecimento!.nome,
                               style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
@@ -174,7 +232,7 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                             ),
                             const SizedBox(height: 10),
                             ReadMoreText(
-                              estabelecimento?['descricao'],
+                              estabelecimento!.descricao,
                               trimMode: TrimMode.Line,
                               trimLines: 7,
                               colorClickableText: Colors.blue,
@@ -196,105 +254,34 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                                   child: Center(
                                       child: Text(
                                           'Ainda não existem avaliações'))),
-                          ],
-                        ),
-                      ),
-                      if (avaliacoes.isNotEmpty)
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                          child: RatingSummary(
-                            counter: numAvaliacoes,
-                            average: mediaAvaliacoes,
-                            counterFiveStars: ContarAvaliacoesPorEstrela(5),
-                            counterFourStars: ContarAvaliacoesPorEstrela(4),
-                            counterThreeStars: ContarAvaliacoesPorEstrela(3),
-                            counterTwoStars: ContarAvaliacoesPorEstrela(2),
-                            counterOneStars: ContarAvaliacoesPorEstrela(1),
-                            label: 'avaliações',
-                            averageStyle: const TextStyle(fontSize: 40),
-                          ),
-                        ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: min(currentPage * itemsPerPage,
-                                  avaliacoes.length),
-                              itemBuilder: (context, index) {
-                                if (index >= (currentPage - 1) * itemsPerPage &&
-                                    index < currentPage * itemsPerPage) {
-                                  Map<String, dynamic> avaliacao =
-                                      avaliacoes[index];
-                                  return ListTile(
-                                    leading:
-                                        Icon(Icons.star, color: Colors.amber),
-                                    title: Text(
-                                        '${avaliacao['utilizador']['nome']}'),
-                                    subtitle: Text(
-                                        '${avaliacao['classificacao']} estrelas'),
-                                  );
-                                } else {
-                                  return Container();
-                                }
-                              },
-                            ),
-                            RatingBarIndicator(
-                              rating: 3.4,
-                              itemCount: 5,
-                              itemSize: 30,
-                              itemBuilder: (context, _) => Icon(
-                                Icons.star,
-                                color: Colors.amber,
-                              ),
-                            ),
+                            if (avaliacoes.isNotEmpty)
+                              SumarioAvaliacoesWidget(
+                                  numAvaliacoes: numAvaliacoes,
+                                  mediaAvaliacoes: mediaAvaliacoes,
+                                  contarAvaliacoesPorEstrela:
+                                      ContarAvaliacoesPorEstrela),
                             const SizedBox(height: 10),
-                             Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(
-                                totalPages,
-                                (pageIndex) => TextButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      currentPage = pageIndex + 1;
-                                    });
-                                  },
-                                  child: Text((pageIndex + 1).toString()),
-                                  style: ButtonStyle(
-                                    backgroundColor:
-                                        WidgetStateProperty.all<Color>(
-                                            Colors.grey[200]!),
-                                    foregroundColor: WidgetStateProperty.all(
-                                        currentPage == pageIndex + 1
-                                            ? Colors.blue
-                                            : Colors.black),
-                                  ),
-                                ),
-                              ),
-                            ),
+                            if(avaliacoes.isNotEmpty)
+                            AvaliacoesWidget(avaliacoes: avaliacoes),
                             const SizedBox(height: 15),
-                            TextField(
+                            AvaliacaoInput(
                               controller: _avaliacaoController,
-                              decoration: InputDecoration(
-                                hintText: 'Escreva a sua avaliação...',
-                                filled: true,
-                                fillColor: Colors.grey[200],
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide.none,
-                                ),
-                              ),
-                              maxLines: 3,
+                              onRatingUpdate: (rating) {
+                                setState(() {
+                                  _rating = rating.round();
+                                  isRatingNull = false;
+                                });
+                              },
+                              validator: isRatingNull,
                             ),
                             const SizedBox(height: 10),
                             Center(
                               child: SizedBox(
                                 width: 380,
                                 child: ElevatedButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    _alertaConfirmacao(context);
+                                  },
                                   child: const Text('Enviar Avaliação'),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF1D324F),
@@ -312,19 +299,19 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                               ),
                             ),
                             Text(
-                              'Morada: ${estabelecimento?['morada']}',
+                              'Morada: ${estabelecimento?.morada}',
                               style: const TextStyle(
                                 fontSize: 14,
                               ),
                             ),
                             Text(
-                              'Telefone: ${estabelecimento?['telemovel']}',
+                              'Telefone: ${estabelecimento?.telemovel ?? ' -'}',
                               style: const TextStyle(
                                 fontSize: 14,
                               ),
                             ),
                             Text(
-                              'Email: ${estabelecimento?['email']}',
+                              'Email: ${estabelecimento?.email ?? ' -'}',
                               style: const TextStyle(
                                 fontSize: 14,
                               ),
@@ -338,23 +325,28 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                               ),
                             ),
                             const SizedBox(height: 5),
-                            SizedBox(
-                              width: double.infinity,
-                              height: 200,
-                              child: GoogleMap(
-                                initialCameraPosition: _kLake,
-                                markers: {
-                                  Marker(
-                                    markerId: MarkerId('restaurant'),
-                                    position: LatLng(40.6698912, -7.9306995),
-                                  ),
-                                },
-                                mapType: MapType.normal,
-                                onMapCreated: (GoogleMapController controller) {
-                                  _controller.complete(controller);
-                                },
-                              ),
-                            ),
+                            /*if (latitude != null &&
+                                longitude != null &&
+                                _localizacao != null)
+                              SizedBox(
+                                width: double.infinity,
+                                height: 200,
+                                child: 
+                                GoogleMap(
+                                  initialCameraPosition: _localizacao!,
+                                  markers: {
+                                    Marker(
+                                      markerId: MarkerId('restaurant'),
+                                      position: LatLng(latitude!, longitude!),
+                                    ),
+                                  },
+                                  mapType: MapType.normal,
+                                  onMapCreated:
+                                      (GoogleMapController controller) {
+                                    _controller.complete(controller);
+                                  },
+                                ),
+                              ),*/
                             const SizedBox(height: 15),
                           ],
                         ),

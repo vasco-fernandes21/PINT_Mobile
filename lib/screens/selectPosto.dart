@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pint/api/postosAreasAPI.dart';
 import 'dart:convert';
 import 'package:pint/navbar.dart';
 import 'package:pint/screens/home/homePage.dart';
+import 'package:pint/utils/colors.dart';
 
 class SelectPosto extends StatefulWidget {
   @override
@@ -64,7 +66,6 @@ class _SelectPostoState extends State<SelectPosto> {
 @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -107,17 +108,12 @@ class _SelectPostoState extends State<SelectPosto> {
                       builder: (context) => HomePage(postoID: selectedPostoId),
                     ),
                   ); 
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      duration: Duration(seconds: 5),
-                      content: Text('Erro: Nenhum posto selecionado')
-                      ),
-                  );
+                } else {                
+                  Fluttertoast.showToast(msg: 'Erro: Nenhum posto selecionado', backgroundColor: Colors.red);
                 }
               },
               style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF1D324F), // Define a cor de fundo do botão
+                          backgroundColor: primaryColor, // Define a cor de fundo do botão
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10), // Radius da borda
                           ),

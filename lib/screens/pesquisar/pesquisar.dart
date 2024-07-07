@@ -111,7 +111,8 @@ class _PesquisarState extends State<Pesquisar> {
                             ),
                         ),
                         Icon(
-                            Icons.food_bank,
+                            Icons.local_taxi
+                            ,
                             color: Colors.white,
                             size: 70
                           ),

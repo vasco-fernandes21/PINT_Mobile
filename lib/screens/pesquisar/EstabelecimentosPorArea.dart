@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:pint/api/EstabelecimentosAPI.dart';
+import 'package:pint/api/api.dart';
 import 'package:pint/navbar.dart';
 import 'package:pint/api/postosAreasAPI.dart';
 import 'paginaEstabelecimento.dart';
@@ -16,7 +18,7 @@ class AreaEstabelecimentos extends StatefulWidget {
 }
 
 class _AreaEstabelecimentosState extends State<AreaEstabelecimentos> {
-
+    final api = ApiClient();
   List<Map<String, dynamic>> estabelecimentos = [];
   List<Map<String, dynamic>> estabelecimentosFiltrados = [];
   String selectedFilter = 'Todos';
@@ -34,7 +36,7 @@ class _AreaEstabelecimentosState extends State<AreaEstabelecimentos> {
   }
 
   void fetchAreas() async {
-    final api = PostosAreasAPI();
+    final api = EstabelecimentosAPI();
     final response = await api.listarEstabelecimentosPorArea(widget.postoID, widget.areaID);
 
   if (response.statusCode == 200) {
@@ -140,7 +142,7 @@ class _AreaEstabelecimentosState extends State<AreaEstabelecimentos> {
                             children: [
                               estab['foto'] != null
                                   ? Image.network(
-                                      'http://192.168.1.13:3001/uploads/estabelecimentos/${estab['foto']}',
+                                      '${api.baseUrl}/uploads/estabelecimentos/${estab['foto']}',
                                       width: double.infinity,
                                       height: 200,
                                       fit: BoxFit.cover,

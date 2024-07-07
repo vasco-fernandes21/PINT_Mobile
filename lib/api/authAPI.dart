@@ -16,6 +16,7 @@ class AuthApi {
       var data = jsonDecode(response.body);
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', data['token']);
+      await prefs.setBool('isLoggedIn', true);
       if (data['recoveryToken'] != null) {
         await prefs.setString('recoveryToken', data['recoveryToken']);
       }
