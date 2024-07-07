@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
           )
         )
       ),
-      home: isLoggedIn == true ? SelectPosto() : LoginPage(), // Define the initial route
+      home: isLoggedIn == true ? SelectPosto() : LoginPage(), 
       routes: {
         '/login': (context) => LoginPage(), // Define the '/login' route
         '/registar': (context) => RegisterPage(), // Define the '/registar' route

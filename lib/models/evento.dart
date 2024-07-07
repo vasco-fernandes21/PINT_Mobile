@@ -28,7 +28,6 @@ class Evento {
       email: json['email'],
       telemovel: json['telemovel'],
       foto: json['foto'],
-      // Inicialize outros campos
     );
   }
 }

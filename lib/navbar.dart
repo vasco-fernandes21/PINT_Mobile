@@ -21,7 +21,7 @@ class NavBar extends StatelessWidget {
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
           icon: Icon(Icons.home_outlined),
-          activeIcon:  Icon(Icons.home),
+          activeIcon: Icon(Icons.home),
           label: '',
         ),
         BottomNavigationBarItem(
@@ -30,17 +30,17 @@ class NavBar extends StatelessWidget {
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.add_circle_outline),
-          activeIcon:  Icon(Icons.add_circle),
+          activeIcon: Icon(Icons.add_circle),
           label: '',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.notifications_outlined),
-          activeIcon:  Icon(Icons.notifications),
+          activeIcon: Icon(Icons.notifications),
           label: '',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),
-          activeIcon:  Icon(Icons.person),
+          activeIcon: Icon(Icons.person),
           label: '',
         ),
       ],
@@ -48,88 +48,109 @@ class NavBar extends StatelessWidget {
       onTap: (index) {
         switch (index) {
           case 0:
-             Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => HomePage(postoID: postoID),
-                    ),
-                  );
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomePage(postoID: postoID),
+              ),
+            );
             break;
           case 1:
             Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Pesquisar(postoID: postoID),
-                    ),
-                  );
+              context,
+              MaterialPageRoute(
+                builder: (context) => Pesquisar(postoID: postoID),
+              ),
+            );
             break;
           case 2:
-showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('Escolha uma opção', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold,)),
-                content: SingleChildScrollView(
-                  child: ListBody(
-                    children: <Widget>[
-                      GestureDetector(
-                        child: Text('Criar Evento'),
-                        onTap: () {
-                          Navigator.pop(context); // Fechar o popup
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CriarEventosPage(postoID: postoID),
-                            ),
-                          );
-                        },
-                      ),
-                      Padding(padding: EdgeInsets.all(8.0)),
-                      GestureDetector(
-                        child: Text('Criar Estabelecimento'),
-                        onTap: () {
-                          Navigator.pop(context); // Fechar o popup
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CriarEstabelecimentoPage(postoID: postoID),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    side: BorderSide(color: Color(0xFF1D324F), width: 0.5),
                   ),
-                ),
-              );
-            },
-          );
-          break;
+                  title: Text(
+                    'Escolha uma opção',
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                  ),
+                  content: SingleChildScrollView(
+                    child: ListBody(
+                      children: <Widget>[
+                        GestureDetector(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                              border: Border(
+                                  bottom:
+                                      BorderSide(color: Colors.grey.shade300)),
+                            ),
+                            child: Text('Criar Evento',
+                                style: TextStyle(fontSize: 16)),
+                          ),
+                          onTap: () {
+                            Navigator.pop(context); // Fechar o popup
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    CriarEventosPage(postoID: postoID),
+                              ),
+                            );
+                          },
+                        ),
+                        GestureDetector(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(vertical: 10),
+                            child: Text('Criar Estabelecimento',
+                                style: TextStyle(fontSize: 16)),
+                          ),
+                          onTap: () {
+                            Navigator.pop(context); // Fechar o popup
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    CriarEstabelecimentoPage(postoID: postoID),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+            break;
           case 3:
             Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Notificacoes(postoID: postoID),
-                    ),
-                  );
+              context,
+              MaterialPageRoute(
+                builder: (context) => Notificacoes(postoID: postoID),
+              ),
+            );
             break;
-            case 4:
+          case 4:
             Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Perfil(postoID: postoID),
-                    ),
-                  );
+              context,
+              MaterialPageRoute(
+                builder: (context) => Perfil(postoID: postoID),
+              ),
+            );
             break;
         }
       },
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white70,
-        backgroundColor: primaryColor,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        type: BottomNavigationBarType.fixed,
-        selectedIconTheme: IconThemeData(size: 30),
-        unselectedIconTheme: IconThemeData(size: 30),
+      selectedItemColor: Colors.white,
+      unselectedItemColor: Colors.white70,
+      backgroundColor: primaryColor,
+      showSelectedLabels: false,
+      showUnselectedLabels: false,
+      type: BottomNavigationBarType.fixed,
+      selectedIconTheme: IconThemeData(size: 30),
+      unselectedIconTheme: IconThemeData(size: 30),
     );
   }
 }
