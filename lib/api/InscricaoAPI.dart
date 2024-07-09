@@ -12,4 +12,9 @@ class InscricoesAPI {
     return api.post('/eventos/inscrever/$eventoId');
   }
 
+  Future<http.Response> apagarInscricaoEvento(int eventoId) {
+    return api.delete('/eventos/desinscrever/$eventoId');
+  }
+
+
 }

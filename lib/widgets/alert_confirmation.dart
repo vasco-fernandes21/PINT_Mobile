@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pint/utils/colors.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 class ConfirmationAlert {
@@ -27,7 +28,8 @@ class ConfirmationAlert {
             onConfirm();
             Navigator.pop(context);
           },
-          color: const Color.fromRGBO(0, 179, 134, 1.0),
+          color: secondaryColor,
+          //color: const Color.fromRGBO(0, 179, 134, 1.0),
         ),
         DialogButton(
           child: const Text(

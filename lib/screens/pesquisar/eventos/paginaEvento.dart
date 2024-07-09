@@ -6,6 +6,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pint/api/InscricaoAPI.dart';
 import 'package:pint/api/api.dart';
+import 'package:pint/models/avaliacao.dart';
 import 'package:pint/models/evento.dart';
 import 'package:pint/models/inscricao.dart';
 import 'package:pint/models/utilizador.dart';
@@ -41,6 +42,7 @@ class _EventoPageState extends State<EventoPage> {
   List<Inscricao> inscricoes = [];
   bool isMyUserTheOwner = false;
   bool isMyUserRegistered = false;
+  List<Avaliacao> comentarios = [];
 
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
@@ -80,6 +82,7 @@ class _EventoPageState extends State<EventoPage> {
         isMyUserTheOwner = verificaCriador(myUser!.id, evento!);
       });
       setLatitudeLongitude(evento!.morada);
+      loadComentarios();
       loadInscricoes();
     } catch (e) {
       setState(() {
@@ -102,11 +105,22 @@ class _EventoPageState extends State<EventoPage> {
         isLoading = false;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erro inscricoes: $e'),
-        ),
-      );
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  void loadComentarios() async{
+    try {
+      final fetchedComentarios = await fetchComentarios(context, widget.eventoID);
+      setState(() {
+        comentarios = fetchedComentarios;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -132,7 +146,7 @@ class _EventoPageState extends State<EventoPage> {
     if (inscrito) {
       ConfirmationAlert.show(
           context: context,
-          onConfirm: () {},
+          onConfirm: _destroyInscricao,
           desc: 'Tens a certeza que queres te desinscrever?');
     } else {
       ConfirmationAlert.show(
@@ -160,6 +174,29 @@ class _EventoPageState extends State<EventoPage> {
       // Falha
       Fluttertoast.showToast(
           msg: 'Erro ao efetuar inscrição.',
+          backgroundColor: errorColor,
+          fontSize: 12);
+    }
+  }
+
+  Future<void> _destroyInscricao() async {
+        final api = InscricoesAPI();
+    final response = await api.apagarInscricaoEvento(widget.eventoID);
+
+    if (response.statusCode == 200) {
+      // Sucesso
+      setState(() {
+        isMyUserRegistered = false;
+      });
+
+      Fluttertoast.showToast(
+          msg: 'Inscrição cancelada com sucesso!',
+          backgroundColor: successColor,
+          fontSize: 12);
+    } else {
+      // Falha
+      Fluttertoast.showToast(
+          msg: 'Erro ao desinscrever.',
           backgroundColor: errorColor,
           fontSize: 12);
     }
@@ -298,6 +335,13 @@ class _EventoPageState extends State<EventoPage> {
                                     title: 'Inscrever'),
                             const SizedBox(
                               height: 15,
+                            ),
+                            const Text(
+                              'Comentários',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),

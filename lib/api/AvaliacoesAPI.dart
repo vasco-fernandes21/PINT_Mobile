@@ -9,6 +9,11 @@ class AvaliacoesAPI {
     
   }
 
+  Future<http.Response> getAvaliacoesEvento(int eventoId) {
+    return api.get('/avaliacao/eventos/$eventoId');
+    
+  }
+
     Future<http.Response> criarAvaliacaoEstabelecimento(int estabelecimentoId, int idUtilizador, int? classificacao, String? comentario) {
     return api.post('/avaliacao/estabelecimentos/criar/$estabelecimentoId', body: {
       'idUtilizador': idUtilizador,

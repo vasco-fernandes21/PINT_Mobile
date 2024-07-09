@@ -6,6 +6,8 @@ class Avaliacao {
   final String nomeUtilizador;
   final String? fotoUtilizador;
   final String data;
+  final int? upvotes;
+  final int? downvotes;
   // Adicione outros campos conforme necessário
 
   Avaliacao({
@@ -16,6 +18,8 @@ class Avaliacao {
     required this.data,
     required this.nomeUtilizador,
     this.fotoUtilizador,
+    this.upvotes,
+    this.downvotes,
     // Inicialize outros campos
   });
 
@@ -28,6 +32,8 @@ class Avaliacao {
       data: json['data'],
       nomeUtilizador: json['utilizador']['nome'],
       fotoUtilizador: json['utilizador']['foto'],
+      upvotes: json['upvotes'],
+      downvotes: json['downvotes'],
       // Inicialize outros campos
     );
   }

@@ -96,6 +96,20 @@ Future<Map<String, Object>> fetchAvaliacoes(int estabelecimentoID) async {
   }
 }
 
+Future<List<Avaliacao>> fetchComentarios(BuildContext context, int eventoId) async {
+  final api = AvaliacoesAPI();
+  final response = await api.getAvaliacoesEvento(eventoId);
+  if (response.statusCode == 200) {
+    final List<dynamic> data = json.decode(response.body)['data'];
+    return data.map((json) => Avaliacao.fromJson(json)).toList();
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Erro ao carregar eventos: ${response.statusCode}')),
+    );
+    return [];
+  }
+}
+
 Future<List<Inscricao>> fetchInscricoes(BuildContext context, int eventoID) async {
   final api = InscricoesAPI();
   final response = await api.getInscricoesEvento(eventoID);
