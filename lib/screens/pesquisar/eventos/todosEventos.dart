@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pint/models/evento.dart';
 import 'package:pint/navbar.dart';
 import 'package:pint/screens/pesquisar/eventos/paginaEvento.dart';
+import 'package:pint/utils/evento_functions.dart';
 import 'package:pint/utils/fetch_functions.dart';
 import 'package:pint/widgets/evento_card.dart';
 
@@ -27,7 +28,7 @@ class _TodosEventosPageState extends State<TodosEventosPage> {
   void loadEventos() async {
     final fetchedEventos = await fetchEventos(context, widget.postoID);
     setState(() {
-      eventos = fetchedEventos;
+      eventos = filtrarEOrdenarEventosFuturos(fetchedEventos);
       isLoading = false;
     });
   }
@@ -55,7 +56,6 @@ class _TodosEventosPageState extends State<TodosEventosPage> {
                               MaterialPageRoute(
                                 builder: (context) => EventoPage(
                                   eventoID: evento.id,
-                                  nomeEvento: evento.titulo,
                                   postoID: widget.postoID,
                                 ),
                               ),

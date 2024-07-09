@@ -10,6 +10,40 @@ int contarAvaliacoesPorEstrela(List<Avaliacao> avaliacoes, int estrelas) {
       .length;
 }
 
+List<Evento> filtrarEOrdenarEventosFuturos(List<Evento> eventos) {
+  DateTime agora = DateTime.now();
+  List<Evento> eventosFuturos = eventos.where((evento) {
+    DateTime dataEvento = DateTime.parse(evento.data);
+    return dataEvento.isAfter(agora);
+  }).toList();
+
+  eventosFuturos.sort((a, b) {
+    DateTime dataA = DateTime.parse(a.data);
+    DateTime dataB = DateTime.parse(b.data);
+    return dataA.compareTo(dataB);
+  });
+
+  return eventosFuturos;
+}
+
+  String formatDataPublicacao(String dataPublicacao) {
+    // Formata a data de publicação no formato desejado
+    DateTime parsedDate = DateTime.parse(dataPublicacao);
+    Duration difference = DateTime.now().difference(parsedDate);
+
+    if (difference.inMinutes < 1) {
+      return 'agora';
+    } else if (difference.inMinutes < 60) {
+      int minutes = difference.inMinutes;
+      return 'há ${minutes == 1 ? '1 minuto' : '$minutes minutos'}';
+    } else if (difference.inHours < 24) {
+      int hours = difference.inHours;
+      return 'há ${hours == 1 ? '1 hora' : '$hours horas'}';
+    } else {
+      return DateFormat('dd/MM/yyyy').format(parsedDate);
+    }
+  }
+
 //Função para devolver uma string formata da data e hora do evento
 String formatarDataHora(String data, String hora) {
   final DateFormat dateFormatter = DateFormat(
@@ -59,4 +93,6 @@ String formatarDataHora(String data, String hora) {
     }
     return false;
   }
+
+
 

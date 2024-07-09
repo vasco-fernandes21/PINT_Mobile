@@ -11,9 +11,11 @@ import 'package:pint/models/evento.dart';
 import 'package:pint/models/inscricao.dart';
 import 'package:pint/models/utilizador.dart';
 import 'package:pint/navbar.dart';
+import 'package:pint/screens/pesquisar/eventos/editarEvento.dart';
 import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/fetch_functions.dart';
 import 'package:pint/widgets/alert_confirmation.dart';
+import 'package:pint/widgets/comentarios_evento.dart';
 import 'package:pint/widgets/custom_button.dart';
 import 'package:readmore/readmore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,12 +24,11 @@ import 'package:pint/utils/evento_functions.dart';
 class EventoPage extends StatefulWidget {
   final int postoID;
   final int eventoID;
-  final String nomeEvento;
 
-  EventoPage(
-      {required this.postoID,
-      required this.eventoID,
-      required this.nomeEvento});
+  EventoPage({
+    required this.postoID,
+    required this.eventoID,
+  });
 
   @override
   State<EventoPage> createState() => _EventoPageState();
@@ -60,7 +61,7 @@ class _EventoPageState extends State<EventoPage> {
     try {
       final SharedPreferences prefs = await _prefs;
       String? token = prefs.getString('token');
-      final fetchedUser = await fetchUtilizadorCompleto(token!);
+      final fetchedUser = await fetchUtilizadorCompleto();
       setState(() {
         myUser = fetchedUser;
       });
@@ -111,13 +112,19 @@ class _EventoPageState extends State<EventoPage> {
     }
   }
 
-  void loadComentarios() async{
+  void loadComentarios() async {
     try {
-      final fetchedComentarios = await fetchComentarios(context, widget.eventoID);
+      final fetchedComentarios =
+          await fetchComentarios(context, widget.eventoID);
       setState(() {
         comentarios = fetchedComentarios;
       });
     } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro comments: $e'),
+        ),
+      );
       setState(() {
         isLoading = false;
       });
@@ -147,12 +154,12 @@ class _EventoPageState extends State<EventoPage> {
       ConfirmationAlert.show(
           context: context,
           onConfirm: _destroyInscricao,
-          desc: 'Tens a certeza que queres te desinscrever?');
+          desc: 'Tens a certeza que te queres desinscrever?');
     } else {
       ConfirmationAlert.show(
           context: context,
           onConfirm: _createInscricao,
-          desc: 'Tens a certeza que queres te inscrever?');
+          desc: 'Tens a certeza que te queres inscrever?');
     }
   }
 
@@ -180,7 +187,7 @@ class _EventoPageState extends State<EventoPage> {
   }
 
   Future<void> _destroyInscricao() async {
-        final api = InscricoesAPI();
+    final api = InscricoesAPI();
     final response = await api.apagarInscricaoEvento(widget.eventoID);
 
     if (response.statusCode == 200) {
@@ -206,7 +213,22 @@ class _EventoPageState extends State<EventoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.nomeEvento),
+        title: isLoading ? Text('Evento') : Text(evento!.titulo),
+        actions: [
+        if (isLoading==false)
+        if (evento!.estado == false && isMyUserTheOwner)
+          IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => EditarEventoPage(
+                          postoID: widget.postoID, evento: evento!)),
+                );
+              },
+              icon: const Icon(Icons.edit)
+              )
+        ],
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
@@ -221,80 +243,86 @@ class _EventoPageState extends State<EventoPage> {
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 15),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            evento?.foto != null
-                                ? Image.network(
-                                    '${api.baseUrl}/uploads/eventos/${evento!.foto}',
-                                    width: double.infinity,
-                                    height: 200,
-                                    fit: BoxFit.cover,
-                                  )
-                                : Container(
-                                    width: double.infinity,
-                                    height: 200,
-                                    color: Colors.grey,
-                                    child: Icon(
-                                      Icons.image_not_supported,
-                                      color: Colors.white,
-                                      size: 50,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              evento?.foto != null
+                                  ? Image.network(
+                                      '${api.baseUrl}/uploads/eventos/${evento!.foto}',
+                                      width: double.infinity,
+                                      height: 200,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Container(
+                                      width: double.infinity,
+                                      height: 200,
+                                      color: Colors.grey,
+                                      child: Icon(
+                                        Icons.image_not_supported,
+                                        color: Colors.white,
+                                        size: 50,
+                                      ),
                                     ),
-                                  ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Text(
-                              evento!.titulo,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
+                              const SizedBox(
+                                height: 10,
                               ),
-                            ),
-                            const Text(
-                              'Descrição',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
+                              Text(
+                                evento!.titulo,
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 5),
-                            ReadMoreText(
-                              evento!.descricao,
-                              trimMode: TrimMode.Line,
-                              trimLines: 7,
-                              colorClickableText: Colors.blue,
-                              trimCollapsedText: 'mostrar mais',
-                              trimExpandedText: 'mostrar menos',
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            const Text(
-                              'Data',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
+                              if (evento!.estado == false)
+                                const Text(
+                                  'Evento pendente à espera de aprovação',
+                                  style: TextStyle(
+                                      color: Colors.amber, fontSize: 12),
+                                ),
+                              const Text(
+                                'Descrição',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 5),
-                            Text(
-                              formatarDataHora(evento!.data, evento!.hora),
-                              style: TextStyle(
-                                fontSize: 14,
+                              const SizedBox(height: 5),
+                              ReadMoreText(
+                                evento!.descricao,
+                                trimMode: TrimMode.Line,
+                                trimLines: 7,
+                                colorClickableText: Colors.blue,
+                                trimCollapsedText: 'mostrar mais',
+                                trimExpandedText: 'mostrar menos',
                               ),
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            const Text(
-                              'Localização',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
+                              const SizedBox(
+                                height: 15,
                               ),
-                            ),
-                            const SizedBox(height: 5),
-                            /*if (latitude != null &&
+                              const Text(
+                                'Data',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                formatarDataHora(evento!.data, evento!.hora),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              const Text(
+                                'Localização',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              /*if (latitude != null &&
                                 longitude != null &&
                                 _localizacao != null)
                               SizedBox(
@@ -316,35 +344,43 @@ class _EventoPageState extends State<EventoPage> {
                                   },
                                 ),
                               ),*/
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            isMyUserRegistered
-                                ? CustomButton(
-                                    onPressed: () {
-                                      _alertaConfirmacao(context, true);
-                                    },
-                                    title: 'Desinscrever',
-                                    backgroundColor: Colors.grey.shade200,
-                                    textColor: primaryColor,
-                                  )
-                                : CustomButton(
-                                    onPressed: () {
-                                      _alertaConfirmacao(context, false);
-                                    },
-                                    title: 'Inscrever'),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            const Text(
-                              'Comentários',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
+                              const SizedBox(
+                                height: 15,
                               ),
-                            ),
-                          ],
-                        ),
+                              if (evento!.estado)
+                                isMyUserRegistered
+                                    ? CustomButton(
+                                        onPressed: () {
+                                          _alertaConfirmacao(context, true);
+                                        },
+                                        title: 'Desinscrever',
+                                        backgroundColor: Colors.grey.shade200,
+                                        textColor: secondaryColor,
+                                      )
+                                    : CustomButton(
+                                        onPressed: () {
+                                          _alertaConfirmacao(context, false);
+                                        },
+                                        title: 'Inscrever'),
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              const Text(
+                                'Comentários',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              comentarios.isEmpty
+                                  ? const Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 20),
+                                      child: Center(
+                                          child: Text(
+                                              'Ainda não existem comentários')))
+                                  : ComentariosList(comentarios: comentarios),
+                            ]),
                       )
                     ],
                   ),

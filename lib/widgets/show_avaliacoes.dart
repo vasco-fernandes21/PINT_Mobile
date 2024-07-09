@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:pint/api/api.dart';
 import 'package:pint/models/avaliacao.dart';
 import 'package:pint/utils/colors.dart';
+import 'package:pint/utils/evento_functions.dart';
 import 'package:readmore/readmore.dart';
 
 class AvaliacoesWidget extends StatefulWidget {
@@ -19,23 +20,7 @@ class _AvaliacoesWidgetState extends State<AvaliacoesWidget> {
   int itemsPerPage = 3;
   int itemsToShow = 3;
 
-  String formatDataPublicacao(String dataPublicacao) {
-    // Formata a data de publicação no formato desejado
-    DateTime parsedDate = DateTime.parse(dataPublicacao);
-    Duration difference = DateTime.now().difference(parsedDate);
 
-    if (difference.inMinutes < 1) {
-      return 'agora';
-    } else if (difference.inMinutes < 60) {
-      int minutes = difference.inMinutes;
-      return 'há ${minutes == 1 ? '1 minuto' : '$minutes minutos'}';
-    } else if (difference.inHours < 24) {
-      int hours = difference.inHours;
-      return 'há ${hours == 1 ? '1 hora' : '$hours horas'}';
-    } else {
-      return DateFormat('dd/MM/yyyy').format(parsedDate);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
+import 'package:pint/models/utilizador.dart';
 import 'package:pint/utils/colors.dart';
+import 'package:pint/utils/fetch_functions.dart';
 import 'screens/auth/loginPage.dart';
 import 'screens/auth/registarPage.dart';
 import 'screens/auth/recuperarPage.dart';
@@ -15,11 +17,18 @@ import 'package:intl/date_symbol_data_local.dart';
 Future<void> main() async {
   await dotenv.load(fileName: ".env.dev"); 
   initializeDateFormatting();
-  Intl.defaultLocale = 'pt_BR';
+  Intl.defaultLocale = 'pt_PT';
   SharedPreferences prefs = await SharedPreferences.getInstance();
   var isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  if (isLoggedIn){
+    Utilizador? myUser;
+    myUser = await fetchUtilizadorCompleto();
+    if (myUser == null){
+      isLoggedIn = false;
+    }
+  }
   runApp(MyApp(isLoggedIn: isLoggedIn));
-  
+
 }
 
 class MyApp extends StatelessWidget {

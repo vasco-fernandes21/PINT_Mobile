@@ -1,12 +1,14 @@
 class Evento {
   final int id;
-  late final int idCriador;
+  final int idCriador;
+  final int idArea;
+  final int idSubarea;
   final bool estado;
   final String titulo;
   final String descricao;
   final String morada;
   final String? email;
-  final int? telemovel;
+  final String? telemovel;
   final String? foto;
   final String data;
   final String hora;
@@ -15,6 +17,8 @@ class Evento {
   Evento({
     required this.id,
     required this.idCriador,
+    required this.idArea,
+    required this.idSubarea,
     required this.estado,
     required this.titulo,
     required this.descricao,
@@ -31,6 +35,8 @@ class Evento {
     return Evento(
       id: json['id'],
       idCriador: json['idCriador'],
+      idArea: json['idArea'],
+      idSubarea: json['idSubarea'],
       estado: json['estado'],
       titulo: json['titulo'],
       descricao: json['descricao'],

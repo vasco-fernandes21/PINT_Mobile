@@ -51,6 +51,8 @@ class EventoCard extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  if (evento.estado == false)
+                  const Text('Evento pendente à espera de aprovação', style: TextStyle(color: Colors.amber , fontSize: 11.5),),
                   const SizedBox(height: 5),
                   Text(evento.data),
                   const SizedBox(height: 5),

@@ -36,11 +36,11 @@ class _HomePageState extends State<HomePage> {
   void loadMyUser() async {
     final SharedPreferences prefs = await _prefs;
     String? token = prefs.getString('token');
-    final fetchedUser = await fetchUtilizadorCompleto(token!);
+    final fetchedUser = await fetchUtilizadorCompleto();
     setState(() {
       myUser = fetchedUser;
-      
     });
+
   }
 
   void loadEventos() async {

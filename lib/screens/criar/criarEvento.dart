@@ -86,6 +86,13 @@ class _CriarEventosPageState extends State<CriarEventosPage> {
     });
     }
 
+    if(_selectedDate == null){
+      setState(() {
+        showValidationDate = true;
+      });
+      return;
+    }
+
     if(_selectedImage == null){
        setState(() {
         isImageNull = true;
