@@ -101,6 +101,13 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
   }
 
   Future<void> setLatitudeLongitude(String morada) async {
+    if (morada.isEmpty) {
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+
     try {
       List<Location> locations = await locationFromAddress(morada);
       if (locations.isNotEmpty) {
@@ -307,7 +314,7 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                               ),
                             ),
                             const SizedBox(height: 5),
-                            /*if (latitude != null &&
+                            if (latitude != null &&
                                 longitude != null &&
                                 _localizacao != null)
                               SizedBox(
@@ -328,7 +335,7 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                                     _controller.complete(controller);
                                   },
                                 ),
-                              ),*/
+                              ),
                             const SizedBox(height: 15),
                           ],
                         ),
