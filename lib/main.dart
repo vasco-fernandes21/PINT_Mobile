@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:pint/calendario.dart';
 import 'package:pint/utils/colors.dart';
 import 'screens/auth/loginPage.dart';
@@ -12,40 +13,48 @@ import 'screens/selectPosto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
-  await dotenv.load(fileName: ".env.dev"); 
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env.dev");
   SharedPreferences prefs = await SharedPreferences.getInstance();
   var isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+  // Inicializa o locale
+  await initializeDateFormatting('pt_PT', null);
+
   runApp(MyApp(isLoggedIn: isLoggedIn));
 }
 
 class MyApp extends StatelessWidget {
-  var isLoggedIn;
+  final bool isLoggedIn;
+
   MyApp({required this.isLoggedIn});
 
   @override
-  Widget build(BuildContext context) { 
-    SystemChrome.setPreferredOrientations([ //Apenas permita usar a app em vertical
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.portraitDown,
-      ]);
+  Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'My Flutter App',
       theme: ThemeData(
         primaryColor: primaryColor,
         scaffoldBackgroundColor: backgroundColor,
-
-        colorScheme: ColorScheme.fromSeed(seedColor:primaryColor),
-
+        colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
         appBarTheme: const AppBarTheme(
           centerTitle: true,
           backgroundColor: Colors.white,
           titleTextStyle: TextStyle(
             color: Colors.black,
-            fontSize: 15
-          )
-        )
+            fontSize: 15,
+          ),
+        ),
       ),
+   
+
+
       home: Calendario(), 
       routes: {
         '/login': (context) => LoginPage(), // Define the '/login' route

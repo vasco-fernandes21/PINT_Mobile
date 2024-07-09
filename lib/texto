@@ -1,0 +1,7 @@
+void loadEventos() async {
+    final fetchedEventos = await fetchEventos(context, 1);
+    setState(() {
+       eventos = fetchedEventos;
+
+    });
+  }
