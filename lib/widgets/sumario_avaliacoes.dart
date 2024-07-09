@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:pint/models/avaliacao.dart';
+import 'package:pint/utils/evento_functions.dart';
 import 'package:rating_summary/rating_summary.dart';
 
 class SumarioAvaliacoesWidget extends StatelessWidget {
   final int numAvaliacoes;
   final double mediaAvaliacoes;
-  final int Function(int) contarAvaliacoesPorEstrela;
+  final List<Avaliacao> avaliacoes;
 
   const SumarioAvaliacoesWidget({
     required this.numAvaliacoes,
     required this.mediaAvaliacoes,
-    required this.contarAvaliacoesPorEstrela,
+    required this.avaliacoes,
   });
 
   @override
@@ -20,11 +22,11 @@ class SumarioAvaliacoesWidget extends StatelessWidget {
         Expanded(
           child: RatingSummary(
             counter: numAvaliacoes,
-            counterFiveStars: contarAvaliacoesPorEstrela(5),
-            counterFourStars: contarAvaliacoesPorEstrela(4),
-            counterThreeStars: contarAvaliacoesPorEstrela(3),
-            counterTwoStars: contarAvaliacoesPorEstrela(2),
-            counterOneStars: contarAvaliacoesPorEstrela(1),
+            counterFiveStars: contarAvaliacoesPorEstrela(avaliacoes, 5),
+            counterFourStars: contarAvaliacoesPorEstrela(avaliacoes, 4),
+            counterThreeStars: contarAvaliacoesPorEstrela(avaliacoes, 3),
+            counterTwoStars: contarAvaliacoesPorEstrela(avaliacoes, 2),
+            counterOneStars: contarAvaliacoesPorEstrela(avaliacoes, 1),
             showAverage: false,
           ),
         ),

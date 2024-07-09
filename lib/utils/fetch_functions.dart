@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:pint/api/AvaliacoesAPI.dart';
 import 'package:pint/api/EstabelecimentosAPI.dart';
 import 'package:pint/api/EventosAPI.dart';
+import 'package:pint/api/InscricaoAPI.dart';
 import 'package:pint/api/UtilizadorAPI.dart';
 import 'package:pint/api/postosAreasAPI.dart';
 import 'package:pint/models/avaliacao.dart';
 import 'package:pint/models/estabelecimento.dart';
 import 'package:pint/models/evento.dart';
+import 'package:pint/models/inscricao.dart';
 import 'package:pint/models/utilizador.dart';
 import '../models/area.dart';
 import '../models/subarea.dart';
@@ -65,6 +67,17 @@ Future<Estabelecimento?> fetchEstabelecimento(int estabelecimentoID) async {
   }
 }
 
+Future<Evento?> fetchEvento (int eventoID) async {
+  final api = EventosAPI();
+  final response = await api.listarEvento(eventoID);
+  if (response.statusCode == 200) {
+    final jsonResponse = json.decode(response.body);
+    return Evento.fromJson(jsonResponse['data']);
+  } else {
+    throw Exception('Erro ao carregar estabelecimento: ${response.statusCode}');
+  }
+}
+
 Future<Map<String, Object>> fetchAvaliacoes(int estabelecimentoID) async {
   final api = AvaliacoesAPI();
   final response = await api.getAvaliacoesEstabelecimento(estabelecimentoID);
@@ -80,6 +93,20 @@ Future<Map<String, Object>> fetchAvaliacoes(int estabelecimentoID) async {
     };
   } else {
     throw Exception('Erro ao carregar avaliacoes: ${response.statusCode}');
+  }
+}
+
+Future<List<Inscricao>> fetchInscricoes(BuildContext context, int eventoID) async {
+  final api = InscricoesAPI();
+  final response = await api.getInscricoesEvento(eventoID);
+  if (response.statusCode == 200) {
+    final List<dynamic> data = json.decode(response.body)['data'];
+    return data.map((json) => Inscricao.fromJson(json)).toList();
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Erro ao carregar eventos: ${response.statusCode}')),
+    );
+    return [];
   }
 }
 

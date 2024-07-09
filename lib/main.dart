@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/intl.dart';
 import 'package:pint/utils/colors.dart';
 import 'screens/auth/loginPage.dart';
 import 'screens/auth/registarPage.dart';
@@ -9,12 +10,16 @@ import 'screens/home/homePage.dart';
 import 'screens/auth/novapassPage.dart';
 import 'screens/selectPosto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env.dev"); 
+  initializeDateFormatting();
+  Intl.defaultLocale = 'pt_BR';
   SharedPreferences prefs = await SharedPreferences.getInstance();
   var isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
   runApp(MyApp(isLoggedIn: isLoggedIn));
+  
 }
 
 class MyApp extends StatelessWidget {

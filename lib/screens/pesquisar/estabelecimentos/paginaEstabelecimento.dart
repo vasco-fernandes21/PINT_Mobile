@@ -1,10 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pint/api/AvaliacoesAPI.dart';
-import 'package:pint/api/postosAreasAPI.dart';
 import 'package:pint/models/avaliacao.dart';
 import 'package:pint/models/estabelecimento.dart';
 import 'package:pint/navbar.dart';
@@ -15,13 +12,9 @@ import 'package:pint/widgets/avaliacao_input.dart';
 import 'package:pint/widgets/show_avaliacoes.dart';
 import 'package:pint/widgets/sumario_avaliacoes.dart';
 import 'package:readmore/readmore.dart';
-import 'package:rating_summary/rating_summary.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:pint/api/api.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class EstabelecimentoPage extends StatefulWidget {
@@ -48,15 +41,13 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
   int currentPage = 1;
   int itemsPerPage = 3;
   final TextEditingController _avaliacaoController = TextEditingController();
+
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
-
   CameraPosition? _localizacao;
-
   double? latitude;
   double? longitude;
 
-  late final _ratingController;
   int? _rating;
 
   final api = ApiClient();
@@ -94,10 +85,9 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
       setState(() {
         avaliacoes = response['avaliacoes'] as List<Avaliacao>;
         numAvaliacoes = avaliacoes.length;
-        mediaAvaliacoes = response['mediaAvaliacoes'] as double;
-        
+        mediaAvaliacoes = response['mediaAvaliacoes'] as double; 
+        isLoading = false;
       });
-      setLatitudeLongitude(estabelecimento!.morada);
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -110,12 +100,6 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
     }
   }
 
-  int ContarAvaliacoesPorEstrela(int estrelas) {
-    return avaliacoes
-        .where((avaliacao) => avaliacao.classificacao == estrelas)
-        .length;
-  }
-
   Future<void> setLatitudeLongitude(String morada) async {
     try {
       List<Location> locations = await locationFromAddress(morada);
@@ -123,7 +107,6 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
         setState(() {
           latitude = locations.first.latitude;
           longitude = locations.first.longitude;
-          isLoading = false;
         });
 
         _localizacao =
@@ -258,8 +241,7 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                               SumarioAvaliacoesWidget(
                                   numAvaliacoes: numAvaliacoes,
                                   mediaAvaliacoes: mediaAvaliacoes,
-                                  contarAvaliacoesPorEstrela:
-                                      ContarAvaliacoesPorEstrela),
+                                  avaliacoes: avaliacoes,),
                             const SizedBox(height: 10),
                             if(avaliacoes.isNotEmpty)
                             AvaliacoesWidget(avaliacoes: avaliacoes),

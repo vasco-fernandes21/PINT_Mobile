@@ -1,5 +1,7 @@
 class Evento {
   final int id;
+  late final int idCriador;
+  final bool estado;
   final String titulo;
   final String descricao;
   final String morada;
@@ -12,6 +14,8 @@ class Evento {
 
   Evento({
     required this.id,
+    required this.idCriador,
+    required this.estado,
     required this.titulo,
     required this.descricao,
     required this.morada,
@@ -26,6 +30,8 @@ class Evento {
   factory Evento.fromJson(Map<String, dynamic> json) {
     return Evento(
       id: json['id'],
+      idCriador: json['idCriador'],
+      estado: json['estado'],
       titulo: json['titulo'],
       descricao: json['descricao'],
       morada: json['morada'],

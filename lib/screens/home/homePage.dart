@@ -4,6 +4,7 @@ import 'package:pint/models/utilizador.dart';
 import 'package:pint/navbar.dart';
 import 'package:pint/screens/criar/criarEvento.dart';
 import 'package:pint/screens/perfil/perfil.dart';
+import 'package:pint/screens/pesquisar/eventos/todosEventos.dart';
 import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/fetch_functions.dart';
 import 'package:pint/widgets/custom_button.dart';
@@ -94,7 +95,7 @@ class _HomePageState extends State<HomePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => Perfil(postoID: widget.postoID),
+                              builder: (context) => TodosEventosPage(postoID: widget.postoID),
                             ),
                           );
                         } , title: 'Ver Todos os Eventos'),

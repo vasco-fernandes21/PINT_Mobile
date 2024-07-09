@@ -7,7 +7,7 @@ import 'screens/notificacoes/notificacoes.dart';
 import 'screens/perfil/perfil.dart';
 import 'screens/criar/criarEvento.dart';
 import 'screens/criar/criarEstabelecimento.dart';
-import 'screens/pesquisar/EstabelecimentosPorArea.dart';
+import 'screens/pesquisar/estabelecimentos/EstabelecimentosPorArea.dart';
 
 class NavBar extends StatelessWidget {
   final int postoID;
