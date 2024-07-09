@@ -28,10 +28,12 @@ class ApiClient {
   }
 
   Future<http.Response> post(String endpoint, {dynamic body, Map<String, String>? headers}) async {
-    final url = Uri.parse('$baseUrl$endpoint');
-    final headers = await _getHeaders();
-    return http.post(url, headers: headers, body: jsonEncode(body));
-  }
+  final url = Uri.parse('$baseUrl$endpoint');
+  final combinedHeaders = await _getHeaders();
+  final encodedBody = jsonEncode(body);
+  print("A enviar pedido para $url com body: $encodedBody"); 
+  return http.post(url, headers: combinedHeaders, body: encodedBody);
+}
 
   Future<http.Response> put(String endpoint, {dynamic body}) async {
     final url = Uri.parse('$baseUrl$endpoint');
