@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
@@ -213,7 +214,7 @@ class _EventoPageState extends State<EventoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: isLoading ? Text('Evento') : Text(evento!.titulo),
+        title: isLoading ? const Text('Evento') : AutoSizeText(evento!.titulo,),
         actions: [
         if (isLoading==false)
         if (evento!.estado == false && isMyUserTheOwner)
@@ -265,19 +266,22 @@ class _EventoPageState extends State<EventoPage> {
                               const SizedBox(
                                 height: 10,
                               ),
-                              Text(
+                              AutoSizeText(
                                 evento!.titulo,
                                 style: const TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                 ),
+                                maxLines: 1,
                               ),
+                              Text ('${evento?.nomeArea} >> ${evento?.nomeSubarea}'),
                               if (evento!.estado == false)
                                 const Text(
                                   'Evento pendente à espera de aprovação',
                                   style: TextStyle(
                                       color: Colors.amber, fontSize: 12),
                                 ),
+                                const SizedBox(height: 15,),
                               const Text(
                                 'Descrição',
                                 style: TextStyle(
@@ -347,7 +351,7 @@ class _EventoPageState extends State<EventoPage> {
                               const SizedBox(
                                 height: 15,
                               ),
-                              if (evento!.estado)
+                              if (evento!.estado && evento!.inscricaoAberta)
                                 isMyUserRegistered
                                     ? CustomButton(
                                         onPressed: () {

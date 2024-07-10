@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pint/api/api.dart';
 import 'package:pint/models/evento.dart';
+import 'package:pint/utils/evento_functions.dart';
 
 class EventoCard extends StatelessWidget {
   final Evento evento;
@@ -54,9 +55,9 @@ class EventoCard extends StatelessWidget {
                   if (evento.estado == false)
                   const Text('Evento pendente à espera de aprovação', style: TextStyle(color: Colors.amber , fontSize: 11.5),),
                   const SizedBox(height: 5),
-                  Text(evento.data),
+                  Text(formatarDataEventoCard(evento.data)),
                   const SizedBox(height: 5),
-                  Text(evento.morada),
+                  Text ('${evento.nomeArea} >> ${evento.nomeSubarea}', style: TextStyle(fontSize: 12),),
                 ],
               ),
             ),

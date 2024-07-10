@@ -1,27 +1,25 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:pint/models/evento.dart';
+import 'package:pint/models/inscricao.dart';
 import 'package:pint/models/utilizador.dart';
-import 'package:pint/navbar.dart';
 import 'package:pint/screens/pesquisar/eventos/paginaEvento.dart';
+import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/evento_functions.dart';
 import 'package:pint/utils/fetch_functions.dart';
-import 'package:pint/widgets/evento_card.dart';
-import 'package:pint/widgets/table_eventos.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-class MeusEventosPage extends StatefulWidget {
+class MinhasInscricoesPage extends StatefulWidget {
   final int postoID;
 
-  MeusEventosPage({required this.postoID});
+  MinhasInscricoesPage({required this.postoID});
 
   @override
-  State<MeusEventosPage> createState() => _MeusEventosPagePageState();
+  State<MinhasInscricoesPage> createState() => _MinhasInscricoesPageState();
 }
 
-class _MeusEventosPagePageState extends State<MeusEventosPage> {
-  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+ class _MinhasInscricoesPageState extends State<MinhasInscricoesPage> {
   bool isLoading = true;
-  List<Evento> eventos = [];
+  List<Inscricao> inscricoes = [];
   Utilizador? myUser;
 
   @override
@@ -32,13 +30,11 @@ class _MeusEventosPagePageState extends State<MeusEventosPage> {
 
   void loadMyUser() async {
     try {
-      final SharedPreferences prefs = await _prefs;
-      String? token = prefs.getString('token');
       final fetchedUser = await fetchUtilizadorCompleto();
       setState(() {
         myUser = fetchedUser;
       });
-      loadEventos();
+      loadInscricoes();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -48,13 +44,16 @@ class _MeusEventosPagePageState extends State<MeusEventosPage> {
     }
   }
 
-  void loadEventos() async {
-    final fetchedEventos = await fetchMyEventos(context);
+  void loadInscricoes() async {
+
+    final fetchedInscricoes = await fetchInscricoesUser(context, myUser!.id);
     setState(() {
-      eventos = fetchedEventos;
+      inscricoes = ordenarInscricoesPorData(fetchedInscricoes);
       isLoading = false;
     });
-  }
+
+    }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -64,18 +63,98 @@ class _MeusEventosPagePageState extends State<MeusEventosPage> {
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : eventos.isEmpty
-              ? Center(
-                  child: Text('Nenhum evento encontrado.'),
+          : inscricoes.isEmpty
+              ? const Center(
+                  child: Text('Nenhuma inscrição encontrada.'),
                 )
-              : SingleChildScrollView(
-                  child: Column(
+              : Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 7.0),
+                  child: ListView(
                     children: [
-                      TableEventos(eventos: eventos)
-                    ]
+                      Table(
+                        columnWidths: const {
+                          0: FlexColumnWidth(2),
+                          1: FlexColumnWidth(1),
+                          2: FlexColumnWidth(1),
+                        },
+                        border: TableBorder.all(),
+                        children: [
+                          const TableRow(
+                            decoration: BoxDecoration(color: secondaryColor),
+                            children: [
+                              Padding(
+                                padding:  EdgeInsets.all(8.0),
+                                child: Text('Nome do Evento',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white, fontSize: 13)),
+                              ),
+                              Padding(
+                                padding:  EdgeInsets.all(8.0),
+                                child: Text('Data',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white, fontSize: 13)),
+                              ),
+                              Padding(
+                                padding:  EdgeInsets.all(8.0),
+                                child: Text('Posto',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white, fontSize: 13)),
+                              ),
+                            ],
+                          ),
+
+                          ...inscricoes.map((inscricao) {
+                            return 
+                            TableRow(
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => EventoPage(
+                                          postoID:
+                                              1, // Passe o postoID correto aqui
+                                          eventoID: inscricao.idEvento,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(inscricao.tituloEvento ?? '-',
+                                        overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11),),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                     formatarDataEvento(inscricao.dataEvento),
+                                    style: const TextStyle(fontSize: 11),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    inscricao.nomePosto ?? '-',
+                                    style: TextStyle(fontSize: 9.6),
+                                  ),
+                                ),
+  
+                                    ],
+                            );
+                          }).toList(),
+                        ],
+                      ),
+                      const SizedBox(height: 15,)
+                    ],
                   ),
                 ),
-      bottomNavigationBar: NavBar(postoID: widget.postoID, index: 1),
     );
   }
-}
+
+  }
+

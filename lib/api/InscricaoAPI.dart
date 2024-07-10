@@ -8,6 +8,10 @@ class InscricoesAPI {
     return api.get('/eventos/$eventoId/inscricao'); 
   }
 
+    Future<http.Response> getInscricoesUser(int userId) {
+    return api.get('/utilizador/inscricao/$userId'); 
+  }
+
   Future<http.Response> criarInscricaoEvento(int eventoId) {
     return api.post('/eventos/inscrever/$eventoId');
   }

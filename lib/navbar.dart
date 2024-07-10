@@ -1,57 +1,84 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:pint/utils/colors.dart';
+import 'package:pint/utils/fetch_functions.dart';
 import 'screens/home/homePage.dart';
 import 'screens/pesquisar/pesquisar.dart';
 import 'screens/notificacoes/notificacoes.dart';
 import 'screens/perfil/perfil.dart';
 import 'screens/criar/criarEvento.dart';
 import 'screens/criar/criarEstabelecimento.dart';
-import 'screens/pesquisar/estabelecimentos/EstabelecimentosPorArea.dart';
 
-class NavBar extends StatelessWidget {
+
+
+class NavBar extends StatefulWidget {
   final int postoID;
   final int index;
 
   NavBar({required this.postoID, required this.index});
 
   @override
+  _NavBarState createState() => _NavBarState();
+}
+
+class _NavBarState extends State<NavBar> {
+  int contadorNotificacoes = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Carregar o contador de notificações quando a NavBar for inicializada
+    atualizarContadorNotificacoes();
+  }
+
+  Future<void> atualizarContadorNotificacoes() async {
+    int contador = await fetchContadorNotificacoes();
+    setState(() {
+      contadorNotificacoes = contador;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
+      items:  <BottomNavigationBarItem>[
+        const BottomNavigationBarItem(
           icon: Icon(Icons.home_outlined),
           activeIcon: Icon(Icons.home),
           label: '',
         ),
-        BottomNavigationBarItem(
+        const BottomNavigationBarItem(
           icon: Icon(Icons.search),
           label: '',
         ),
-        BottomNavigationBarItem(
+        const BottomNavigationBarItem(
           icon: Icon(Icons.add_circle_outline),
           activeIcon: Icon(Icons.add_circle),
           label: '',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.notifications_outlined),
-          activeIcon: Icon(Icons.notifications),
+          icon: contadorNotificacoes > 0
+              ? Icon(Icons.notifications_outlined)
+              : Icon(Icons.notifications_active_outlined),
+          activeIcon: contadorNotificacoes > 0
+              ? Icon(Icons.notifications)
+              : Icon(Icons.notifications_active),
           label: '',
         ),
-        BottomNavigationBarItem(
+        const BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),
           activeIcon: Icon(Icons.person),
           label: '',
         ),
       ],
-      currentIndex: index,
+      currentIndex: widget.index,
       onTap: (index) {
         switch (index) {
           case 0:
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => HomePage(postoID: postoID),
+                builder: (context) => HomePage(postoID: widget.postoID),
               ),
             );
             break;
@@ -59,7 +86,7 @@ class NavBar extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => Pesquisar(postoID: postoID),
+                builder: (context) => Pesquisar(postoID: widget.postoID),
               ),
             );
             break;
@@ -96,7 +123,7 @@ class NavBar extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    CriarEventosPage(postoID: postoID),
+                                    CriarEventosPage(postoID: widget.postoID),
                               ),
                             );
                           },
@@ -113,7 +140,7 @@ class NavBar extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    CriarEstabelecimentoPage(postoID: postoID),
+                                    CriarEstabelecimentoPage(postoID: widget.postoID),
                               ),
                             );
                           },
@@ -129,7 +156,7 @@ class NavBar extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => Notificacoes(postoID: postoID),
+                builder: (context) => Notificacoes(postoID: widget.postoID),
               ),
             );
             break;
@@ -137,7 +164,7 @@ class NavBar extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => Perfil(postoID: postoID),
+                builder: (context) => Perfil(postoID: widget.postoID),
               ),
             );
             break;

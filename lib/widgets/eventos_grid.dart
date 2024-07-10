@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:pint/screens/pesquisar/eventos/calendario.dart';
 import 'package:pint/screens/pesquisar/eventos/meusEventos.dart';
+import 'package:pint/screens/pesquisar/eventos/minhasInscricoes.dart';
+import 'package:pint/screens/pesquisar/eventos/preferenciasEventos.dart';
 import 'package:pint/screens/pesquisar/eventos/todosEventos.dart';
 import 'package:pint/utils/colors.dart';
 
@@ -25,7 +27,16 @@ class EventosGridView extends StatelessWidget {
         _buildEventoTile(
           titulo: 'Para Ti',
           iconData: Icons.favorite,
-          onTap: () {},
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PreferenciasEventosPage(
+                  postoID: postoID,
+                ),
+              ),
+            );
+          },
         ),
         _buildEventoTile(
           titulo: 'Próximos Eventos',
@@ -73,8 +84,14 @@ class EventosGridView extends StatelessWidget {
           titulo: 'Minhas Inscrições',
           iconData: Icons.check_box,
           onTap: () {
-            Navigator.pushNamed(context,
-                '/minhas_inscricoes'); // Navegar para a página 'Minhas Inscrições'
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MinhasInscricoesPage(
+                  postoID: postoID,
+                ),
+              ),
+            ); // Navegar para a página 'Minhas Inscrições'
           },
         ),
       ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pint/screens/pesquisar/eventos/paginaEvento.dart';
+import 'package:pint/utils/colors.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:pint/models/evento.dart';
@@ -113,7 +114,7 @@ class _CalendarioState extends State<Calendario> {
                   ),
                   calendarStyle: const CalendarStyle(
                     selectedDecoration: BoxDecoration(
-                      color: Color.fromARGB(255, 166, 197, 223),
+                      color: secondaryColor,
                       shape: BoxShape.circle,
                     ),
                     todayDecoration: BoxDecoration(

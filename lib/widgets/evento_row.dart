@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pint/api/api.dart';
 import 'package:pint/models/evento.dart';
 import 'package:pint/utils/colors.dart';
+import 'package:pint/utils/evento_functions.dart';
 
 class EventoRow extends StatelessWidget {
   final Evento evento;
@@ -13,7 +14,6 @@ class EventoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Container(
-        
         height: 100,
         padding: EdgeInsets.all(10), // Altura fixa para todos os cards
         child: Row(
@@ -52,7 +52,7 @@ class EventoRow extends StatelessWidget {
                   ),
                   SizedBox(height: 5),
                   Text(
-                    evento.data.toString(), // Ajuste conforme o formato de data
+                        diasAte(evento.data), // Ajuste conforme o formato de data
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 10,

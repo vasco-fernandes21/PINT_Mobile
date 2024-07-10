@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:pint/models/evento.dart';
 import 'package:pint/models/utilizador.dart';
@@ -6,6 +7,7 @@ import 'package:pint/screens/criar/criarEvento.dart';
 import 'package:pint/screens/perfil/perfil.dart';
 import 'package:pint/screens/pesquisar/eventos/todosEventos.dart';
 import 'package:pint/utils/colors.dart';
+import 'package:pint/utils/evento_functions.dart';
 import 'package:pint/utils/fetch_functions.dart';
 import 'package:pint/widgets/custom_button.dart';
 import 'package:pint/widgets/evento_row.dart';
@@ -46,7 +48,7 @@ class _HomePageState extends State<HomePage> {
   void loadEventos() async {
     final fetchedEventos = await fetchEventos(context, widget.postoID);
     setState(() {
-      eventos = fetchedEventos;
+      eventos = filtrarEOrdenarEventosFuturos(fetchedEventos);
       isLoading = false;
     });
   }
@@ -67,13 +69,13 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     //Text('Olá, ${myUser?.nome}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 35, ))
                     ShaderMask(
-                      shaderCallback: (bounds) => LinearGradient(
-                        colors: [primaryColor, Colors.lightBlueAccent],
+                      shaderCallback: (bounds) => const LinearGradient(
+                        colors: [secondaryColor, Colors.lightBlueAccent],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ).createShader(bounds),
-                      child: Text('Olá, ${myUser?.nome}',
-                          style: TextStyle(
+                      child: AutoSizeText('Olá, ${myUser?.nome}',
+                          style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                               fontSize:
@@ -84,12 +86,12 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(
                       height: 15,
                     ),
-                    Text(
+                    const Text(
                       'Próximos Eventos',
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                     ),
-                    ...eventos.map((evento) => EventoRow(evento: evento)).toList(),
+                   ...eventos.take(4).map((evento) => EventoRow(evento: evento)),
                     const SizedBox(height: 15,),
                     CustomButton(onPressed: () {
                           Navigator.push(

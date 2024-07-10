@@ -4,12 +4,14 @@ import 'package:pint/api/AvaliacoesAPI.dart';
 import 'package:pint/api/EstabelecimentosAPI.dart';
 import 'package:pint/api/EventosAPI.dart';
 import 'package:pint/api/InscricaoAPI.dart';
+import 'package:pint/api/NotificacoesAPI.dart';
 import 'package:pint/api/UtilizadorAPI.dart';
 import 'package:pint/api/postosAreasAPI.dart';
 import 'package:pint/models/avaliacao.dart';
 import 'package:pint/models/estabelecimento.dart';
 import 'package:pint/models/evento.dart';
 import 'package:pint/models/inscricao.dart';
+import 'package:pint/models/notificacao.dart';
 import 'package:pint/models/utilizador.dart';
 import '../models/area.dart';
 import '../models/subarea.dart';
@@ -136,6 +138,57 @@ Future<List<Inscricao>> fetchInscricoes(BuildContext context, int eventoID) asyn
       SnackBar(content: Text('Erro ao carregar eventos: ${response.statusCode}')),
     );*/
     return [];
+  }
+}
+
+Future<List<Inscricao>> fetchInscricoesUser(BuildContext context, int userID) async {
+  final api = InscricoesAPI();
+  final response = await api.getInscricoesUser(userID);
+  if (response.statusCode == 200) {
+    final List<dynamic> data = json.decode(response.body)['inscricoes'];
+    return data.map((json) => Inscricao.fromJson(json)).toList();
+  } else {
+    /*ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Erro ao carregar eventos: ${response.statusCode}')),
+    );*/
+    return [];
+  }
+}
+
+Future<List<Notificacao>> fetchNotificacoes(BuildContext context, int userID) async {
+  final api = NotificacoesAPI();
+  final response = await api.getNotificacoes();
+  if (response.statusCode == 200) {
+    final List<dynamic> data = json.decode(response.body)['data']['notificacoes'];
+    return data.map((json) => Notificacao.fromJson(json)).toList();
+  } else {
+    /*ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Erro ao carregar eventos: ${response.statusCode}')),
+    );*/
+    return [];
+  }
+}
+
+Future<int> fetchContadorNotificacoes() async {
+  try {
+    final api = NotificacoesAPI();
+    var response = await api.getContadorNotificacoes();
+    if (response.statusCode == 200) {
+      Map<String, dynamic> responseData = json.decode(response.body);
+      if (responseData['status'] == 'success') {
+        int contador = responseData['data']['contador'];
+        return contador;
+      } else {
+        // Tratar caso o status seja diferente de 'success'
+        return 0;
+      }
+    } else {
+      // Tratar outros códigos de status HTTP, se necessário
+      return 0;
+    }
+  } catch (e) {
+    // Tratar exceções, como falha na conexão
+    return 0;
   }
 }
 

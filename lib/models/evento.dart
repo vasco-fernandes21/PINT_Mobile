@@ -3,6 +3,8 @@ class Evento {
   final int idCriador;
   final int idArea;
   final int idSubarea;
+  final String? nomeArea;
+  final String? nomeSubarea;
   final bool estado;
   final String titulo;
   final String descricao;
@@ -12,6 +14,7 @@ class Evento {
   final String? foto;
   final String data;
   final String hora;
+  final bool inscricaoAberta;
   // Adicione outros campos conforme necessário
 
   Evento({
@@ -25,6 +28,9 @@ class Evento {
     required this.morada,
     required this.data,
     required this.hora,
+    required this.inscricaoAberta,
+    this.nomeArea,
+    this.nomeSubarea,
     this.email,
     this.telemovel,
     this.foto,
@@ -37,6 +43,8 @@ class Evento {
       idCriador: json['idCriador'],
       idArea: json['idArea'],
       idSubarea: json['idSubarea'],
+      nomeArea: json['area']['nome'],
+      nomeSubarea: json['subarea']['nome'],
       estado: json['estado'],
       titulo: json['titulo'],
       descricao: json['descricao'],
@@ -46,6 +54,7 @@ class Evento {
       foto: json['foto'],
       data: json['data'],
       hora: json['hora'],
+      inscricaoAberta: json['inscricaoAberta'],
       // Inicialize outros campos
     );
   }
