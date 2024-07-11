@@ -7,19 +7,22 @@ class TextInput extends StatelessWidget {
   final TextInputType? keyboardType;
   final String errorMessage;
   final bool isFieldRequired;
+  final int minLines;
 
   TextInput({
     required this.controller,
     required this.label,
     this.keyboardType,
     required this.errorMessage,
-    this.isFieldRequired = true, // por padrão, o campo é obrigatório
+    this.isFieldRequired = true,
+    this.minLines = 1, // por padrão, o campo é obrigatório
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      minLines: minLines,
       decoration: InputDecoration(
         labelText: label,
         filled: true,

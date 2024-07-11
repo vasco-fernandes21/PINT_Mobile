@@ -53,7 +53,7 @@ class EstabelecimentoCard extends StatelessWidget {
                   const SizedBox(height: 5),
                   Text(estab['subarea']),
                   const SizedBox(height: 5),
-                  Text(estab['morada']),
+                  Text(estab['morada'], maxLines: 1, overflow: TextOverflow.ellipsis,),
                 ],
               ),
             ),

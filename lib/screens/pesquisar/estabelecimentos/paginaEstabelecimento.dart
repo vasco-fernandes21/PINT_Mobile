@@ -1,14 +1,20 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:pint/api/AvaliacoesAPI.dart';
+import 'package:pint/api/FotosAPI.dart';
 import 'package:pint/models/avaliacao.dart';
 import 'package:pint/models/estabelecimento.dart';
+import 'package:pint/models/foto.dart';
+import 'package:pint/models/utilizador.dart';
 import 'package:pint/navbar.dart';
 import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/fetch_functions.dart';
 import 'package:pint/widgets/alert_confirmation.dart';
 import 'package:pint/widgets/avaliacao_input.dart';
+import 'package:pint/widgets/image_carousel.dart';
 import 'package:pint/widgets/show_avaliacoes.dart';
 import 'package:pint/widgets/sumario_avaliacoes.dart';
 import 'package:readmore/readmore.dart';
@@ -32,6 +38,8 @@ class EstabelecimentoPage extends StatefulWidget {
 }
 
 class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  String? token;
   bool isLoading = true;
   Estabelecimento? estabelecimento;
   List<Avaliacao> avaliacoes = [];
@@ -41,6 +49,7 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
   int currentPage = 1;
   int itemsPerPage = 3;
   final TextEditingController _avaliacaoController = TextEditingController();
+  Utilizador? myUser;
 
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
@@ -49,6 +58,10 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
   double? longitude;
 
   int? _rating;
+
+  List<Foto> fotos = [];
+  List<String> urlFotos = [];
+
 
   final api = ApiClient();
 
@@ -66,6 +79,8 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
         estabelecimento = fetchedEstabelecimentos;
       });
       setLatitudeLongitude(estabelecimento!.morada);
+      loadMyUser();
+      loadFotos();
       loadAvaliacoes();
     } catch (e) {
       setState(() {
@@ -76,6 +91,52 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
           content: Text(e.toString()),
         ),
       );
+    }
+  }
+
+    void loadMyUser() async {
+    try {
+      final SharedPreferences prefs = await _prefs;
+      setState(() {
+        token = prefs.getString('token');
+      });
+      final fetchedUser = await fetchUtilizadorCompleto();
+      setState(() {
+        myUser = fetchedUser;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro user: $e'),
+        ),
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+    void loadFotos() async {
+    try {
+      final fetchedFotos = await fetchFotosEvento(context, widget.estabelecimentoID);
+      setState(() {
+        fotos = fetchedFotos;
+        if (estabelecimento?.foto != null) {
+          urlFotos.add(estabelecimento!.foto!);
+        }
+        for (var foto in fotos) {
+          urlFotos.add(foto.foto);
+        }
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro fotos: $e'),
+        ),
+      );
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -171,17 +232,45 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
     }
   }
 
+  void selectImage() async {
+  final ImagePicker _picker = ImagePicker();
+  
+  // Seleciona uma imagem da galeria
+  final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+  if (image != null) {
+    final file = File(image.path);
+    final api = FotosAPI();
+    final response = await api.adicionarFotoEvento(estabelecimento!.id, myUser!.id, file);
+
+    if (response.statusCode == 200){
+Fluttertoast.showToast(
+          msg: 'Foto enviada para aprovação!',
+          backgroundColor: successColor,
+          fontSize: 12);
+    } else{
+      Fluttertoast.showToast(
+          msg: 'Erro ao enviar foto.',
+          backgroundColor: errorColor,
+          fontSize: 12);
+    }
+  
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     int totalPages = (avaliacoes.length / itemsPerPage).ceil();
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.NomeEstabelecimento),
+        actions: [
+          IconButton(onPressed: selectImage, icon: const Icon(Icons.add_a_photo))
+        ],
       ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : estabelecimento == null
-              ? Center(child: Text('Estabelecimento não encontrado.'))
+              ? const Center(child: Text('Estabelecimento não encontrado.'))
               : SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,23 +280,18 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            estabelecimento!.foto != null
-                                ? Image.network(
-                                    '${api.baseUrl}/uploads/estabelecimentos/${estabelecimento!.foto}',
-                                    width: double.infinity,
-                                    height: 200,
-                                    fit: BoxFit.cover,
-                                  )
-                                : Container(
-                                    width: double.infinity,
-                                    height: 200,
-                                    color: Colors.grey,
-                                    child: Icon(
-                                      Icons.image_not_supported,
-                                      color: Colors.white,
-                                      size: 50,
+                            urlFotos.isNotEmpty
+                            ? ImageCarousel(imageUrls: urlFotos, isEstabelecimento: true)
+                            : Container(
+                                      width: double.infinity,
+                                      height: 200,
+                                      color: Colors.grey,
+                                      child: const Icon(
+                                        Icons.image_not_supported,
+                                        color: Colors.white,
+                                        size: 50,
+                                      ),
                                     ),
-                                  ),
                             const SizedBox(height: 10),
                             Text(
                               estabelecimento!.nome,
@@ -332,7 +416,7 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                                       position: LatLng(latitude!, longitude!),
                                     ),
                                   },
-                                  mapType: MapType.hybrid,
+                                  mapType: MapType.normal,
                                   onMapCreated:
                                       (GoogleMapController controller) {
                                     _controller.complete(controller);

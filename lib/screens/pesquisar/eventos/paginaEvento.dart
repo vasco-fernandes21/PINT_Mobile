@@ -1,23 +1,29 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:pint/api/FotosAPI.dart';
 import 'package:pint/api/InscricaoAPI.dart';
 import 'package:pint/api/api.dart';
 import 'package:pint/models/avaliacao.dart';
 import 'package:pint/models/evento.dart';
+import 'package:pint/models/foto.dart';
 import 'package:pint/models/inscricao.dart';
 import 'package:pint/models/utilizador.dart';
 import 'package:pint/navbar.dart';
 import 'package:pint/screens/pesquisar/eventos/editarEvento.dart';
 import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/fetch_functions.dart';
+import 'package:pint/utils/image_picker.dart';
 import 'package:pint/widgets/alert_confirmation.dart';
 import 'package:pint/widgets/comentarios_evento.dart';
 import 'package:pint/widgets/custom_button.dart';
+import 'package:pint/widgets/image_carousel.dart';
 import 'package:readmore/readmore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pint/utils/evento_functions.dart';
@@ -46,6 +52,9 @@ class _EventoPageState extends State<EventoPage> {
   bool isMyUserTheOwner = false;
   bool isMyUserRegistered = false;
   List<Avaliacao> comentarios = [];
+  List<Avaliacao>todosComentariosOrdenados = [];
+  List<Foto> fotos = [];
+  List<String> urlFotos = [];
 
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
@@ -88,6 +97,7 @@ class _EventoPageState extends State<EventoPage> {
       });
       setLatitudeLongitude(evento!.morada);
       loadComentarios();
+      loadFotos();
       loadInscricoes();
     } catch (e) {
       setState(() {
@@ -123,10 +133,66 @@ class _EventoPageState extends State<EventoPage> {
       setState(() {
         comentarios = fetchedComentarios;
       });
+      await _carregarTodosComentarios();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Erro comments: $e'),
+        ),
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+    Future<void> _carregarTodosComentarios() async {
+    List<Avaliacao> comentariosOrdenados = [];
+
+    for (Avaliacao comentarioPai in comentarios) {
+      await _adicionarComentarioERepostasRecursivamente(
+          comentariosOrdenados, comentarioPai);
+    }
+
+    setState(() {
+
+      todosComentariosOrdenados = filtrarComentariosNaoNulos(comentariosOrdenados);
+    });
+  }
+
+  Future<void> _adicionarComentarioERepostasRecursivamente(
+      List<Avaliacao> lista, Avaliacao comentario) async {
+    // Adiciona o comentário atual na lista
+    lista.add(comentario);
+
+    // Carrega as respostas para o comentário atual
+    final fetchedRespostas =
+        await fetchRespostasComentario(context, comentario.id);
+
+    // Adiciona todas as respostas e suas sub-respostas de forma recursiva
+    if (fetchedRespostas.isNotEmpty) {
+      for (Avaliacao resposta in fetchedRespostas) {
+        await _adicionarComentarioERepostasRecursivamente(lista, resposta);
+      }
+    }
+  }
+
+  void loadFotos() async {
+    try {
+      final fetchedFotos = await fetchFotosEvento(context, widget.eventoID);
+      setState(() {
+        fotos = fetchedFotos;
+        if (evento?.foto != null) {
+          urlFotos.add(evento!.foto!);
+        }
+        for (var foto in fotos) {
+          urlFotos.add(foto.foto);
+        }
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro fotos: $e'),
         ),
       );
       setState(() {
@@ -213,31 +279,62 @@ class _EventoPageState extends State<EventoPage> {
     }
   }
 
+void selectImage() async {
+  final ImagePicker _picker = ImagePicker();
+  
+  // Seleciona uma imagem da galeria
+  final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+  if (image != null) {
+    final file = File(image.path);
+    final api = FotosAPI();
+    final response = await api.adicionarFotoEvento(evento!.id, myUser!.id, file);
+
+    if (response.statusCode == 200){
+Fluttertoast.showToast(
+          msg: 'Foto enviada para aprovação!',
+          backgroundColor: successColor,
+          fontSize: 12);
+    } else{
+      Fluttertoast.showToast(
+          msg: 'Erro ao enviar foto.',
+          backgroundColor: errorColor,
+          fontSize: 12);
+    }
+  
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: isLoading ? const Text('Evento') : AutoSizeText(evento!.titulo,),
+        title: isLoading
+            ? const Text('Evento')
+            : AutoSizeText(
+                evento!.titulo,
+              ),
         actions: [
-        if (isLoading==false)
-        if (evento!.estado == false && isMyUserTheOwner)
-          IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => EditarEventoPage(
-                          postoID: widget.postoID, evento: evento!)),
-                );
-              },
-              icon: const Icon(Icons.edit)
-              )
+          if (isLoading == false)
+            IconButton(
+                onPressed: selectImage, icon: const Icon(Icons.add_a_photo)),
+          if (isLoading == false)
+            if (evento!.estado == false && isMyUserTheOwner)
+              IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => EditarEventoPage(
+                              postoID: widget.postoID, evento: evento!)),
+                    );
+                  },
+                  icon: const Icon(Icons.edit))
         ],
       ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : evento == null
-              ? Center(
+              ? const Center(
                   child: Text('Nenhum evento encontrado.'),
                 )
               : SingleChildScrollView(
@@ -249,18 +346,13 @@ class _EventoPageState extends State<EventoPage> {
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              evento?.foto != null
-                                  ? Image.network(
-                                      '${api.baseUrl}/uploads/eventos/${evento!.foto}',
-                                      width: double.infinity,
-                                      height: 200,
-                                      fit: BoxFit.cover,
-                                    )
+                              urlFotos.isNotEmpty
+                                  ? ImageCarousel(imageUrls: urlFotos, isEstabelecimento: false,)
                                   : Container(
                                       width: double.infinity,
                                       height: 200,
                                       color: Colors.grey,
-                                      child: Icon(
+                                      child: const Icon(
                                         Icons.image_not_supported,
                                         color: Colors.white,
                                         size: 50,
@@ -277,14 +369,17 @@ class _EventoPageState extends State<EventoPage> {
                                 ),
                                 maxLines: 1,
                               ),
-                              Text ('${evento?.nomeArea} >> ${evento?.nomeSubarea}'),
+                              Text(
+                                  '${evento?.nomeArea} >> ${evento?.nomeSubarea}'),
                               if (evento!.estado == false)
                                 const Text(
                                   'Evento pendente à espera de aprovação',
                                   style: TextStyle(
                                       color: Colors.amber, fontSize: 12),
                                 ),
-                                const SizedBox(height: 15,),
+                              const SizedBox(
+                                height: 15,
+                              ),
                               const Text(
                                 'Descrição',
                                 style: TextStyle(
@@ -329,7 +424,7 @@ class _EventoPageState extends State<EventoPage> {
                                 ),
                               ),
                               const SizedBox(height: 5),
-                              /*if (latitude != null &&
+                              if (latitude != null &&
                                 longitude != null &&
                                 _localizacao != null)
                               SizedBox(
@@ -350,7 +445,7 @@ class _EventoPageState extends State<EventoPage> {
                                     _controller.complete(controller);
                                   },
                                 ),
-                              ),*/
+                              ),
                               const SizedBox(
                                 height: 15,
                               ),
@@ -386,7 +481,7 @@ class _EventoPageState extends State<EventoPage> {
                                       child: Center(
                                           child: Text(
                                               'Ainda não existem comentários')))
-                                  : ComentariosList(comentarios: comentarios),
+                                  : ComentariosList(comentarios: todosComentariosOrdenados, eventoId: evento!.id,),
                             ]),
                       )
                     ],

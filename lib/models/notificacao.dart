@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class Notificacao {
   final int id;
   final int idUtilizador;

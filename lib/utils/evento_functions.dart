@@ -209,3 +209,8 @@ bool verificaInscricao(int meuId, List<Inscricao> inscricoes) {
   }
   return false;
 }
+
+List<Avaliacao> filtrarComentariosNaoNulos(List<Avaliacao> comentarios) {
+  return comentarios.where((comentario) => comentario.comentario != null).toList();
+}
+

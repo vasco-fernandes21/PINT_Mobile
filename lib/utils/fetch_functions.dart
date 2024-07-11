@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pint/api/AvaliacoesAPI.dart';
 import 'package:pint/api/EstabelecimentosAPI.dart';
 import 'package:pint/api/EventosAPI.dart';
+import 'package:pint/api/FotosAPI.dart';
 import 'package:pint/api/InscricaoAPI.dart';
 import 'package:pint/api/NotificacoesAPI.dart';
 import 'package:pint/api/UtilizadorAPI.dart';
@@ -11,6 +12,7 @@ import 'package:pint/api/postosAreasAPI.dart';
 import 'package:pint/models/avaliacao.dart';
 import 'package:pint/models/estabelecimento.dart';
 import 'package:pint/models/evento.dart';
+import 'package:pint/models/foto.dart';
 import 'package:pint/models/inscricao.dart';
 import 'package:pint/models/notificacao.dart';
 import 'package:pint/models/utilizador.dart';
@@ -130,6 +132,20 @@ Future<List<Avaliacao>> fetchComentarios(BuildContext context, int eventoId) asy
   }
 }
 
+Future<List<Avaliacao>> fetchRespostasComentario(BuildContext context, int comentarioId) async {
+  final api = AvaliacoesAPI();
+  final response = await api.getRespostaAvaliacao(comentarioId);
+  if (response.statusCode == 200) {
+    final List<dynamic> data = json.decode(response.body)['data'];
+    return data.map((json) => Avaliacao.fromJson(json)).toList();
+  } else {
+    /*ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Erro ao carregar eventos: ${response.statusCode}')),
+    );*/
+    return [];
+  }
+}
+
 Future<List<Inscricao>> fetchInscricoes(BuildContext context, int eventoID) async {
   final api = InscricoesAPI();
   final response = await api.getInscricoesEvento(eventoID);
@@ -207,6 +223,21 @@ Future<Utilizador?> fetchUtilizadorCompleto() async {
     return null;
   }
 }
+
+Future<List<Foto>> fetchFotosEvento(BuildContext context, int eventoID) async {
+  final api = FotosAPI();
+  final response = await api.getFotosEvento(eventoID);
+  if (response.statusCode == 200) {
+    final List<dynamic> data = json.decode(response.body)['data'];
+    return data.map((json) => Foto.fromJson(json)).toList();
+  } else {
+    /*ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Erro ao carregar eventos: ${response.statusCode}')),
+    );*/
+    return [];
+  }
+}
+
 
 Widget buildUserAvatar(String? imageUrl, int? idGoogle, {double width = 120, double height = 120}) {
   String? finalImageUrl;

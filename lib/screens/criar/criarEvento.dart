@@ -45,7 +45,6 @@ class _CriarEventosPageState extends State<CriarEventosPage> {
   File? _selectedImage;
   bool isImageNull = false;
   bool showValidationDate = false;
-  final AuthApi _authApi = AuthApi();
 
   @override
   void initState() {
@@ -59,6 +58,7 @@ class _CriarEventosPageState extends State<CriarEventosPage> {
       areas = fetchedAreas;
     });
   }
+  
 
   Future<void> _pickImage() async {
     final pickedFile =

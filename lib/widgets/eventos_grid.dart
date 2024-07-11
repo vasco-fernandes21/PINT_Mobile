@@ -125,7 +125,7 @@ class EventosGridView extends StatelessWidget {
             Icon(
               iconData,
               color: Colors.white,
-              size: 70,
+              size: 90,
             ),
           ],
         ),
