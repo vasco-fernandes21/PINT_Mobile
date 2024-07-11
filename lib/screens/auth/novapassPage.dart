@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../api/api.dart'; // Certifique-se de que o caminho está correto
 
 class NovaPassPage extends StatefulWidget {
@@ -32,11 +33,14 @@ class _NovaPassPageState extends State<NovaPassPage> {
     }
   }
 
-  Future<void> _changePassword(String password) async {
-    try {
-      var arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
-      var recoveryToken = arguments['recoveryToken'];
+  Future<String?> getRecoveryToken() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getString('recoveryToken');
+}
 
+  Future<void> _changePassword(String password) async {
+    String? recoveryToken = await getRecoveryToken();
+    try {
       var response = await api.post('/reset-passe', body: {
         'novaPass': password,
         'token': recoveryToken,
@@ -50,7 +54,9 @@ class _NovaPassPageState extends State<NovaPassPage> {
         textColor: Colors.white,
         fontSize: 16.0,
       );
-      Navigator.pushReplacementNamed(context, '/');
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.remove('recoveryToken');
+        Navigator.pushReplacementNamed(context, '/');
     } catch (e) {
       Fluttertoast.showToast(
         msg: e.toString(),

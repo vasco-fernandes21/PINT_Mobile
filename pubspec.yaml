@@ -32,6 +32,8 @@ dependencies:
   table_calendar: ^3.1.2
   auto_size_text: ^3.0.0
   badges: ^3.1.2
+  permission_handler: ^11.3.1
+  google_sign_in: ^6.2.1
   carousel_slider: ^4.2.1
   comment_tree: ^0.3.0
 
@@ -39,6 +41,16 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/softinsalogo.png"
+
+
+
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -50,7 +62,8 @@ flutter:
     - .env.dev
     - assets/
     - assets/images/
-
+    - assets/images/softinsa.svg
+    - assets/images/softinsalogo.png
 
   uses-material-design: true
 

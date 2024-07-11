@@ -7,6 +7,7 @@ class Utilizador {
   final String? email;
   final String? foto;
   final String? cargo;
+  final String? ultimoLogin;
   final int? idAreaPreferencia;
   final int? idSubareaPreferencia;
   final int? idGoogle;
@@ -20,6 +21,7 @@ class Utilizador {
     this.email,
     this.foto,
     this.cargo,
+    this.ultimoLogin,
     this.idAreaPreferencia,
     this.idSubareaPreferencia,
     this.idGoogle,
@@ -35,6 +37,7 @@ class Utilizador {
       email: json['email'],
       foto: json['foto'],
       cargo: json['cargo'],
+      ultimoLogin: json['ultimoLogin'],
       idAreaPreferencia: json['idArea'],
       idSubareaPreferencia: json['idSubarea'],
       idGoogle: json['id_google']

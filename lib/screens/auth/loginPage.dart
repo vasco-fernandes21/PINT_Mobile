@@ -97,14 +97,13 @@ class _LoginPageState extends State<LoginPage> {
           child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
-                SizedBox(height: 100),
+                SizedBox(height: 220),
                 Padding(
                   padding: EdgeInsets.symmetric(
-                      horizontal:
-                          15), // Ajuste este valor para controlar o espaço no topo
+                      horizontal: 10), // Ajuste este valor para controlar o espaço no topo
                   child: SvgPicture.asset(
                     'assets/images/softinsa.svg',
-                    height: 90,
+                    height: 120,
                     fit: BoxFit.fitHeight,
                   ),
                 ),

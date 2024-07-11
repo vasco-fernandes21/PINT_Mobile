@@ -1,5 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // Pacote para lidar com formatação de datas
 import 'package:pint/models/evento.dart';
 import 'package:pint/models/utilizador.dart';
 import 'package:pint/navbar.dart';
@@ -27,6 +28,7 @@ class _HomePageState extends State<HomePage> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   Utilizador? myUser;
   List<Evento> eventos = [];
+  String saudacao = '';
 
   @override
   void initState() {
@@ -41,8 +43,8 @@ class _HomePageState extends State<HomePage> {
     final fetchedUser = await fetchUtilizadorCompleto();
     setState(() {
       myUser = fetchedUser;
+      updateSaudacao();
     });
-
   }
 
   void loadEventos() async {
@@ -51,6 +53,37 @@ class _HomePageState extends State<HomePage> {
       eventos = filtrarEOrdenarEventosFuturos(fetchedEventos);
       isLoading = false;
     });
+  }
+
+  void updateSaudacao() {
+    if (myUser != null && myUser!.ultimoLogin != null) {
+      final currentHour = DateTime.now().hour;
+      final currentDate = DateTime.now();
+      final lastLoginDate = DateTime.parse(myUser!.ultimoLogin!); // Converter para DateTime
+
+      final diff = currentDate.difference(lastLoginDate);
+      final diffDays = diff.inDays;
+
+      if (diffDays >= 15) {
+        setState(() {
+          saudacao = 'Seja bem-vindo novamente, ${myUser!.nome}';
+        });
+      } else {
+        if (currentHour >= 6 && currentHour < 13) {
+          setState(() {
+            saudacao = 'Bom dia, ${myUser!.nome}';
+          });
+        } else if (currentHour >= 13 && currentHour < 20) {
+          setState(() {
+            saudacao = 'Boa tarde, ${myUser!.nome}';
+          });
+        } else {
+          setState(() {
+            saudacao = 'Boa noite, ${myUser!.nome}';
+          });
+        }
+      }
+    }
   }
 
   @override
@@ -67,22 +100,22 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    //Text('Olá, ${myUser?.nome}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 35, ))
                     ShaderMask(
-                      shaderCallback: (bounds) => const LinearGradient(
+                      shaderCallback: (bounds) => LinearGradient(
                         colors: [secondaryColor, Colors.lightBlueAccent],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ).createShader(bounds),
-                      child: AutoSizeText('Olá, ${myUser?.nome}',
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize:
-                                  30),
-                                  maxLines: 1, // Set the text color to white to see the gradient
-                          ),
-                    ),  
+                      child: AutoSizeText(
+                        saudacao,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 30,
+                        ),
+                        maxLines: 1,
+                      ),
+                    ),
                     const SizedBox(
                       height: 15,
                     ),
@@ -91,17 +124,28 @@ class _HomePageState extends State<HomePage> {
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                     ),
-                   ...eventos.take(3).map((evento) => EventoRow(evento: evento, postoID: widget.postoID,)),
-                    const SizedBox(height: 15,),
-                    CustomButton(onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => TodosEventosPage(postoID: widget.postoID),
-                            ),
-                          );
-                        } , title: 'Ver Todos os Eventos'),
-                        const SizedBox(
+                    ...eventos
+                        .take(3)
+                        .map((evento) => EventoRow(
+                              evento: evento,
+                              postoID: widget.postoID,
+                            )),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    CustomButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                TodosEventosPage(postoID: widget.postoID),
+                          ),
+                        );
+                      },
+                      title: 'Ver Todos os Eventos',
+                    ),
+                    const SizedBox(
                       height: 15,
                     ),
                   ],
