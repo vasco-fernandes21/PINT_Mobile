@@ -36,6 +36,16 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/softinsalogo.png"
+
+
+
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -48,6 +58,7 @@ flutter:
     - assets/
     - assets/images/
     - assets/images/softinsa.svg
+    - assets/images/softinsalogo.png
 
   uses-material-design: true
 
