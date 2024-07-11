@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../api/authAPI.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pint/screens/selectPosto.dart';
@@ -16,52 +17,76 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   void _submit() async {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-      try {
-        var response = await authApi.login(
-            _emailController.text, _passwordController.text);
-        if (response != null && response.containsKey('statusCode')) {
-          print('Response Status Code: ${response['statusCode']}');
-          if (response['statusCode'] == 200 && response.containsKey('body')) {
-            var data = response['body'];
-            print('Response Data: $data');
-            var recoveryToken = data['recoveryToken'] ?? '';
+  if (_formKey.currentState!.validate()) {
+    _formKey.currentState!.save();
+    try {
+      var response = await authApi.login(
+          _emailController.text, _passwordController.text);
+      if (response != null && response.containsKey('statusCode')) {
+        print('Response Status Code: ${response['statusCode']}');
+        if (response['statusCode'] == 200 && response.containsKey('body')) {
+          var data = response['body'];
+          print('Response Data: $data');
+          var recoveryToken = data['recoveryToken'] ?? '';
 
-            if (recoveryToken.isNotEmpty) {
-              Navigator.pushReplacementNamed(context, '/novapass',
-                  arguments: {'recoveryToken': recoveryToken});
-            } else {
-              Fluttertoast.showToast(
-                msg: "Login realizado com sucesso",
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.CENTER,
-                backgroundColor: Colors.green,
-                textColor: Colors.white,
-                fontSize: 16.0,
-              );
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SelectPosto(),
-                  ));
-            }
+          if (recoveryToken.isNotEmpty) {
+            Navigator.pushReplacementNamed(context, '/novapass',
+                arguments: {'recoveryToken': recoveryToken});
           } else {
-            var error = response['body'] != null &&
-                    response['body'].containsKey('error')
-                ? response['body']['error']
-                : 'Unknown error';
-            print('Error: $error');
             Fluttertoast.showToast(
-              msg: error,
+              msg: "Login realizado com sucesso",
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.CENTER,
-              backgroundColor: Colors.red,
+              backgroundColor: Colors.green,
               textColor: Colors.white,
               fontSize: 16.0,
             );
+            print('Solicitando permissões...');
+            await requestPermissions();
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SelectPosto(),
+                ));
           }
         } else {
+          var error = response['body'] != null &&
+                  response['body'].containsKey('error')
+              ? response['body']['error']
+              : 'Unknown error';
+          print('Error: $error');
+          Fluttertoast.showToast(
+            msg: error,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        }
+      } else {
+        print('Response is null or does not contain statusCode');
+        Fluttertoast.showToast(
+          msg: 'Erro na resposta do servidor',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      }
+    } catch (e) {
+      print('Exception: $e');
+      Fluttertoast.showToast(
+        msg: 'Erro inesperado',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
+  }else {
           print('Response is null or does not contain statusCode');
           Fluttertoast.showToast(
             msg: 'Erro na resposta do servidor',
@@ -85,6 +110,36 @@ class _LoginPageState extends State<LoginPage> {
       }
     }
   }
+
+  Future<void> requestPermissions() async {
+  Map<Permission, PermissionStatus> statuses = await [
+    Permission.camera,
+    Permission.photos,
+  ].request();
+
+  statuses.forEach((permission, status) {
+    if (status.isDenied) {
+      Fluttertoast.showToast(
+        msg: 'Permissão ${permission.toString()} foi negada.',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    } else if (status.isPermanentlyDenied) {
+      Fluttertoast.showToast(
+        msg: 'Permissão ${permission.toString()} foi permanentemente negada. Por favor, permita nas configurações.',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {

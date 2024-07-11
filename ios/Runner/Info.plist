@@ -9,7 +9,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Pint</string>
+	<string>The Softshares</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -17,7 +17,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>pint</string>
+	<string>The Softshares</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -49,5 +49,13 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	
+	<!-- Permissões adicionais -->
+	<key>NSCameraUsageDescription</key>
+	<string>Esta aplicação precisa aceder a camara para tirar fotos.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Esta aplicação precisa aceder a biblioteca de fotos para selecionar e carregar fotos.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Esta aplicação precisa de permissão para salvar fotos na biblioteca de fotos.</string>
 </dict>
 </plist>

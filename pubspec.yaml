@@ -30,6 +30,7 @@ dependencies:
   table_calendar: ^3.1.2
   auto_size_text: ^3.0.0
   badges: ^3.1.2
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:
@@ -46,7 +47,7 @@ flutter:
     - .env.dev
     - assets/
     - assets/images/
-
+    - assets/images/softinsa.svg
 
   uses-material-design: true
 
