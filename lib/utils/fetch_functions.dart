@@ -6,6 +6,7 @@ import 'package:pint/api/EventosAPI.dart';
 import 'package:pint/api/InscricaoAPI.dart';
 import 'package:pint/api/NotificacoesAPI.dart';
 import 'package:pint/api/UtilizadorAPI.dart';
+import 'package:pint/api/api.dart';
 import 'package:pint/api/postosAreasAPI.dart';
 import 'package:pint/models/avaliacao.dart';
 import 'package:pint/models/estabelecimento.dart';
@@ -15,6 +16,8 @@ import 'package:pint/models/notificacao.dart';
 import 'package:pint/models/utilizador.dart';
 import '../models/area.dart';
 import '../models/subarea.dart';
+
+final api = ApiClient();
 
 Future<List<Area>> fetchAreas(BuildContext context) async {
   final api = PostosAreasAPI();
@@ -155,7 +158,7 @@ Future<List<Inscricao>> fetchInscricoesUser(BuildContext context, int userID) as
   }
 }
 
-Future<List<Notificacao>> fetchNotificacoes(BuildContext context, int userID) async {
+Future<List<Notificacao>> fetchNotificacoes(BuildContext context) async {
   final api = NotificacoesAPI();
   final response = await api.getNotificacoes();
   if (response.statusCode == 200) {
@@ -203,4 +206,55 @@ Future<Utilizador?> fetchUtilizadorCompleto() async {
     print ('Erro ao carregar utilizador: ${response.statusCode}');
     return null;
   }
+}
+
+Widget buildUserAvatar(String? imageUrl, int? idGoogle, {double width = 120, double height = 120}) {
+  String? finalImageUrl;
+
+  if (idGoogle != null) {
+    finalImageUrl = imageUrl ?? 'assets/images/default-avatar.jpg';
+  } else if (imageUrl != null) {
+    finalImageUrl = '${api.baseUrl}/uploads/utilizador/$imageUrl';
+  } else {
+    finalImageUrl = 'assets/images/default-avatar.jpg';
+  }
+
+  return Image.network(
+    finalImageUrl,
+    fit: BoxFit.cover,
+    width: width,
+    height: height,
+    errorBuilder: (context, error, stackTrace) {
+      return Image.asset(
+        'assets/images/default-avatar.jpg',
+        fit: BoxFit.cover,
+        width: width,
+        height: height,
+      );
+    },
+  );
+}
+
+ImageProvider<Object> buildUserAvatarImageProvider(String? imageUrl, int? idGoogle) {
+  if (idGoogle != null) {
+    return NetworkImage(imageUrl ?? 'assets/images/default-avatar.jpg');
+  } else if (imageUrl != null) {
+    return NetworkImage('${api.baseUrl}/uploads/utilizador/$imageUrl');
+  } else {
+    return const AssetImage('assets/images/default-avatar.jpg');
+  }
+}
+
+Widget userCircleAvatar({required String? imageUrl, required int? idGoogle, double radius = 20}) {
+  return CircleAvatar(
+    radius: radius,
+    backgroundImage: buildUserAvatarImageProvider(imageUrl, idGoogle),
+    onBackgroundImageError: (exception, stackTrace) =>
+       Image.asset(
+        'assets/images/default-avatar.jpg',
+        fit: BoxFit.cover,
+        width: radius * 2,
+        height: radius * 2,
+      )
+  );
 }

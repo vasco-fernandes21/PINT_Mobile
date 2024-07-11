@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pint/api/api.dart';
 import 'package:pint/models/avaliacao.dart';
 import 'package:pint/utils/evento_functions.dart';
+import 'package:pint/utils/fetch_functions.dart';
 
 class ComentariosList extends StatelessWidget {
   final List<Avaliacao> comentarios;
@@ -21,12 +22,7 @@ class ComentariosList extends StatelessWidget {
         return Column(
           children: [
           ListTile(
-            leading: CircleAvatar(
-              backgroundImage: comentario.fotoUtilizador != null
-              ? NetworkImage('${api.baseUrl}/uploads/utilizador/${comentario.fotoUtilizador}')
-              : AssetImage('assets/images/default-avatar.jpg')
-                              as ImageProvider,
-            ),
+            leading: userCircleAvatar(imageUrl: comentario.fotoUtilizador, idGoogle: null),
             title: Text(comentario.nomeUtilizador, style: TextStyle(fontSize: 13),),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

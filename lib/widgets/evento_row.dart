@@ -1,18 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:pint/api/api.dart';
 import 'package:pint/models/evento.dart';
+import 'package:pint/screens/pesquisar/eventos/paginaEvento.dart';
 import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/evento_functions.dart';
 
 class EventoRow extends StatelessWidget {
   final Evento evento;
+  final int postoID;
   final api = ApiClient();
 
-  EventoRow({required this.evento});
+  EventoRow({required this.evento, required this.postoID});
 
   @override
   Widget build(BuildContext context) {
     return Card(
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => EventoPage(
+                  postoID: postoID,
+                  eventoID: evento.id,
+                ),
+              ),
+            );
+        },
       child: Container(
         height: 100,
         padding: EdgeInsets.all(10), // Altura fixa para todos os cards
@@ -64,6 +78,7 @@ class EventoRow extends StatelessWidget {
           ],
         ),
       ),
+      )
     );
   }
 }

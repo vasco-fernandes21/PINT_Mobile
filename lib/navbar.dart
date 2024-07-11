@@ -4,12 +4,11 @@ import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/fetch_functions.dart';
 import 'screens/home/homePage.dart';
 import 'screens/pesquisar/pesquisar.dart';
-import 'screens/notificacoes/notificacoes.dart';
-import 'screens/perfil/perfil.dart';
+import 'screens/notificacoes/paginaNotificacoes.dart';
+import 'screens/perfil/meuperfil.dart';
 import 'screens/criar/criarEvento.dart';
 import 'screens/criar/criarEstabelecimento.dart';
-
-
+import 'package:badges/badges.dart' as badges;
 
 class NavBar extends StatefulWidget {
   final int postoID;
@@ -25,7 +24,7 @@ class _NavBarState extends State<NavBar> {
   int contadorNotificacoes = 0;
 
   @override
-  void initState() {
+  void initState() { 
     super.initState();
     // Carregar o contador de notificações quando a NavBar for inicializada
     atualizarContadorNotificacoes();
@@ -41,7 +40,7 @@ class _NavBarState extends State<NavBar> {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      items:  <BottomNavigationBarItem>[
+      items: <BottomNavigationBarItem>[
         const BottomNavigationBarItem(
           icon: Icon(Icons.home_outlined),
           activeIcon: Icon(Icons.home),
@@ -57,12 +56,28 @@ class _NavBarState extends State<NavBar> {
           label: '',
         ),
         BottomNavigationBarItem(
-          icon: contadorNotificacoes > 0
-              ? Icon(Icons.notifications_outlined)
-              : Icon(Icons.notifications_active_outlined),
-          activeIcon: contadorNotificacoes > 0
-              ? Icon(Icons.notifications)
-              : Icon(Icons.notifications_active),
+          icon: badges.Badge(
+            showBadge: contadorNotificacoes > 0,
+            badgeContent: Text(
+              contadorNotificacoes > 9 ?'9+' : '$contadorNotificacoes',
+              style: const TextStyle(color: Colors.white, fontSize: 10),
+            ),
+            child: const Icon(
+              Icons.notifications_outlined,
+              size: 30,
+            ),
+          ),
+          activeIcon:  badges.Badge(
+            showBadge: contadorNotificacoes > 0,
+            badgeContent: Text(
+              contadorNotificacoes > 9 ?'9+' : contadorNotificacoes.toString(),
+              style: const TextStyle(color: Colors.white, fontSize: 10),
+            ),
+            child: const Icon(
+              Icons.notifications,
+              size: 30,
+            ),
+          ),
           label: '',
         ),
         const BottomNavigationBarItem(
@@ -139,8 +154,8 @@ class _NavBarState extends State<NavBar> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    CriarEstabelecimentoPage(postoID: widget.postoID),
+                                builder: (context) => CriarEstabelecimentoPage(
+                                    postoID: widget.postoID),
                               ),
                             );
                           },
@@ -156,7 +171,7 @@ class _NavBarState extends State<NavBar> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => Notificacoes(postoID: widget.postoID),
+                builder: (context) => NotificacoesPage(postoID: widget.postoID),
               ),
             );
             break;
@@ -164,7 +179,7 @@ class _NavBarState extends State<NavBar> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => Perfil(postoID: widget.postoID),
+                builder: (context) => PerfilPage(postoID: widget.postoID,),
               ),
             );
             break;

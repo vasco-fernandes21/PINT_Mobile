@@ -1,6 +1,5 @@
-import 'dart:convert';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:pint/api/postosAreasAPI.dart';
 import 'package:pint/models/area.dart';
 import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/fetch_functions.dart';
@@ -45,14 +44,29 @@ class _PesquisarState extends State<Pesquisar> {
     });
   }
 
+  final Map<String, IconData> iconMap = {
+    'LocalHospitalOutlined': Icons.local_hospital,
+    'SportsSoccerOutlined': Icons.sports_soccer,
+    'SchoolOutlined': Icons.school,
+    'RestaurantOutlined': Icons.restaurant,
+    'BedOutlined': Icons.bed,
+    'DirectionsCarOutlined': Icons.directions_car,
+    'DeckOutlined': Icons.deck,
+    'AccountBalanceOutlined': Icons.account_balance,
+    'PublicOutlined': Icons.public,
+    'BuildOutlined': Icons.build,
+    'ScienceOutlined': Icons.science,
+    'PaletteOutlined': Icons.palette,
+  };
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pesquisar'),
+        title: const Text('Pesquisar'),
         actions: [
           PopupMenuButton<int>(
-            icon: Icon(Icons.filter_list),
+            icon: const Icon(Icons.filter_list),
             onSelected: (item) => handleFilterToggle(item),
             itemBuilder: (context) => [
               PopupMenuItem<int>(
@@ -75,7 +89,7 @@ class _PesquisarState extends State<Pesquisar> {
                   ],
                 ),
               ),
-              PopupMenuDivider(),
+              const PopupMenuDivider(),
               PopupMenuItem<int>(
                 value: 2,
                 child: Row(
@@ -101,19 +115,24 @@ class _PesquisarState extends State<Pesquisar> {
         ],
       ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : showEstabelecimentos
               ? Padding(
-                  padding: EdgeInsets.fromLTRB(
+                  padding: const EdgeInsets.fromLTRB(
                       20.0, 0.0, 20.0, 8.0), // left, top, right, bottom
                   child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: 15.0,
                       mainAxisSpacing: 15.0,
                     ),
                     itemCount: areas.length,
                     itemBuilder: (BuildContext context, int index) {
+                      String areaIconName =
+                          areas[index].icone ?? ''; // Nome do ícone da área
+
+                      IconData? areaIcon = iconMap[areaIconName];
                       return GestureDetector(
                         onTap: () {
                           // Implemente o que deseja fazer ao clicar no quadrado aqui
@@ -134,21 +153,36 @@ class _PesquisarState extends State<Pesquisar> {
                           child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
+                                AutoSizeText(
                                   areas[index].nome,
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
+                                  maxLines: 1,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
                                 ),
-                                Icon(Icons.local_taxi,
-                                    color: Colors.white, size: 70),
+                                // Mostra o ícone correspondente, se disponível
+                                areaIcon != null
+                                    ? Icon(
+                                        areaIcon,
+                                        color: Colors.white,
+                                        size: 90,
+                                      )
+                                    : const Icon(
+                                        Icons.settings,
+                                        color: Colors.white,
+                                        size: 90,
+                                      ), // fazer mapa de icons dinamico
                               ]),
                         ),
                       );
                     },
                   ),
                 )
-              : EventosGridView(postoID: widget.postoID,),
+              : EventosGridView(
+                  postoID: widget.postoID,
+                ),
       bottomNavigationBar: NavBar(postoID: widget.postoID, index: 1),
     );
   }

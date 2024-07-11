@@ -129,9 +129,9 @@ class _AreaEstabelecimentosState extends State<AreaEstabelecimentos> {
         ],
       ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : estabelecimentosFiltrados.isEmpty
-              ? Center(child: Text('Nenhum estabelecimento encontrado.'))
+              ? const Center(child: Text('Nenhum estabelecimento encontrado.'))
               : SingleChildScrollView(
                   child: Column(
                     children: estabelecimentosFiltrados.map((estab) {

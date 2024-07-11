@@ -37,6 +37,7 @@ class EventoPage extends StatefulWidget {
 
 class _EventoPageState extends State<EventoPage> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  late String? token;
   final api = ApiClient();
   bool isLoading = true;
   Evento? evento;
@@ -61,7 +62,9 @@ class _EventoPageState extends State<EventoPage> {
   void loadMyUser() async {
     try {
       final SharedPreferences prefs = await _prefs;
-      String? token = prefs.getString('token');
+      setState(() {
+        token = prefs.getString('token');
+      });
       final fetchedUser = await fetchUtilizadorCompleto();
       setState(() {
         myUser = fetchedUser;
@@ -166,7 +169,7 @@ class _EventoPageState extends State<EventoPage> {
 
   Future<void> _createInscricao() async {
     final api = InscricoesAPI();
-    final response = await api.criarInscricaoEvento(widget.eventoID);
+    final response = await api.criarInscricaoEvento(widget.eventoID, token);
 
     if (response.statusCode == 200) {
       // Sucesso

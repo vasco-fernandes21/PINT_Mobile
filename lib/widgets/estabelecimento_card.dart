@@ -26,7 +26,7 @@ class EstabelecimentoCard extends StatelessWidget {
                     '${api.baseUrl}/uploads/estabelecimentos/${estab['foto']}',
                     width: double.infinity,
                     height: 200,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.cover, 
                   )
                 : Container(
                     width: double.infinity,

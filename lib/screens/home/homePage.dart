@@ -4,7 +4,7 @@ import 'package:pint/models/evento.dart';
 import 'package:pint/models/utilizador.dart';
 import 'package:pint/navbar.dart';
 import 'package:pint/screens/criar/criarEvento.dart';
-import 'package:pint/screens/perfil/perfil.dart';
+import 'package:pint/screens/perfil/meuperfil.dart';
 import 'package:pint/screens/pesquisar/eventos/todosEventos.dart';
 import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/evento_functions.dart';
@@ -91,7 +91,7 @@ class _HomePageState extends State<HomePage> {
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                     ),
-                   ...eventos.take(4).map((evento) => EventoRow(evento: evento)),
+                   ...eventos.take(3).map((evento) => EventoRow(evento: evento, postoID: widget.postoID,)),
                     const SizedBox(height: 15,),
                     CustomButton(onPressed: () {
                           Navigator.push(

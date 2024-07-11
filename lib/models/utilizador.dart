@@ -9,6 +9,7 @@ class Utilizador {
   final String? cargo;
   final int? idAreaPreferencia;
   final int? idSubareaPreferencia;
+  final int? idGoogle;
 
   Utilizador({
     required this.id,
@@ -21,6 +22,7 @@ class Utilizador {
     this.cargo,
     this.idAreaPreferencia,
     this.idSubareaPreferencia,
+    this.idGoogle,
      });
 
   factory Utilizador.fromJson(Map<String, dynamic> json) {
@@ -34,7 +36,8 @@ class Utilizador {
       foto: json['foto'],
       cargo: json['cargo'],
       idAreaPreferencia: json['idArea'],
-      idSubareaPreferencia: json['idSubarea']
+      idSubareaPreferencia: json['idSubarea'],
+      idGoogle: json['id_google']
     );
   }
 }

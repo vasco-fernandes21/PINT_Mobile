@@ -11,8 +11,8 @@ class ApiClient {
     final token = prefs.getString('token');
     if (token != null) {
       return {
-        'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
+        //'Content-Type': 'application/json',
       };
     } else {
       return {
@@ -27,13 +27,14 @@ class ApiClient {
     return http.get(url, headers: headers);
   }
 
-  Future<http.Response> post(String endpoint, {dynamic body, Map<String, String>? headers}) async {
-  final url = Uri.parse('$baseUrl$endpoint');
-  final combinedHeaders = await _getHeaders();
-  final encodedBody = jsonEncode(body);
-  print("A enviar pedido para $url com body: $encodedBody"); 
-  return http.post(url, headers: combinedHeaders, body: encodedBody);
-}
+  Future<http.Response> post(String endpoint,
+      {dynamic body, Map<String, String>? headers}) async {
+    final url = Uri.parse('$baseUrl$endpoint');
+    final combinedHeaders = await _getHeaders();
+    final encodedBody = jsonEncode(body);
+    print("A enviar pedido para $url com body: $encodedBody");
+    return http.post(url, headers: combinedHeaders, body: encodedBody);
+  }
 
   Future<http.Response> put(String endpoint, {dynamic body}) async {
     final url = Uri.parse('$baseUrl$endpoint');

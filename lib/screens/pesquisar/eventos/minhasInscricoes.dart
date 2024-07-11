@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pint/models/evento.dart';
 import 'package:pint/models/inscricao.dart';
 import 'package:pint/models/utilizador.dart';
+import 'package:pint/navbar.dart';
 import 'package:pint/screens/pesquisar/eventos/paginaEvento.dart';
 import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/evento_functions.dart';
@@ -153,6 +154,7 @@ class MinhasInscricoesPage extends StatefulWidget {
                     ],
                   ),
                 ),
+                bottomNavigationBar: NavBar(postoID: widget.postoID, index: 1),
     );
   }
 

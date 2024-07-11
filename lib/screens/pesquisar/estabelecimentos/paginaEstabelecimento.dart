@@ -110,19 +110,22 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
 
     try {
       List<Location> locations = await locationFromAddress(morada);
+
       if (locations.isNotEmpty) {
         setState(() {
           latitude = locations.first.latitude;
           longitude = locations.first.longitude;
+          print(latitude);
+          print(longitude);
         });
 
-        _localizacao =
-            CameraPosition(target: LatLng(latitude!, longitude!), zoom: 15);
+        _localizacao = CameraPosition(target: LatLng(latitude!, longitude!), zoom: 15);
       }
     } catch (e) {
       print('Erro ao obter localização: $e');
       isLoading = false;
     }
+
   }
 
   void _alertaConfirmacao(BuildContext context) {
@@ -325,11 +328,11 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                                   initialCameraPosition: _localizacao!,
                                   markers: {
                                     Marker(
-                                      markerId: MarkerId('restaurant'),
+                                      markerId: const MarkerId('marker'),
                                       position: LatLng(latitude!, longitude!),
                                     ),
                                   },
-                                  mapType: MapType.normal,
+                                  mapType: MapType.hybrid,
                                   onMapCreated:
                                       (GoogleMapController controller) {
                                     _controller.complete(controller);
