@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:permission_handler/permission_handler.dart';
 import '../../api/authAPI.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pint/screens/selectPosto.dart';
@@ -17,9 +16,9 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   void _submit() async {
-    try {
-      if (_formKey.currentState!.validate()) {
-        _formKey.currentState!.save();
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      try {
         var response = await authApi.login(
             _emailController.text, _passwordController.text);
         if (response != null && response.containsKey('statusCode')) {
@@ -41,14 +40,11 @@ class _LoginPageState extends State<LoginPage> {
                 textColor: Colors.white,
                 fontSize: 16.0,
               );
-              print('Solicitando permissões...');
-              await requestPermissions();
               Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SelectPosto(),
-                ),
-              );
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SelectPosto(),
+                  ));
             }
           } else {
             var error = response['body'] != null &&
@@ -76,10 +72,10 @@ class _LoginPageState extends State<LoginPage> {
             fontSize: 16.0,
           );
         }
-      } else {
-        print('Formulário inválido');
+      } catch (e) {
+        print('Exception: $e');
         Fluttertoast.showToast(
-          msg: 'Por favor, preencha todos os campos corretamente',
+          msg: 'Erro inesperado',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.CENTER,
           backgroundColor: Colors.red,
@@ -87,46 +83,7 @@ class _LoginPageState extends State<LoginPage> {
           fontSize: 16.0,
         );
       }
-    } catch (e) {
-      print('Exception: $e');
-      Fluttertoast.showToast(
-        msg: 'Erro inesperado',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
     }
-  }
-
-  Future<void> requestPermissions() async {
-    Map<Permission, PermissionStatus> statuses = await [
-      Permission.photos,
-    ].request();
-
-    statuses.forEach((permission, status) {
-      if (status.isDenied) {
-        Fluttertoast.showToast(
-          msg: 'Permissão ${permission.toString()} foi negada.',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-      } else if (status.isPermanentlyDenied) {
-        Fluttertoast.showToast(
-          msg:
-              'Permissão ${permission.toString()} foi permanentemente negada. Por favor, permita nas configurações.',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-      }
-    });
   }
 
   @override
