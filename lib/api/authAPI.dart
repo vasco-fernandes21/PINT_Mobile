@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api.dart';
@@ -14,14 +15,16 @@ class AuthApi {
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
+      print(data);
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', data['token']);
       await prefs.setBool('isLoggedIn', true);
       if (data['recoveryToken'] != null) {
         await prefs.setString('recoveryToken', data['recoveryToken']);
       }
-      print('Token: ${data['token']}');
-      print('Recovery Token: ${data['recoveryToken']}');
+      if (data['recoveryToken'] != null) {
+        await prefs.setString('recoveryToken', data['recoveryToken']);
+      }
       return {'statusCode': response.statusCode, 'body': data};
     } else {
       var errorData = jsonDecode(response.body);
