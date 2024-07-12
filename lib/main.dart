@@ -8,14 +8,13 @@ import 'package:pint/utils/fetch_functions.dart';
 import 'screens/auth/loginPage.dart';
 import 'screens/auth/registarPage.dart';
 import 'screens/auth/recuperarPage.dart';
-import 'screens/home/homePage.dart';
 import 'screens/auth/novapassPage.dart';
 import 'screens/selectPosto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 Future<void> main() async {
-  await dotenv.load(fileName: ".env.dev"); 
+  await dotenv.load(fileName: ".env"); 
   initializeDateFormatting();
   Intl.defaultLocale = 'pt_PT';
   SharedPreferences prefs = await SharedPreferences.getInstance();
