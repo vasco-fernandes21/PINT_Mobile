@@ -1,6 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Pacote para lidar com formatação de datas
+import 'package:intl/intl.dart'; 
 import 'package:pint/models/evento.dart';
 import 'package:pint/models/utilizador.dart';
 import 'package:pint/navbar.dart';
@@ -43,6 +43,8 @@ class _HomePageState extends State<HomePage> {
     final fetchedUser = await fetchUtilizadorCompleto();
     setState(() {
       myUser = fetchedUser;
+      print(myUser?.nome);
+      print(myUser?.ultimoLogin);
       updateSaudacao();
     });
   }
@@ -59,7 +61,7 @@ class _HomePageState extends State<HomePage> {
     if (myUser != null && myUser!.ultimoLogin != null) {
       final currentHour = DateTime.now().hour;
       final currentDate = DateTime.now();
-      final lastLoginDate = DateTime.parse(myUser!.ultimoLogin!); // Converter para DateTime
+      final lastLoginDate = DateTime.parse(myUser!.ultimoLogin!); 
 
       final diff = currentDate.difference(lastLoginDate);
       final diffDays = diff.inDays;
