@@ -58,32 +58,36 @@ class _HomePageState extends State<HomePage> {
   }
 
   void updateSaudacao() {
-    if (myUser != null && myUser!.ultimoLogin != null) {
+    if (myUser != null) {
       final currentHour = DateTime.now().hour;
-      final currentDate = DateTime.now();
-      final lastLoginDate = DateTime.parse(myUser!.ultimoLogin!); 
 
-      final diff = currentDate.difference(lastLoginDate);
-      final diffDays = diff.inDays;
+      if (myUser!.ultimoLogin != null) {
+        final currentDate = DateTime.now();
+        final lastLoginDate = DateTime.parse(myUser!.ultimoLogin!);
 
-      if (diffDays >= 15) {
+        final diff = currentDate.difference(lastLoginDate);
+        final diffDays = diff.inDays;
+
+        if (diffDays >= 15) {
+          setState(() {
+            saudacao = 'Seja bem-vindo novamente, ${myUser!.nome}';
+          });
+          return;
+        }
+      }
+
+      if (currentHour >= 6 && currentHour < 13) {
         setState(() {
-          saudacao = 'Seja bem-vindo novamente, ${myUser!.nome}';
+          saudacao = 'Bom dia, ${myUser!.nome}';
+        });
+      } else if (currentHour >= 13 && currentHour < 20) {
+        setState(() {
+          saudacao = 'Boa tarde, ${myUser!.nome}';
         });
       } else {
-        if (currentHour >= 6 && currentHour < 13) {
-          setState(() {
-            saudacao = 'Bom dia, ${myUser!.nome}';
-          });
-        } else if (currentHour >= 13 && currentHour < 20) {
-          setState(() {
-            saudacao = 'Boa tarde, ${myUser!.nome}';
-          });
-        } else {
-          setState(() {
-            saudacao = 'Boa noite, ${myUser!.nome}';
-          });
-        }
+        setState(() {
+          saudacao = 'Boa noite, ${myUser!.nome}';
+        });
       }
     }
   }

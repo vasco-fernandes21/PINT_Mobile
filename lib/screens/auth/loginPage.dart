@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../api/authAPI.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pint/screens/selectPosto.dart';
@@ -14,6 +17,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   void _submit() async {
     if (_formKey.currentState!.validate()) {
@@ -40,11 +44,12 @@ class _LoginPageState extends State<LoginPage> {
                 textColor: Colors.white,
                 fontSize: 16.0,
               );
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SelectPosto(),
-                  ));
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SelectPosto(),
+                ),
+              );
             }
           } else {
             var error = response['body'] != null &&
@@ -86,6 +91,74 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+  try {
+    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+    if (googleUser != null) {
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final idToken = googleAuth.idToken;
+      if (idToken != null) {
+        final response = await authApi.googleLogin(idToken);
+        
+        if (response.statusCode == 200) {
+          var data = jsonDecode(response.body);
+          print('Response Data: $data');
+          
+          if (data['token'] != null) {
+            // Armazena o token e detalhes do usuário
+            String token = data['token'];
+
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            await prefs.setBool('isLoggedIn', true);
+            await prefs.setString('token', token);
+            // await prefs.setString('userName', user['nome']);
+            // await prefs.setString('userEmail', user['email']);
+            // await prefs.setString('userPhoto', user['foto']);
+            // await prefs.setString('userGoogleId', user['id_google']);
+
+            // Navega para a página desejada
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SelectPosto(), // Passe o usuário para a próxima página, se necessário
+              ),
+            );
+          } else {
+            Fluttertoast.showToast(
+              msg: 'Erro ao fazer login. Verifique se a conta foi criada corretamente.',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              backgroundColor: Colors.red,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+          }
+        } else {
+          var errorData = jsonDecode(response.body);
+          Fluttertoast.showToast(
+            msg: errorData['error'] ?? 'Erro ao fazer login com o Google',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        }
+      }
+    }
+  } catch (error) {
+    print('Erro ao fazer login com o Google: $error');
+    Fluttertoast.showToast(
+      msg: 'Erro ao fazer login com o Google',
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.CENTER,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,17 +172,14 @@ class _LoginPageState extends State<LoginPage> {
               children: <Widget>[
                 SizedBox(height: 220),
                 Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 10), // Ajuste este valor para controlar o espaço no topo
+                  padding: EdgeInsets.symmetric(horizontal: 10),
                   child: SvgPicture.asset(
                     'assets/images/softinsa.svg',
                     height: 120,
                     fit: BoxFit.fitHeight,
                   ),
                 ),
-                SizedBox(
-                    height:
-                        20), // Adiciona espaço entre o logo e o primeiro campo
+                SizedBox(height: 20),
                 Container(
                   width: 380,
                   child: TextFormField(
@@ -158,67 +228,73 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 15),
                 Container(
-                  width:
-                      380, // Adiciona margem vertical entre o botão e os campos
+                  width: 380,
                   child: Column(
                     children: [
                       SizedBox(
-                        width: 380, // Define a largura do botão
+                        width: 380,
                         height: 40,
                         child: ElevatedButton(
                           onPressed: _submit,
                           child: Text('ENTRAR'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(
-                                0xFF1D324F), // Define a cor de fundo do botão
+                            backgroundColor: Color(0xFF1D324F),
                             shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(10), // Radius da borda
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            // Padding
                             textStyle: TextStyle(
                                 fontSize: 15,
-                                fontWeight:
-                                    FontWeight.bold), // Tamanho do texto
-                            foregroundColor: Colors.white, // Cor do texto
+                                fontWeight: FontWeight.bold),
+                            foregroundColor: Colors.white,
                           ),
                         ),
                       ),
-                      SizedBox(
-                          height: 10), // Adiciona um espaço entre os botões
+                      SizedBox(height: 10),
                       SizedBox(
                         width: 380,
-                        height: 40, // Define a largura do botão
+                        height: 40,
                         child: ElevatedButton(
                           onPressed: () {
-                            // Navigate to the registration page
                             Navigator.pushNamed(context, '/registar');
                           },
                           child: Text('CRIAR CONTA'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(
-                                0xFF1D324F), // Define a cor de fundo do botão
+                            backgroundColor: Color(0xFF1D324F),
                             shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(10), // Radius da borda
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            // Padding
                             textStyle: TextStyle(
                                 fontSize: 15,
-                                fontWeight:
-                                    FontWeight.bold), // Tamanho do texto
-                            foregroundColor: Colors.white, // Cor do texto
+                                fontWeight: FontWeight.bold),
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      SizedBox(
+                        width: 380,
+                        height: 40,
+                        child: ElevatedButton(
+                          onPressed: _signInWithGoogle,
+                          child: Text('ENTRAR COM GOOGLE'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue, // Cor padrão para o botão do Google
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            textStyle: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold),
+                            foregroundColor: Colors.white,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                // Adds a flexible space before the TextButton
                 Container(
                   child: TextButton(
                     onPressed: () {
-                      // Navigate to the password recovery page
                       Navigator.pushNamed(context, '/recuperar');
                     },
                     child: const Text(

@@ -2,7 +2,7 @@ class Utilizador {
   final int id;
   final String nome;
   final String? nif;
-  final String? loaclidade;
+  final String? localidade;
   final String? telemovel;
   final String? email;
   final String? foto;
@@ -10,13 +10,13 @@ class Utilizador {
   final String? ultimoLogin;
   final int? idAreaPreferencia;
   final int? idSubareaPreferencia;
-  final int? idGoogle;
+  final String? idGoogle;
 
   Utilizador({
     required this.id,
     required this.nome,
     this.nif,
-    this.loaclidade,
+    this.localidade,
     this.telemovel,
     this.email,
     this.foto,
@@ -32,7 +32,7 @@ class Utilizador {
       id: json['id'],
       nome: json['nome'],
       nif: json['nif'],
-      loaclidade: json['loaclidade'],
+      localidade: json['localidade'],
       telemovel: json['telemovel'],
       email: json['email'],
       foto: json['foto'],

@@ -2,10 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>io.flutter.embedded_views_preview</key>
-	<true/>
-	<key>GMSApiKey</key>
-	<string>AIzaSyBkvnVEmV_pwnsc52AqcPmx5giZmVu7LpU</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -24,6 +20,19 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.104348306910-b2pb0npvtd8cthl2mq77lhuv7r3pu3j9</string>
+			</array>
+		</dict>
+	</array>
+    <key>GIDClientID</key>
+    <string>104348306910-b2pb0npvtd8cthl2mq77lhuv7r3pu3j9.apps.googleusercontent.com</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
@@ -49,13 +58,5 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	
-	<!-- Permissões adicionais -->
-	<key>NSCameraUsageDescription</key>
-	<string>Esta aplicação precisa aceder a camara para tirar fotos.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Esta aplicação precisa aceder a biblioteca de fotos para selecionar e carregar fotos.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Esta aplicação precisa de permissão para salvar fotos na biblioteca de fotos.</string>
 </dict>
 </plist>
