@@ -267,7 +267,7 @@ Future<List<Foto>> fetchFotosEvento(BuildContext context, int eventoID) async {
 }
 
 
-Widget buildUserAvatar(String? imageUrl, int? idGoogle, {double width = 120, double height = 120}) {
+Widget buildUserAvatar(String? imageUrl, String? idGoogle, {double width = 120, double height = 120}) {
   String? finalImageUrl;
 
   if (idGoogle != null) {
@@ -294,7 +294,7 @@ Widget buildUserAvatar(String? imageUrl, int? idGoogle, {double width = 120, dou
   );
 }
 
-ImageProvider<Object> buildUserAvatarImageProvider(String? imageUrl, int? idGoogle) {
+ImageProvider<Object> buildUserAvatarImageProvider(String? imageUrl, String? idGoogle) {
   if (idGoogle != null) {
     return NetworkImage(imageUrl ?? 'assets/images/default-avatar.jpg');
   } else if (imageUrl != null) {
@@ -304,7 +304,7 @@ ImageProvider<Object> buildUserAvatarImageProvider(String? imageUrl, int? idGoog
   }
 }
 
-Widget userCircleAvatar({required String? imageUrl, required int? idGoogle, double radius = 20}) {
+Widget userCircleAvatar({required String? imageUrl, required String? idGoogle, double radius = 20}) {
   return CircleAvatar(
     radius: radius,
     backgroundImage: buildUserAvatarImageProvider(imageUrl, idGoogle),

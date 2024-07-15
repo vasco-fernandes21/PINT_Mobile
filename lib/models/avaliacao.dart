@@ -9,7 +9,7 @@ class Avaliacao {
   final int? idPai;
   final int? upvotes;
   final int? downvotes;
-  final int? idGoogle;
+  final String? idGoogle;
   // Adicione outros campos conforme necessário
 
   Avaliacao({

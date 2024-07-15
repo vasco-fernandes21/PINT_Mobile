@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_offline/flutter_offline.dart';
-import 'package:intl/intl.dart'; // Pacote para lidar com formatação de datas
+import 'package:intl/intl.dart'; 
 import 'package:pint/models/estabelecimento.dart';
 import 'package:pint/models/evento.dart';
 import 'package:pint/models/utilizador.dart';
@@ -51,6 +51,8 @@ class _HomePageState extends State<HomePage> {
     final fetchedUser = await fetchUtilizadorCompleto();
     setState(() {
       myUser = fetchedUser;
+      print(myUser?.nome);
+      print(myUser?.ultimoLogin);
       updateSaudacao();
     });
   }
@@ -86,35 +88,37 @@ class _HomePageState extends State<HomePage> {
 
 
   void updateSaudacao() {
-    if (myUser != null ) {
+    if (myUser != null) {
       final currentHour = DateTime.now().hour;
-      final currentDate = DateTime.now();
-      /*final lastLoginDate = DateTime.parse(myUser!.ultimoLogin!); // Converter para DateTime
 
-      final diff = currentDate.difference(lastLoginDate);
-      final diffDays = diff.inDays;
+      if (myUser!.ultimoLogin != null) {
+        final currentDate = DateTime.now();
+        final lastLoginDate = DateTime.parse(myUser!.ultimoLogin!);
 
-      if (diffDays >= 15) {
-        setState(() {
-          saudacao = 'Seja bem-vindo novamente, ${myUser!.nome}';
-        });
-      } else {*/
+        final diff = currentDate.difference(lastLoginDate);
+        final diffDays = diff.inDays;
 
-        if (currentHour >= 6 && currentHour < 13) {
+        if (diffDays >= 15) {
           setState(() {
-            saudacao = 'Bom dia,\n${myUser!.nome}';
+            saudacao = 'Seja bem-vindo novamente, ${myUser!.nome}';
           });
-        } else if (currentHour >= 13 && currentHour < 20) {
-          setState(() {
-            saudacao = 'Boa tarde,\n${myUser!.nome}';
-          });
-        } else {
-          setState(() {
-            saudacao = 'Boa noite,\n${myUser!.nome}';
-          });
-
+          return;
         }
-      //}
+      }
+
+      if (currentHour >= 6 && currentHour < 13) {
+        setState(() {
+          saudacao = 'Bom dia, ${myUser!.nome}';
+        });
+      } else if (currentHour >= 13 && currentHour < 20) {
+        setState(() {
+          saudacao = 'Boa tarde, ${myUser!.nome}';
+        });
+      } else {
+        setState(() {
+          saudacao = 'Boa noite, ${myUser!.nome}';
+        });
+      }
     }
   }
 

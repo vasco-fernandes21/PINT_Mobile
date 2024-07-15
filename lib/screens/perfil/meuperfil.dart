@@ -26,6 +26,7 @@ class _PerfilPageState extends State<PerfilPage> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   late String? token;
   Utilizador? myUser;
+  
 
   @override
   void initState() {

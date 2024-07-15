@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'api.dart';
 
 class AuthApi {
@@ -61,4 +62,12 @@ class AuthApi {
       'token': recoveryToken,
     });
   }
+}
+
+class Google {
+  static final _googleSignIn = GoogleSignIn();
+
+  static Future<GoogleSignInAccount?> login() => _googleSignIn.signIn();
+
+  static Future logout() => _googleSignIn.signOut();
 }
