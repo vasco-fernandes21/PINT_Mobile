@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
       ]);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'My Flutter App',
+      title: 'The Softshares',
       theme: ThemeData(
         primaryColor: primaryColor,
         scaffoldBackgroundColor: backgroundColor,

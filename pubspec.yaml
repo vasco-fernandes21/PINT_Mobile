@@ -36,6 +36,7 @@ dependencies:
   google_sign_in: ^6.2.1
   carousel_slider: ^4.2.1
   comment_tree: ^0.3.0
+  flutter_facebook_auth: ^7.0.1
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +65,8 @@ flutter:
     - assets/images/
     - assets/images/softinsa.svg
     - assets/images/softinsalogo.png
+    - assets/icons/google-icon.svg
+    - assets/icons/facebook-icon.svg
 
   uses-material-design: true
 

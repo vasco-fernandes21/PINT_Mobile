@@ -10,6 +10,7 @@ class Avaliacao {
   final int? upvotes;
   final int? downvotes;
   final String? idGoogle;
+  final String? idFacebook;
   // Adicione outros campos conforme necessário
 
   Avaliacao({
@@ -24,6 +25,7 @@ class Avaliacao {
     this.downvotes,
     this.idPai,
     this.idGoogle,
+    this.idFacebook,
     // Inicialize outros campos
   });
 
@@ -40,7 +42,7 @@ class Avaliacao {
       downvotes: json['downvotes'],
       idPai: json['idPai'],
       idGoogle: json['utilizador']['id_google'],
-      // Inicialize outros campos
+      idFacebook: json['utilizador']['id_facebook'],
     );
   }
 }

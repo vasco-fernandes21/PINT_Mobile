@@ -183,7 +183,7 @@ Future<void> _downvote() async {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ListTile(
-          leading: userCircleAvatar(imageUrl: comentario.fotoUtilizador, idGoogle: comentario.idGoogle),
+          leading: userCircleAvatar(imageUrl: comentario.fotoUtilizador, idGoogle: comentario.idGoogle, idFacebook: comentario.idFacebook),
           title: AutoSizeText(comentario.nomeUtilizador, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14,), maxLines: 1,),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
