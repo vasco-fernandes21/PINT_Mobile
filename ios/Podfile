@@ -34,7 +34,7 @@ target 'Runner' do
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 
   # Google Maps
-  pod 'GoogleMaps', '~> 8.4'
+  pod 'GoogleMaps', '~> 9.0'
   
   # Google Sign-In
   pod 'GoogleSignIn', '~> 7.1'
