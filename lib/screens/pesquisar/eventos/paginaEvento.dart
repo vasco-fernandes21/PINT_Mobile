@@ -62,6 +62,8 @@ class _EventoPageState extends State<EventoPage> {
   double? latitude;
   double? longitude;
 
+
+
   @override
   void initState() {
     super.initState();
@@ -474,14 +476,7 @@ Fluttertoast.showToast(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              comentarios.isEmpty
-                                  ? const Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(vertical: 20),
-                                      child: Center(
-                                          child: Text(
-                                              'Ainda não existem comentários')))
-                                  : ComentariosList(comentarios: todosComentariosOrdenados, eventoId: evento!.id,),
+                              ComentariosList(comentarios: todosComentariosOrdenados, eventoId: evento!.id, myUserId: myUser!.id,),
                             ]),
                       )
                     ],

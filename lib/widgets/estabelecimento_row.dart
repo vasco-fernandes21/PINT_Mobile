@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:pint/api/api.dart';
-import 'package:pint/models/evento.dart';
-import 'package:pint/screens/pesquisar/eventos/paginaEvento.dart';
-import 'package:pint/utils/colors.dart';
-import 'package:pint/utils/evento_functions.dart';
+import 'package:pint/models/estabelecimento.dart';
+import 'package:pint/screens/pesquisar/estabelecimentos/paginaEstabelecimento.dart';
 
-class EventoRow extends StatelessWidget {
-  final Evento evento;
+class EstabelecimentoRow extends StatelessWidget {
+  final Estabelecimento estabelecimento;
   final int postoID;
   final api = ApiClient();
 
-  EventoRow({required this.evento, required this.postoID});
+  EstabelecimentoRow({required this.estabelecimento, required this.postoID});
 
   @override
   Widget build(BuildContext context) {
@@ -20,23 +18,24 @@ class EventoRow extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => EventoPage(
+              builder: (context) => EstabelecimentoPage(
                 postoID: postoID,
-                eventoID: evento.id,
+                estabelecimentoID: estabelecimento.id,
+                NomeEstabelecimento: estabelecimento.nome,
               ),
             ),
           );
         },
         child: Container(
           height: 100,
-          padding: EdgeInsets.all(10), // Altura fixa para todos os cards
+          padding: const EdgeInsets.all(10), // Altura fixa para todos os cards
           child: Row(
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(10), // Raio de borda para a imagem
-                child: evento.foto != null
+                child: estabelecimento.foto != null
                     ? Image.network(
-                        '${api.baseUrl}/uploads/eventos/${evento.foto}',
+                        '${api.baseUrl}/uploads/estabelecimentos/${estabelecimento.foto}',
                         width: 80,
                         height: 80,
                         fit: BoxFit.cover,
@@ -51,24 +50,24 @@ class EventoRow extends StatelessWidget {
                         ),
                       ),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      evento.titulo,
+                      estabelecimento.nome,
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
-                        overflow: TextOverflow.ellipsis
+                        overflow: TextOverflow.ellipsis,
                       ),
                       maxLines: 2,
                     ),
-                    SizedBox(height: 5),
+                    const SizedBox(height: 5),
                     Text(
-                      diasAte(evento.data), // Ajuste conforme o formato de data
+                      'Qualquer merda', 
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 10,

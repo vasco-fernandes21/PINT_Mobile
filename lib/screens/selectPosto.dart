@@ -16,6 +16,7 @@ class _SelectPostoState extends State<SelectPosto> {
   List<Map<String, dynamic>> options = [];
   Map<String, dynamic>? selectedPosto;
   int selectedPostoId = 0;
+  String selectedPostoNome = '';
 
   @override
   void initState() {
@@ -105,7 +106,7 @@ class _SelectPostoState extends State<SelectPosto> {
                  Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => HomePage(postoID: selectedPostoId),
+                      builder: (context) => HomePage(postoID: selectedPostoId,),
                     ),
                   ); 
                 } else {                

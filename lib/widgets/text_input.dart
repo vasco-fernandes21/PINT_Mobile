@@ -5,15 +5,17 @@ class TextInput extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final TextInputType? keyboardType;
-  final String errorMessage;
+  final String? errorMessage;
   final bool isFieldRequired;
   final int minLines;
+  final String? suffixText;
 
   TextInput({
     required this.controller,
     required this.label,
     this.keyboardType,
-    required this.errorMessage,
+    this.errorMessage,
+    this.suffixText,
     this.isFieldRequired = true,
     this.minLines = 1, // por padrão, o campo é obrigatório
   });
@@ -25,6 +27,7 @@ class TextInput extends StatelessWidget {
       minLines: minLines,
       decoration: InputDecoration(
         labelText: label,
+        suffixText: suffixText,
         filled: true,
         fillColor: Colors.grey[200],
         border: OutlineInputBorder(
@@ -33,7 +36,7 @@ class TextInput extends StatelessWidget {
         ),
       ),
       validator: isFieldRequired
-          ? (value) => validateNotEmpty(value, errorMessage: errorMessage)
+          ? (value) => validateNotEmpty(value, errorMessage: errorMessage ?? 'Erro')
           : null,
       keyboardType: keyboardType,
     );

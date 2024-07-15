@@ -146,6 +146,7 @@ class _PerfilPageState extends State<PerfilPage> {
                                 builder: (context) => PreferenciasPage(
                                     postoID: widget.postoID,
                                     myUser: myUser!),
+                                    
                               ),
                             );
                       },
@@ -219,13 +220,9 @@ class PerfilMenuWidget extends StatelessWidget {
       leading: Container(
         width: 40,
         height: 40,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(100),
-          color: secondaryColor,
-        ),
         child: Icon(
           icon,
-          color: Colors.white,
+          color: secondaryColor,
           size: 27,
         ),
       ),

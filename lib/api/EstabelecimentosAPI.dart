@@ -16,6 +16,12 @@ class EstabelecimentosAPI {
     return api.get(endpoint);
   }
 
+    Future<http.Response> getEstabelecimentosPosto(int idPosto) {
+    String endpoint =
+        '/estabelecimentos/mobile?idPosto=$idPosto';
+    return api.get(endpoint);
+  }
+
   Future<http.Response> criarEstabelecimento({
     required String nome,
     required String descricao,

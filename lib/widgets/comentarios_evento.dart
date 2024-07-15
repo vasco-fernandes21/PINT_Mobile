@@ -15,8 +15,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ComentariosList extends StatefulWidget {
   final List<Avaliacao> comentarios;
   final int eventoId;
+  final int myUserId;
 
-  ComentariosList({required this.comentarios, required this.eventoId});
+  ComentariosList({required this.comentarios, required this.eventoId, required this.myUserId});
 
   @override
   _ComentariosListState createState() => _ComentariosListState();
@@ -70,22 +71,20 @@ Future<void> _downvote() async {
         }
 
 
-    Future<void> _createComentario() async {
-      if(_comentarioController.text.isEmpty){
+  Future<void> _createComentario() async {
+    if(_comentarioController.text.isEmpty){
         Fluttertoast.showToast(
           msg: 'Escreve um comentário.',
           backgroundColor: errorColor,
           fontSize: 12);
           return;
-      }
+    }
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     if (idPai == null)
     {
-    int idUtilizador = 1; // Substituir pelo id do user
-    // Chame a função para criar a avaliação
     final response = await api.criarComentarioEvento(
-        widget.eventoId, idUtilizador, 3, _comentarioController.text);
+        widget.eventoId, widget.myUserId, 3, _comentarioController.text);
 
     if (response.statusCode == 200) {
       // Sucesso

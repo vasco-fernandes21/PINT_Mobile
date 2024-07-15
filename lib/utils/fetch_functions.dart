@@ -77,6 +77,19 @@ Future<List<Evento>> fetchMyEventos(BuildContext context) async {
   }
 }
 
+Future<List<Estabelecimento>> fetchTodosEstabelecimentosPosto(BuildContext context, int idPosto) async {
+  final api = EstabelecimentosAPI();
+  final response = await api.getEstabelecimentosPosto(idPosto);
+  if (response.statusCode == 200) {
+    final List<dynamic> data = json.decode(response.body)['data'];
+    return data.map((json) => Estabelecimento.fromJson(json)).toList();
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Erro ao carregar eventos: ${response.statusCode}')),
+    );
+    return [];
+  }
+}
 
 Future<Estabelecimento?> fetchEstabelecimento(int estabelecimentoID) async {
   final api = EstabelecimentosAPI();
@@ -88,6 +101,21 @@ Future<Estabelecimento?> fetchEstabelecimento(int estabelecimentoID) async {
     throw Exception('Erro ao carregar estabelecimento: ${response.statusCode}');
   }
 }
+
+Future<List<Estabelecimento>> fetchEstabelecimentosPorArea(BuildContext context, int areaId, int idPosto) async {
+  final api = EstabelecimentosAPI();
+  final response = await api.listarEstabelecimentosPorArea(idPosto, areaId);
+  if (response.statusCode == 200) {
+    final List<dynamic> data = json.decode(response.body)['data'];
+    return data.map((json) => Estabelecimento.fromJson(json)).toList();
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Erro ao carregar eventos: ${response.statusCode}')),
+    );
+    return [];
+  }
+}
+
 
 Future<Evento?> fetchEvento (int eventoID) async {
   final api = EventosAPI();

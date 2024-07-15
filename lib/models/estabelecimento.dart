@@ -6,6 +6,9 @@ class Estabelecimento {
   final String? email;
   final int? telemovel;
   final String? foto;
+  final String? nomeSubarea;
+  final String? classificacaoMedia;
+  final String? precoMedio;
   // Adicione outros campos conforme necessário
 
   Estabelecimento({
@@ -13,9 +16,12 @@ class Estabelecimento {
     required this.nome,
     required this.descricao,
     required this.morada,
+    this.nomeSubarea,
     this.email,
     this.telemovel,
     this.foto,
+    this.precoMedio,
+    this.classificacaoMedia,
     // Inicialize outros campos
   });
 
@@ -28,6 +34,9 @@ class Estabelecimento {
       email: json['email'],
       telemovel: json['telemovel'],
       foto: json['foto'],
+      nomeSubarea: json['Subarea']['nome'],
+      classificacaoMedia: json['classificacao_media'],
+      precoMedio: json['preco_medio'],
       // Inicialize outros campos
     );
   }

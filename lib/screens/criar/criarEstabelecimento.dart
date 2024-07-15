@@ -38,6 +38,7 @@ class _CriarEstabelecimentoPageState extends State<CriarEstabelecimentoPage> {
   final TextEditingController _moradaController = TextEditingController();
   final TextEditingController _telemovelController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+    final TextEditingController _precoController = TextEditingController();
   
 
   @override
@@ -169,11 +170,13 @@ Future<void> _createEstabelecimento() async {
               const SizedBox(height: 15),
               TextInput(controller: _descriptionController, label: 'Descrição', keyboardType: TextInputType.text, errorMessage: 'Por favor, insira a descrição'),
               const SizedBox(height: 15),
-              TextInput(controller: _telemovelController, label: 'Telemóvel', keyboardType: TextInputType.phone, errorMessage: '', isFieldRequired: false,),
+              TextInput(controller: _telemovelController, label: 'Telemóvel', keyboardType: TextInputType.phone, isFieldRequired: false,),
               const SizedBox(height: 15),
-              TextInput(controller: _emailController, label: 'Email', keyboardType: TextInputType.emailAddress, errorMessage: '', isFieldRequired: false,),
+              TextInput(controller: _emailController, label: 'Email', keyboardType: TextInputType.emailAddress, isFieldRequired: false,),
               const SizedBox(height: 15),
               TextInput(controller: _moradaController, label: 'Morada', keyboardType: TextInputType.streetAddress, errorMessage: 'Por favor, insira a morada'),
+              const SizedBox(height: 15),
+              TextInput(controller: _precoController, label: 'Preço médio p/pessoa', keyboardType: TextInputType.number, isFieldRequired: false, suffixText: '€',),
               const SizedBox(height: 15),
               ImageInput(selectedImage: _selectedImage, onPickImage: _pickImage, validator: isImageNull,),         
               const SizedBox(height: 20),

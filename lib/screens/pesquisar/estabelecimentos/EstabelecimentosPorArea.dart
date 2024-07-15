@@ -3,8 +3,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pint/api/EstabelecimentosAPI.dart';
 import 'package:pint/api/api.dart';
+import 'package:pint/models/estabelecimento.dart';
 import 'package:pint/navbar.dart';
 import 'package:pint/api/postosAreasAPI.dart';
+import 'package:pint/utils/fetch_functions.dart';
 import 'package:pint/widgets/estabelecimento_card.dart';
 import 'paginaEstabelecimento.dart';
 
@@ -21,85 +23,52 @@ class AreaEstabelecimentos extends StatefulWidget {
 
 class _AreaEstabelecimentosState extends State<AreaEstabelecimentos> {
   final api = ApiClient();
-  List<Map<String, dynamic>> estabelecimentos = [];
-  List<Map<String, dynamic>> estabelecimentosFiltrados = [];
-  String selectedFilter = 'Todos';
-  List<String> subareas = ['Todos'];
-  Map<String, dynamic>? Estabelecimento;
-  int selectedEstabId = 0;
+  List<Estabelecimento> estabelecimentos = [];
+  List<Estabelecimento> estabelecimentosFiltrados = [];
+  String selectedFilter = 'Todas';
+  List<String> subareas = ['Todas'];
+  int selectedOrder = 0;
   bool isLoading = true;
+  double? classificacaoMedia;
 
   @override
   void initState() {
     super.initState();
-    fetchAreas();
+    loadEstabelecimentos();
   }
 
-  void fetchAreas() async {
-    final api = EstabelecimentosAPI();
-    final response =
-        await api.listarEstabelecimentosPorArea(widget.postoID, widget.areaID);
-
-    if (response.statusCode == 200) {
-      try {
-        // Decodificar a resposta JSON
-        Map<String, dynamic> jsonResponse = json.decode(response.body);
-
-        // Verificar se a chave 'data' existe na resposta
-        if (jsonResponse.containsKey('data')) {
-          // Acessar a lista de postos dentro de 'data'
-          List<dynamic> estabsData = jsonResponse['data'];
-
-          setState(() {
-            estabelecimentos = estabsData
-                .map<Map<String, dynamic>>((item) => {
-                      'id': item['id'],
-                      'nome': item['nome'],
-                      'morada': item['morada'],
-                      'descricao': item['descricao'],
-                      'foto': item['foto'],
-                      'subarea': item['Subarea']['nome'],
-                    })
-                .toList();
-            estabelecimentosFiltrados = List.from(estabelecimentos);
-            subareas.addAll(estabelecimentos
-                .map((e) => e['subarea'].toString())
+    void loadEstabelecimentos() async {
+    try {
+      final fetchedEstabelecimentos =
+          await fetchEstabelecimentosPorArea(context, widget.areaID, widget.postoID);
+      setState(() {
+        estabelecimentos = fetchedEstabelecimentos;
+        estabelecimentosFiltrados = estabelecimentos;
+        subareas.addAll(estabelecimentos
+                .map((e) => e.nomeSubarea.toString())
                 .toSet()
                 .toList());
-            isLoading = false;
-          });
-        } else {
-          // Se 'data' não estiver presente na resposta
-          isLoading = false;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text('Dados de postos não encontrados na resposta')),
-          );
-        }
-      } catch (e) {
-        // Capturar e mostrar erros de decodificação JSON
         isLoading = false;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao processar os dados: $e')),
-        );
-      }
-    } else {
-      // Tratar erros de status HTTP
-      isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('Erro ao carregar dados: ${response.statusCode}')),
+          content: Text(e.toString()),
+        ),
       );
     }
   }
 
   void filterEstabelecimentos() {
     setState(() {
-      if (selectedFilter == 'Todos') {
+      if (selectedFilter == 'Todas') {
         estabelecimentosFiltrados = List.from(estabelecimentos);
       } else {
         estabelecimentosFiltrados = estabelecimentos.where((estab) {
-          return estab['subarea'] == selectedFilter;
+          return estab.nomeSubarea == selectedFilter;
         }).toList();
       }
     });
@@ -109,8 +78,36 @@ class _AreaEstabelecimentosState extends State<AreaEstabelecimentos> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.NomeArea}'),
+        title: Text(widget.NomeArea),
         actions: [
+          PopupMenuButton<int>(
+            onSelected: (int result) {
+              setState(() {
+                selectedOrder = result;
+                if (selectedOrder == 0){
+                  estabelecimentos.sort((a, b) => double.parse(a.classificacaoMedia ?? '0.00').compareTo(double.parse(b.classificacaoMedia ?? '0.00')));
+                } else if (selectedOrder== 1) {
+                  estabelecimentos.sort((b, a) => double.parse(a.classificacaoMedia ?? '0.00').compareTo(double.parse(b.classificacaoMedia ?? '0.00')));
+                }
+              });
+            },
+            icon: const Icon(Icons.sort),
+            itemBuilder: (context) => <PopupMenuEntry<int>>[
+          const PopupMenuItem<int>(
+          value: null,
+          child: Text('Classificação', style: TextStyle(fontWeight: FontWeight.bold)),
+          enabled: false,
+        ),
+        const PopupMenuItem<int>(
+          value: 0,
+          child: Text('Ordem Crescente',),
+        ),
+        const PopupMenuItem<int>(
+          value: 1,
+          child: Text('Ordem Decrescente',),
+        ),
+            ],
+          ),
           PopupMenuButton<String>(
             onSelected: (String result) {
               setState(() {
@@ -118,13 +115,18 @@ class _AreaEstabelecimentosState extends State<AreaEstabelecimentos> {
                 filterEstabelecimentos();
               });
             },
-            icon: Icon(Icons.filter_list_alt),
-            itemBuilder: (BuildContext context) => subareas
-                .map((subarea) => PopupMenuItem<String>(
-                      value: subarea,
-                      child: Text(subarea),
-                    ))
-                .toList(),
+            icon: const Icon(Icons.filter_list_alt),
+             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+        const PopupMenuItem<String>(
+          value: null,
+          child: Text('Filtrar por Subárea', style: TextStyle(fontWeight: FontWeight.bold)),
+          enabled: false,
+        ),
+        ...subareas.map((subarea) => PopupMenuItem<String>(
+          value: subarea,
+          child: Text(subarea),
+        )).toList(),
+      ],
           ),
         ],
       ),
@@ -142,8 +144,8 @@ class _AreaEstabelecimentosState extends State<AreaEstabelecimentos> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => EstabelecimentoPage(
-                                estabelecimentoID: estab['id'],
-                                NomeEstabelecimento: estab['nome'],
+                                estabelecimentoID: estab.id,
+                                NomeEstabelecimento: estab.nome,
                                 postoID: widget.postoID,
                               ),
                             ),

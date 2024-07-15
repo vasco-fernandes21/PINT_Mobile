@@ -1,6 +1,10 @@
+import 'dart:math';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_offline/flutter_offline.dart';
 import 'package:intl/intl.dart'; // Pacote para lidar com formatação de datas
+import 'package:pint/models/estabelecimento.dart';
 import 'package:pint/models/evento.dart';
 import 'package:pint/models/utilizador.dart';
 import 'package:pint/navbar.dart';
@@ -11,6 +15,7 @@ import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/evento_functions.dart';
 import 'package:pint/utils/fetch_functions.dart';
 import 'package:pint/widgets/custom_button.dart';
+import 'package:pint/widgets/estabelecimento_row.dart';
 import 'package:pint/widgets/evento_row.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -28,13 +33,16 @@ class _HomePageState extends State<HomePage> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   Utilizador? myUser;
   List<Evento> eventos = [];
+  List<Estabelecimento> estabelecimentos = [];
   String saudacao = '';
+  
 
   @override
   void initState() {
     super.initState();
     loadMyUser();
     loadEventos();
+    loadEstabelecimentos();
   }
 
   void loadMyUser() async {
@@ -51,15 +59,37 @@ class _HomePageState extends State<HomePage> {
     final fetchedEventos = await fetchEventos(context, widget.postoID);
     setState(() {
       eventos = filtrarEOrdenarEventosFuturos(fetchedEventos);
-      isLoading = false;
     });
   }
 
+      void loadEstabelecimentos() async {
+    try {
+      final fetchedEstabelecimentos =
+          await fetchTodosEstabelecimentosPosto(context, widget.postoID);
+      setState(() {
+        fetchedEstabelecimentos.shuffle(Random());
+        estabelecimentos = fetchedEstabelecimentos.take(3).toList();
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+        ),
+      );
+    }
+  }
+
+
+
   void updateSaudacao() {
-    if (myUser != null && myUser!.ultimoLogin != null) {
+    if (myUser != null ) {
       final currentHour = DateTime.now().hour;
       final currentDate = DateTime.now();
-      final lastLoginDate = DateTime.parse(myUser!.ultimoLogin!); // Converter para DateTime
+      /*final lastLoginDate = DateTime.parse(myUser!.ultimoLogin!); // Converter para DateTime
 
       final diff = currentDate.difference(lastLoginDate);
       final diffDays = diff.inDays;
@@ -68,21 +98,23 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           saudacao = 'Seja bem-vindo novamente, ${myUser!.nome}';
         });
-      } else {
+      } else {*/
+
         if (currentHour >= 6 && currentHour < 13) {
           setState(() {
-            saudacao = 'Bom dia, ${myUser!.nome}';
+            saudacao = 'Bom dia,\n${myUser!.nome}';
           });
         } else if (currentHour >= 13 && currentHour < 20) {
           setState(() {
-            saudacao = 'Boa tarde, ${myUser!.nome}';
+            saudacao = 'Boa tarde,\n${myUser!.nome}';
           });
         } else {
           setState(() {
-            saudacao = 'Boa noite, ${myUser!.nome}';
+            saudacao = 'Boa noite,\n${myUser!.nome}';
           });
+
         }
-      }
+      //}
     }
   }
 
@@ -101,7 +133,7 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ShaderMask(
-                      shaderCallback: (bounds) => LinearGradient(
+                      shaderCallback: (bounds) => const LinearGradient(
                         colors: [secondaryColor, Colors.lightBlueAccent],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -113,7 +145,7 @@ class _HomePageState extends State<HomePage> {
                           fontWeight: FontWeight.bold,
                           fontSize: 30,
                         ),
-                        maxLines: 1,
+                        maxLines: 2,
                       ),
                     ),
                     const SizedBox(
@@ -148,6 +180,16 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(
                       height: 15,
                     ),
+                    const Text(
+                      'Explora Viseu',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                    ),
+                    ...estabelecimentos
+                        .map((estabelecimento) => EstabelecimentoRow(
+                              estabelecimento: estabelecimento,
+                              postoID: widget.postoID,
+                            )),
                   ],
                 ),
               ),
