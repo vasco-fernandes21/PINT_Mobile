@@ -141,4 +141,44 @@ Future<Response> adicionarDownvote(int eventoId, String? token) async {
     return response;
   }
 
+  Future<Response> adicionarUpvoteEstabelecimento(int eventoId, String? token) async {
+    final url = '${api.baseUrl}/avaliacao/$eventoId/upvote';
+
+    var response = await dio.post(
+      url,
+      data: {
+      'tipoEntidade': 'estabelecimentos',
+      'idEntidade': eventoId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+
+    return response;
+  }
+
+  Future<Response> adicionarDownvoteEstabelecimento(int eventoId, String? token) async {
+    final url = '${api.baseUrl}/avaliacao/$eventoId/downvote';
+
+    var response = await dio.post(
+      url,
+      data: {
+      'tipoEntidade': 'estabelecimentos',
+      'idEntidade': eventoId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+
+    return response;
+  }
+
 }

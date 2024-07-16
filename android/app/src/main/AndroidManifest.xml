@@ -42,8 +42,12 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" android:host="pint-softinsa.vercel.app" />
-                <data android:pathPattern="/selectposto"/>
+                <data android:scheme="http" android:host="pint-softinsa.vercel.app"/>
+                <data
+                    android:scheme="https"
+                    android:host="192.168.1.13"
+                    android:port="3001"
+                    android:pathPattern="/estabelecimentos/..*" />
                 <data android:scheme="https" />
             </intent-filter>
         </activity>
@@ -62,6 +66,14 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
         </intent>
     </queries>
 </manifest>

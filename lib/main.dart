@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import 'package:pint/models/utilizador.dart';
+import 'package:pint/screens/pesquisar/estabelecimentos/paginaEstabelecimento.dart';
+import 'package:pint/screens/pesquisar/eventos/paginaEvento.dart';
 import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/fetch_functions.dart';
 import 'package:pint/widgets/verifica_conexao.dart';
@@ -54,6 +56,13 @@ GoRouter createRouter(bool isLoggedIn, bool isServerOff) {
         path: '/error',
         builder: (BuildContext context, GoRouterState state) {
           return ErrorServerWidget();
+        },
+      ),
+      GoRoute(
+        path: '/estabelecimento/:id',
+        builder: (BuildContext context, GoRouterState state) {
+          int? estabelecimentoID = int.tryParse(state.pathParameters['id'] ?? '');
+          return EstabelecimentoPage(estabelecimentoID: estabelecimentoID ?? 0,);
         },
       ),
     ],

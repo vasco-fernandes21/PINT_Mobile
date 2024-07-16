@@ -142,8 +142,7 @@ class _AreaEstabelecimentosState extends State<AreaEstabelecimentos> {
                             MaterialPageRoute(
                               builder: (context) => EstabelecimentoPage(
                                 estabelecimentoID: estab.id,
-                                NomeEstabelecimento: estab.nome,
-                                postoID: widget.postoID,
+                                
                               ),
                             ),
                           );

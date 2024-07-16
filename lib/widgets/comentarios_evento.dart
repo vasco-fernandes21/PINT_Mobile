@@ -39,26 +39,22 @@ class _ComentariosListState extends State<ComentariosList> {
   final GlobalKey _targetKey = GlobalKey();
 
 
-      Future<void> _upvote() async {
+      Future<void> _upvote(Avaliacao comentario) async {
         final SharedPreferences prefs = await _prefs;
 
         try {
-        final response = api.adicionarUpvote(widget.eventoId, prefs.getString('token'));
-
-          setState(() {
-            isUpvoted = true;
-            isDownvoted = false;
-          });
+        final response = api.adicionarUpvote(comentario.id, prefs.getString('token'));
+        
         } catch (e) {
 
         }
         }
 
-Future<void> _downvote() async {
+Future<void> _downvote(int idComentario) async {
         final SharedPreferences prefs = await _prefs;
 
         try {
-        final response = api.adicionarDownvote(widget.eventoId, prefs.getString('token'));
+        final response = api.adicionarDownvote(idComentario, prefs.getString('token'));
 
           setState(() {
             isUpvoted = false;
@@ -183,7 +179,7 @@ Future<void> _downvote() async {
                Row(
                           children: List.generate(
                             comentario.classificacao,
-                            (index) => Icon(Icons.star, color: Colors.amber),
+                            (index) => const Icon(Icons.star, color: Colors.amber),
                           ),
               ),
               ReadMoreText(comentario.comentario ?? '', trimMode: TrimMode.Line,
@@ -235,7 +231,7 @@ Future<void> _downvote() async {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  GestureDetector(onTap: _upvote, child:  Icon(Icons.thumb_up, color: Colors.grey, size: 20)),
+                  GestureDetector(onTap: () { _upvote(comentario);}, child:  const Icon(Icons.thumb_up, color: Colors.grey, size: 20)),
                   const SizedBox(width: 4),
                   Text('${comentario.upvotes ?? 0}'),
                 ],
@@ -244,7 +240,7 @@ Future<void> _downvote() async {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  GestureDetector(onTap: _downvote, child: Icon(Icons.thumb_down, color: Colors.grey, size: 20),
+                  GestureDetector(onTap: () { _downvote(comentario.id);}, child: const Icon(Icons.thumb_down, color: Colors.grey, size: 20),
    ),
                   SizedBox(width: 4),
                   Text('${comentario.downvotes ?? 0}'),

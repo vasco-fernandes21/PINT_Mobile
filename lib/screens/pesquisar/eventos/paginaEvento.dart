@@ -16,6 +16,7 @@ import 'package:pint/models/foto.dart';
 import 'package:pint/models/inscricao.dart';
 import 'package:pint/models/utilizador.dart';
 import 'package:pint/navbar.dart';
+import 'package:pint/screens/auth/loginPage.dart';
 import 'package:pint/screens/pesquisar/eventos/editarEvento.dart';
 import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/fetch_functions.dart';
@@ -24,6 +25,7 @@ import 'package:pint/widgets/comentarios_evento.dart';
 import 'package:pint/widgets/custom_button.dart';
 import 'package:pint/widgets/evento_tabelaInscricoes.dart';
 import 'package:pint/widgets/image_carousel.dart';
+import 'package:pint/widgets/share_options.dart';
 import 'package:pint/widgets/verifica_conexao.dart';
 import 'package:readmore/readmore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -73,8 +75,21 @@ class _EventoPageState extends State<EventoPage> {
   @override
   void initState() {
     super.initState();
+    checkLoginAndNavigate(context);
     loadMyUser();
   }
+
+    Future<void> checkLoginAndNavigate(BuildContext context) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+  if (!isLoggedIn) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
+  }
+}
 
     void openAppLink(Uri uri) {
     _navigatorKey.currentState?.pushNamed(uri.fragment);
@@ -381,6 +396,16 @@ Fluttertoast.showToast(
                                 ),
                                 maxLines: 1,
                               ),
+                              IconButton(
+                                    onPressed: () {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return ShareOptions(url: '${api.baseUrl}/eventos/${evento!.id}', msg: 'Achei este evento interessante!');
+                                        },
+                                      );
+                                    },
+                                    icon: const Icon(Icons.share)),
                               const SizedBox(height: 5),
                               Text(
                                   '${evento?.nomeArea} >> ${evento?.nomeSubarea}'),

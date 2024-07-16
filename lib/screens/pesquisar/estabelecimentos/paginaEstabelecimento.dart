@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
@@ -11,6 +12,7 @@ import 'package:pint/models/estabelecimento.dart';
 import 'package:pint/models/foto.dart';
 import 'package:pint/models/utilizador.dart';
 import 'package:pint/navbar.dart';
+import 'package:pint/screens/auth/loginPage.dart';
 import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/fetch_functions.dart';
 import 'package:pint/widgets/alert_confirmation.dart';
@@ -18,6 +20,7 @@ import 'package:pint/widgets/avaliacao_input.dart';
 import 'package:pint/widgets/avaliacoes_estabelecimento.dart';
 import 'package:pint/widgets/comentarios_evento.dart';
 import 'package:pint/widgets/image_carousel.dart';
+import 'package:pint/widgets/share_options.dart';
 import 'package:pint/widgets/show_avaliacoes.dart';
 import 'package:pint/widgets/sumario_avaliacoes.dart';
 import 'package:pint/widgets/verifica_conexao.dart';
@@ -28,14 +31,11 @@ import 'package:pint/api/api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class EstabelecimentoPage extends StatefulWidget {
-  final int postoID;
   final int estabelecimentoID;
-  final String NomeEstabelecimento;
 
   EstabelecimentoPage(
       {required this.estabelecimentoID,
-      required this.NomeEstabelecimento,
-      required this.postoID});
+      });
 
   @override
   State<EstabelecimentoPage> createState() => _EstabelecimentoPageState();
@@ -63,7 +63,6 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
   double? latitude;
   double? longitude;
 
-
   List<Foto> fotos = [];
   List<String> urlFotos = [];
 
@@ -72,8 +71,21 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
   @override
   void initState() {
     super.initState();
+    checkLoginAndNavigate(context);
     loadEstabelecimento();
   }
+
+  Future<void> checkLoginAndNavigate(BuildContext context) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+  if (!isLoggedIn) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
+  }
+}
 
   void loadEstabelecimento() async {
     try {
@@ -212,33 +224,33 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
     }
   }
 
- void editarPrecoMedio() async {
-  if(_precoController.text.isEmpty){
-    return;
-  }
-  double novoPreco = 0;
-  try {
+  void editarPrecoMedio() async {
+    if (_precoController.text.isEmpty) {
+      return;
+    }
+    double novoPreco = 0;
+    try {
       novoPreco = double.parse(_precoController.text);
-  } catch (e) {
-     return;
-  }
+    } catch (e) {
+      return;
+    }
 
-  final api = EstabelecimentosAPI();
-  final response = await api.editarPrecoEstabelecimento(estabelecimento!.id, novoPreco);
+    final api = EstabelecimentosAPI();
+    final response =
+        await api.editarPrecoEstabelecimento(estabelecimento!.id, novoPreco);
 
-  if(response.statusCode == 200){
-            Fluttertoast.showToast(
-            msg: 'Preço médio enviado!',
-            backgroundColor: successColor,
-            fontSize: 12);
+    if (response.statusCode == 200) {
+      Fluttertoast.showToast(
+          msg: 'Preço médio enviado!',
+          backgroundColor: successColor,
+          fontSize: 12);
+    } else {
+      Fluttertoast.showToast(
+          msg: 'Erro ao enviar preço médio.',
+          backgroundColor: errorColor,
+          fontSize: 12);
+    }
   }
-  else{
-    Fluttertoast.showToast(
-            msg: 'Erro ao enviar preço médio.',
-            backgroundColor: errorColor,
-            fontSize: 12);
-  }
- }
 
   void selectImage() async {
     final ImagePicker _picker = ImagePicker();
@@ -269,8 +281,8 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
   Widget build(BuildContext context) {
     int totalPages = (avaliacoes.length / itemsPerPage).ceil();
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.NomeEstabelecimento),
+      appBar: isLoading ? null : isServerOff ? null :AppBar(
+        title: Text(estabelecimento!.nome),
         actions: [
           IconButton(
               onPressed: selectImage, icon: const Icon(Icons.add_a_photo))
@@ -309,17 +321,28 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                                         ),
                                       ),
                                 const SizedBox(height: 10),
-                                Text(
+                                AutoSizeText(
                                   estabelecimento!.nome,
                                   style: const TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                   ),
+                                  maxLines: 1,
                                 ),
-                                if (estabelecimento!.precoMedio != null || estabelecimento!.precoMedio != 'NaN')
-                                Text(
-                                  'Preço médio : ${estabelecimento!.precoMedio} €'
-                                ),
+                                IconButton(
+                                    onPressed: () {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return ShareOptions(url: '${api.baseUrl}/estabelecimentos/${estabelecimento!.id}', msg: 'Achei este estabelecimento interessante!');
+                                        },
+                                      );
+                                    },
+                                    icon: const Icon(Icons.share)),
+                                if (estabelecimento!.precoMedio != null &&
+                                    estabelecimento!.precoMedio != 'NaN')
+                                  Text(
+                                      'Preço médio : ${estabelecimento!.precoMedio} €'),
                                 TextField(
                                   keyboardType: TextInputType.number,
                                   controller: _precoController,
@@ -352,6 +375,9 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                                       ),
                                     ),
                                   ),
+                                ),
+                                const SizedBox(
+                                  height: 15,
                                 ),
                                 const Text(
                                   'Descrição',
@@ -474,7 +500,7 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                       ),
                     ),
             ),
-      bottomNavigationBar: NavBar(postoID: widget.postoID, index: 1),
+      bottomNavigationBar: isLoading ? null :NavBar(postoID: estabelecimento!.idPosto, index: 1),
     );
   }
 }

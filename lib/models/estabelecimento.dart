@@ -1,5 +1,6 @@
 class Estabelecimento {
   final int id;
+  final int idPosto;
   final String nome;
   final String descricao;
   final String morada;
@@ -13,6 +14,7 @@ class Estabelecimento {
 
   Estabelecimento({
     required this.id,
+    required this.idPosto,
     required this.nome,
     required this.descricao,
     required this.morada,
@@ -37,6 +39,7 @@ class Estabelecimento {
       nomeSubarea: json['Subarea']['nome'],
       classificacaoMedia: json['classificacao_media'],
       precoMedio: json['preco_medio'],
+      idPosto: json['idPosto'],
       // Inicialize outros campos
     );
   }

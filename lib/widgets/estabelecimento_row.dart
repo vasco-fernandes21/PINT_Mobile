@@ -19,9 +19,8 @@ class EstabelecimentoRow extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (context) => EstabelecimentoPage(
-                postoID: postoID,
+                
                 estabelecimentoID: estabelecimento.id,
-                NomeEstabelecimento: estabelecimento.nome,
               ),
             ),
           );

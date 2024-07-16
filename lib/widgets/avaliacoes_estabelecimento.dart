@@ -38,26 +38,22 @@ class _AvaliacoesListState extends State<AvaliacoesList> {
   final GlobalKey _targetKey = GlobalKey();
 
 
-      Future<void> _upvote() async {
+      Future<void> _upvote(Avaliacao avaliacao) async {
         final SharedPreferences prefs = await _prefs;
 
         try {
-        final response = api.adicionarUpvote(widget.estabelecimentoId, prefs.getString('token'));
-
-          setState(() {
-            isUpvoted = true;
-            isDownvoted = false;
-          });
+        final response = api.adicionarUpvoteEstabelecimento(avaliacao.id, prefs.getString('token'));
+        
         } catch (e) {
 
         }
         }
 
-Future<void> _downvote() async {
+  Future<void> _downvote(Avaliacao avaliacao) async {
         final SharedPreferences prefs = await _prefs;
 
         try {
-        final response = api.adicionarDownvote(widget.estabelecimentoId, prefs.getString('token'));
+        final response = api.adicionarDownvote(avaliacao.id, prefs.getString('token'));
 
           setState(() {
             isUpvoted = false;
@@ -255,7 +251,7 @@ Future<void> _downvote() async {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  GestureDetector(onTap: _upvote, child:  Icon(Icons.thumb_up, color: Colors.grey, size: 20)),
+                  GestureDetector(onTap: () { _upvote(avaliacao);}, child:  Icon(Icons.thumb_up, color: Colors.grey, size: 20)),
                   const SizedBox(width: 4),
                   Text('${avaliacao.upvotes ?? 0}'),
                 ],
@@ -264,7 +260,7 @@ Future<void> _downvote() async {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  GestureDetector(onTap: _downvote, child: Icon(Icons.thumb_down, color: Colors.grey, size: 20),
+                  GestureDetector(onTap: () { _downvote(avaliacao);}, child: Icon(Icons.thumb_down, color: Colors.grey, size: 20),
    ),
                   SizedBox(width: 4),
                   Text('${avaliacao.downvotes ?? 0}'),
