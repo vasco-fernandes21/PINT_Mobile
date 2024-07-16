@@ -22,56 +22,42 @@ class _LoginPageState extends State<LoginPage> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   void _submit() async {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-      try {
-        var response = await authApi.login(
-            _emailController.text, _passwordController.text);
-        if (response != null && response.containsKey('statusCode')) {
-          print('Response Status Code: ${response['statusCode']}');
-          if (response['statusCode'] == 200 && response.containsKey('body')) {
-            var data = response['body'];
-            print('Response Data: $data');
-            var recoveryToken = data['recoveryToken'] ?? '';
-
-            if (recoveryToken.isNotEmpty) {
-              Navigator.pushReplacementNamed(context, '/novapass',
-                  arguments: {'recoveryToken': recoveryToken});
-            } else {
-              Fluttertoast.showToast(
-                msg: "Login realizado com sucesso",
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.CENTER,
-                backgroundColor: Colors.green,
-                textColor: Colors.white,
-                fontSize: 16.0,
-              );
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SelectPosto(),
-                ),
-              );
-            }
+  if (_formKey.currentState!.validate()) {
+    _formKey.currentState!.save();
+    try {
+      var response = await authApi.login(_emailController.text, _passwordController.text);
+      if (response != null && response.containsKey('statusCode')) {
+        if (response['statusCode'] == 200 && response.containsKey('body')) {
+          var data = response['body'];
+          var recoveryToken = data['recoveryToken'] ?? '';
+          if (recoveryToken.isNotEmpty) {
+            Navigator.pushReplacementNamed(
+              context,
+              '/novapass',
+              arguments: {'recoveryToken': recoveryToken},
+            );
           } else {
-            var error = response['body'] != null &&
-                    response['body'].containsKey('error')
-                ? response['body']['error']
-                : 'Unknown error';
-            print('Error: $error');
             Fluttertoast.showToast(
-              msg: error,
+              msg: "Login realizado com sucesso",
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.CENTER,
-              backgroundColor: Colors.red,
+              backgroundColor: Colors.green,
               textColor: Colors.white,
               fontSize: 16.0,
             );
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SelectPosto(),
+              ),
+            );
           }
         } else {
-          print('Response is null or does not contain statusCode');
+          var error = response['body'] != null && response['body'].containsKey('error')
+              ? response['body']['error']
+              : 'Unknown error';
           Fluttertoast.showToast(
-            msg: 'Erro na resposta do servidor',
+            msg: error,
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.CENTER,
             backgroundColor: Colors.red,
@@ -79,10 +65,9 @@ class _LoginPageState extends State<LoginPage> {
             fontSize: 16.0,
           );
         }
-      } catch (e) {
-        print('Exception: $e');
+      } else {
         Fluttertoast.showToast(
-          msg: 'Erro inesperado',
+          msg: 'Erro na resposta do servidor',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.CENTER,
           backgroundColor: Colors.red,
@@ -90,14 +75,25 @@ class _LoginPageState extends State<LoginPage> {
           fontSize: 16.0,
         );
       }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: 'Erro inesperado',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
     }
   }
+}
 
   Future<void> _signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser != null) {
-        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
         final idToken = googleAuth.idToken;
         if (idToken != null) {
           final response = await authApi.googleLogin(idToken);
@@ -123,7 +119,8 @@ class _LoginPageState extends State<LoginPage> {
               );
             } else {
               Fluttertoast.showToast(
-                msg: 'Erro ao fazer login. Verifique se a conta foi criada corretamente.',
+                msg:
+                    'Erro ao fazer login. Verifique se a conta foi criada corretamente.',
                 toastLength: Toast.LENGTH_SHORT,
                 gravity: ToastGravity.CENTER,
                 backgroundColor: Colors.red,
@@ -169,14 +166,14 @@ class _LoginPageState extends State<LoginPage> {
         final String email = userData['email'];
         final String nome = userData['name'];
         final String foto = userData['picture']['data']['url'];
-        final String id = userData['id'].toString(); 
+        final String id = userData['id'].toString();
 
         print('Email: $email');
         print('Name: $nome');
         print('Foto: $foto');
         print('ID: $id');
 
-        final response = await authApi.facebookLogin(id,nome, email, foto);
+        final response = await authApi.facebookLogin(id, nome, email, foto);
 
         if (response.statusCode == 200) {
           var data = jsonDecode(response.body);
@@ -199,7 +196,8 @@ class _LoginPageState extends State<LoginPage> {
             );
           } else {
             Fluttertoast.showToast(
-              msg: 'Erro ao fazer login. Verifique se a conta foi criada corretamente.',
+              msg:
+                  'Erro ao fazer login. Verifique se a conta foi criada corretamente.',
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.CENTER,
               backgroundColor: Colors.red,
@@ -325,8 +323,7 @@ class _LoginPageState extends State<LoginPage> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             textStyle: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold),
+                                fontSize: 15, fontWeight: FontWeight.bold),
                             foregroundColor: Colors.white,
                           ),
                         ),
@@ -346,62 +343,51 @@ class _LoginPageState extends State<LoginPage> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             textStyle: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold),
+                                fontSize: 15, fontWeight: FontWeight.bold),
                             foregroundColor: Colors.white,
                           ),
                         ),
                       ),
-                      SizedBox(height: 10),
-                      SizedBox(
-                        width: 380,
-                        height: 40,
-                        child: ElevatedButton(
-                          onPressed: _signInWithGoogle,
-                          child: Text('ENTRAR COM GOOGLE'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue, // Cor padrão para o botão do Google
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                      SizedBox(height: 30),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          GestureDetector(
+                            onTap: _signInWithGoogle,
+                            child: Container(
+                              margin: EdgeInsets.symmetric(horizontal: 10),
+                              child: SvgPicture.asset(
+                                'assets/icons/google-icon.svg',
+                                width: 30,
+                                height: 30,
+                              ),
                             ),
-                            textStyle: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold),
-                            foregroundColor: Colors.white,
                           ),
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      SizedBox(
-                        width: 380,
-                        height: 40,
-                        child: ElevatedButton(
-                          onPressed: _signInWithFacebook,
-                          child: Text('ENTRAR COM FACEBOOK'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue[800], // Cor padrão para o botão do Facebook
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                          GestureDetector(
+                            onTap: _signInWithFacebook,
+                            child: Container(
+                              margin: EdgeInsets.symmetric(horizontal: 10),
+                              child: SvgPicture.asset(
+                                'assets/icons/facebook-icon.svg',
+                                width: 30,
+                                height: 30,
+                              ),
                             ),
-                            textStyle: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold),
-                            foregroundColor: Colors.white,
+                          ),
+                        ],
+                      ),
+                      Container(
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/recuperar');
+                          },
+                          child: const Text(
+                            'Esqueceste-te da palavra-passe?',
+                            style: TextStyle(fontSize: 12),
                           ),
                         ),
                       ),
                     ],
-                  ),
-                ),
-                Container(
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/recuperar');
-                    },
-                    child: const Text(
-                      'Esqueceste-te da palavra-passe?',
-                      style: TextStyle(fontSize: 12),
-                    ),
                   ),
                 ),
               ],

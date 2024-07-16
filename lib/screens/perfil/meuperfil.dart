@@ -40,7 +40,6 @@ class _PerfilPageState extends State<PerfilPage> {
       try {
       final fetchedUser = await fetchUtilizadorCompleto();
       setState(() {
-        print("deu bom");
         myUser = fetchedUser;
         isServerOff=false;
         isLoading = false;
