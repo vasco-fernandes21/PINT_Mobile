@@ -1,10 +1,13 @@
+import 'dart:convert';
 import 'dart:math';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_offline/flutter_offline.dart';
-import 'package:intl/intl.dart'; 
+import 'package:intl/intl.dart';
+import 'package:pint/api/postosAreasAPI.dart'; 
 import 'package:pint/models/estabelecimento.dart';
 import 'package:pint/models/evento.dart';
+import 'package:pint/models/posto.dart';
 import 'package:pint/models/utilizador.dart';
 import 'package:pint/navbar.dart';
 import 'package:pint/screens/pesquisar/eventos/todosEventos.dart';
@@ -34,6 +37,7 @@ class _HomePageState extends State<HomePage> {
   List<Evento> eventos = [];
   List<Estabelecimento> estabelecimentos = [];
   String saudacao = '';
+  Posto? posto;
   
 
   @override
@@ -54,6 +58,7 @@ class _HomePageState extends State<HomePage> {
       updateSaudacao();
     });
     loadEventos();
+    fetchPostoById(widget.postoID);
     loadEstabelecimentos();
     } catch (e) {
       setState(() {
@@ -91,7 +96,36 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<Posto?> fetchPostoById(int id) async {
+    try {
+      final api = PostosAreasAPI();
+      final response = await api.listarPostos();
 
+      if (response.statusCode == 200) {
+        // Decodificar a resposta JSON
+        Map<String, dynamic> jsonResponse = json.decode(response.body);
+
+        if (jsonResponse.containsKey('data')) {
+          // Acessar a lista de postos dentro de 'data'
+          List<dynamic> postos = jsonResponse['data'];
+          List<Posto> postosList = postos.map<Posto>((item) => Posto.fromJson(item)).toList();
+
+          // Encontrar o posto com o ID fornecido
+          setState(() {
+            posto = postosList.firstWhere((posto) => posto.id == id);
+          });
+          return postosList.firstWhere((posto) => posto.id == id);
+        } else {
+          return null;
+        }
+      } else {
+        throw Exception('Failed to load postos');
+      }
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
 
   void updateSaudacao() {
     if (myUser != null) {
@@ -189,8 +223,8 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(
                       height: 15,
                     ),
-                    const Text(
-                      'Explora Viseu',
+                     Text(
+                      'Explora ${posto?.nome}',
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                     ),

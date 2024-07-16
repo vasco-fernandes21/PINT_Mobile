@@ -197,8 +197,6 @@ Future<void> _createEstabelecimento() async {
               const SizedBox(height: 15),
               TextInput(controller: _moradaController, label: 'Morada', keyboardType: TextInputType.streetAddress, errorMessage: 'Por favor, insira a morada'),
               const SizedBox(height: 15),
-              TextInput(controller: _precoController, label: 'Preço médio p/pessoa', keyboardType: TextInputType.number, isFieldRequired: false, suffixText: '€',),
-              const SizedBox(height: 15),
               ImageInput(selectedImage: _selectedImage, onPickImage: _pickImage, validator: isImageNull,),         
               const SizedBox(height: 20),
               ElevatedButton(

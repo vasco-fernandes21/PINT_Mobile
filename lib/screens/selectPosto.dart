@@ -3,6 +3,7 @@ import 'package:flutter_offline/flutter_offline.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pint/api/postosAreasAPI.dart';
+import 'package:pint/models/posto.dart';
 import 'dart:convert';
 import 'package:pint/navbar.dart';
 import 'package:pint/screens/home/homePage.dart';
@@ -15,8 +16,8 @@ class SelectPosto extends StatefulWidget {
 }
 
 class _SelectPostoState extends State<SelectPosto> {
-  List<Map<String, dynamic>> options = [];
-  Map<String, dynamic>? selectedPosto;
+  List<Posto> options = [];
+  Posto? selectedPosto;
   int selectedPostoId = 0;
   String selectedPostoNome = '';
   bool isLoading = true;
@@ -38,16 +39,12 @@ class _SelectPostoState extends State<SelectPosto> {
         // Decodificar a resposta JSON
         Map<String, dynamic> jsonResponse = json.decode(response.body);
         
-        // Verificar se a chave 'data' existe na resposta
         if (jsonResponse.containsKey('data')) {
           // Acessar a lista de postos dentro de 'data'
           List<dynamic> postos = jsonResponse['data'];
 
-          setState(() {
-            options = postos.map<Map<String, dynamic>>((item) => {
-              'id': item['id'],
-              'nome': item['nome'],
-            }).cast<Map<String, dynamic>>().toList();
+        setState(() {
+            options = postos.map<Posto>((item) => Posto.fromJson(item)).toList();
             isLoading = false;
           });
         } else {
@@ -92,24 +89,24 @@ class _SelectPostoState extends State<SelectPosto> {
                 border: Border.all(color: Colors.grey, width: 2),
                 borderRadius: BorderRadius.circular(5),
               ),
-            child: DropdownButton<Map<String, dynamic>>(
-              underline: SizedBox(),
-              dropdownColor: Colors.white,
-              hint: Text('Seleciona um posto'),
-              value: selectedPosto,
-              onChanged: (Map<String, dynamic>? newValue) {
-                setState(() {
-                  selectedPosto = newValue;
-                  selectedPostoId = newValue!['id'];
-                });
-              },
-              items: options.map<DropdownMenuItem<Map<String, dynamic>>>((Map<String, dynamic> value) {
-                return DropdownMenuItem<Map<String, dynamic>>(
-                  value: value,
-                  child: Text(value['nome']),
-                );
-              } as DropdownMenuItem<Map<String, dynamic>> Function(Map<String, dynamic> e)).toList(),
-            ),
+            child: DropdownButton<Posto>(
+                underline: SizedBox(),
+                dropdownColor: Colors.white,
+                hint: const Text('Seleciona um posto'),
+                value: selectedPosto,
+                onChanged: (Posto? newValue) {
+                  setState(() {
+                    selectedPosto = newValue;
+                    selectedPostoId = newValue?.id ?? 0;
+                  });
+                },
+                items: options.map<DropdownMenuItem<Posto>>((Posto value) {
+                  return DropdownMenuItem<Posto>(
+                    value: value,
+                    child: Text(value.nome),
+                  );
+                }).toList(),
+              ),
             ),
             SizedBox(height: 20),
             ElevatedButton(

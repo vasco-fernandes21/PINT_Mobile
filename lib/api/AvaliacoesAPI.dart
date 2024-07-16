@@ -40,13 +40,34 @@ class AvaliacoesAPI {
     return response;
   }
 
-  Future<http.Response> getRespostaAvaliacao(int avaliacaoId) {
+  Future<http.Response> getRespostaComentario(int avaliacaoId) {
     return api.get('/avaliacao/eventos/respostas/$avaliacaoId');
     
   }
 
-      Future<Response>  criarRespostaComentario(int idAvaliacao, int? classificacao, String? comentario, String? token) async {
+    Future<Response>  criarRespostaComentario(int idAvaliacao, int? classificacao, String? comentario, String? token) async {
     final url = '${api.baseUrl}/avaliacao/eventos/responder/$idAvaliacao';
+
+    final response = await dio.post(
+      url,
+      data: {
+      'classificacao': classificacao,
+      'comentario' : comentario},
+      options: Options(headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json'})
+    );
+
+    return response;
+  }
+
+  Future<http.Response> getRespostaAvaliacao(int avaliacaoId) {
+    return api.get('/avaliacao/estabelecimentos/respostas/$avaliacaoId');
+    
+  }
+
+    Future<Response>  criarRespostaAvaliacao(int idAvaliacao, int? classificacao, String? comentario, String? token) async {
+    final url = '${api.baseUrl}/avaliacao/estabelecimentos/responder/$idAvaliacao';
 
     final response = await dio.post(
       url,

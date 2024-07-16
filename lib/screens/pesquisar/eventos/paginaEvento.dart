@@ -22,6 +22,7 @@ import 'package:pint/utils/fetch_functions.dart';
 import 'package:pint/widgets/alert_confirmation.dart';
 import 'package:pint/widgets/comentarios_evento.dart';
 import 'package:pint/widgets/custom_button.dart';
+import 'package:pint/widgets/evento_tabelaInscricoes.dart';
 import 'package:pint/widgets/image_carousel.dart';
 import 'package:pint/widgets/verifica_conexao.dart';
 import 'package:readmore/readmore.dart';
@@ -165,8 +166,7 @@ class _EventoPageState extends State<EventoPage> {
     }
 
     setState(() {
-
-      todosComentariosOrdenados = filtrarComentariosNaoNulos(comentariosOrdenados);
+      todosComentariosOrdenados = comentariosOrdenados;
     });
   }
 
@@ -381,8 +381,10 @@ Fluttertoast.showToast(
                                 ),
                                 maxLines: 1,
                               ),
+                              const SizedBox(height: 5),
                               Text(
                                   '${evento?.nomeArea} >> ${evento?.nomeSubarea}'),
+                              Text(contarInscricoes(inscricoes)),
                               if (evento!.estado == false)
                                 const Text(
                                   'Evento pendente à espera de aprovação',
@@ -436,7 +438,7 @@ Fluttertoast.showToast(
                                 ),
                               ),
                               const SizedBox(height: 5),
-                              /*if (latitude != null &&
+                              if (latitude != null &&
                                 longitude != null &&
                                 _localizacao != null)
                               SizedBox(
@@ -457,7 +459,18 @@ Fluttertoast.showToast(
                                     _controller.complete(controller);
                                   },
                                 ),
-                              ),*/
+                              ),
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              const Text(
+                                'Inscrições',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              TabelaInscricoes(inscricoes: inscricoes),
                               const SizedBox(
                                 height: 15,
                               ),

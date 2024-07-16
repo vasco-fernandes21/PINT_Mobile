@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pint/api/AvaliacoesAPI.dart';
+import 'package:pint/api/EstabelecimentosAPI.dart';
 import 'package:pint/api/FotosAPI.dart';
 import 'package:pint/models/avaliacao.dart';
 import 'package:pint/models/estabelecimento.dart';
@@ -14,6 +15,8 @@ import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/fetch_functions.dart';
 import 'package:pint/widgets/alert_confirmation.dart';
 import 'package:pint/widgets/avaliacao_input.dart';
+import 'package:pint/widgets/avaliacoes_estabelecimento.dart';
+import 'package:pint/widgets/comentarios_evento.dart';
 import 'package:pint/widgets/image_carousel.dart';
 import 'package:pint/widgets/show_avaliacoes.dart';
 import 'package:pint/widgets/sumario_avaliacoes.dart';
@@ -45,12 +48,13 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
   bool isServerOff = false;
   Estabelecimento? estabelecimento;
   List<Avaliacao> avaliacoes = [];
+  List<Avaliacao> todasAvaliacoesOrdenadas = [];
   int numAvaliacoes = 1;
   double mediaAvaliacoes = 0;
   bool isRatingNull = false;
   int currentPage = 1;
   int itemsPerPage = 3;
-  final TextEditingController _avaliacaoController = TextEditingController();
+  final TextEditingController _precoController = TextEditingController();
   Utilizador? myUser;
 
   final Completer<GoogleMapController> _controller =
@@ -59,11 +63,9 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
   double? latitude;
   double? longitude;
 
-  int? _rating;
 
   List<Foto> fotos = [];
   List<String> urlFotos = [];
-
 
   final api = ApiClient();
 
@@ -92,7 +94,7 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
     }
   }
 
-    void loadMyUser() async {
+  void loadMyUser() async {
     try {
       final SharedPreferences prefs = await _prefs;
       setState(() {
@@ -114,9 +116,10 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
     }
   }
 
-    void loadFotos() async {
+  void loadFotos() async {
     try {
-      final fetchedFotos = await fetchFotosEvento(context, widget.estabelecimentoID);
+      final fetchedFotos =
+          await fetchFotosEvento(context, widget.estabelecimentoID);
       setState(() {
         fotos = fetchedFotos;
         if (estabelecimento?.foto != null) {
@@ -144,26 +147,48 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
       setState(() {
         avaliacoes = response['avaliacoes'] as List<Avaliacao>;
         numAvaliacoes = avaliacoes.length;
-        mediaAvaliacoes = response['mediaAvaliacoes'] as double; 
+        mediaAvaliacoes = response['mediaAvaliacoes'] as double;
         isLoading = false;
       });
+      await _carregarTodosComentarios();
     } catch (e) {
       setState(() {
         isLoading = false;
       });
-      /*ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-        ),
-      );*/
+    }
+  }
+
+  Future<void> _carregarTodosComentarios() async {
+    List<Avaliacao> comentariosOrdenados = [];
+
+    for (Avaliacao comentarioPai in avaliacoes) {
+      await _adicionarComentarioERepostasRecursivamente(
+          comentariosOrdenados, comentarioPai);
+    }
+    setState(() {
+      todasAvaliacoesOrdenadas = comentariosOrdenados;
+    });
+  }
+
+  Future<void> _adicionarComentarioERepostasRecursivamente(
+      List<Avaliacao> lista, Avaliacao comentario) async {
+    // Adiciona o comentário atual na lista
+    lista.add(comentario);
+
+    // Carrega as respostas para o comentário atual
+    final fetchedRespostas =
+        await fetchRespostasAvaliacoes(context, comentario.id);
+
+    // Adiciona todas as respostas e suas sub-respostas de forma recursiva
+    if (fetchedRespostas.isNotEmpty) {
+      for (Avaliacao resposta in fetchedRespostas) {
+        await _adicionarComentarioERepostasRecursivamente(lista, resposta);
+      }
     }
   }
 
   Future<void> setLatitudeLongitude(String morada) async {
     if (morada.isEmpty) {
-      setState(() {
-        isLoading = false;
-      });
       return;
     }
 
@@ -178,82 +203,67 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
           print(longitude);
         });
 
-        _localizacao = CameraPosition(target: LatLng(latitude!, longitude!), zoom: 15);
+        _localizacao =
+            CameraPosition(target: LatLng(latitude!, longitude!), zoom: 15);
       }
     } catch (e) {
       print('Erro ao obter localização: $e');
       isLoading = false;
     }
-
   }
 
-  void _alertaConfirmacao(BuildContext context) {
-    if (_rating == null) {
-      setState(() {
-        isRatingNull = true;
-      });
-      return;
-    }
-    ConfirmationAlert.show(
-        context: context,
-        onConfirm: _createAvaliacao,
-        desc: 'Tens a certeza que queres criar uma avaliação?');
+ void editarPrecoMedio() async {
+  if(_precoController.text.isEmpty){
+    return;
+  }
+  double novoPreco = 0;
+  try {
+      novoPreco = double.parse(_precoController.text);
+  } catch (e) {
+     return;
   }
 
-  Future<void> _createAvaliacao() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  final api = EstabelecimentosAPI();
+  final response = await api.editarPrecoEstabelecimento(estabelecimento!.id, novoPreco);
 
-    int estabelecimentoId = widget.estabelecimentoID;
-    int idUtilizador =
-        1; // Substitua pelo ID real do utilizador assssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
-    int? classificacao = _rating;
-    String? comentario =
-        _avaliacaoController.text.isNotEmpty ? _avaliacaoController.text : null;
-
-    // Chame a função para criar a avaliação
-    final api_avaliacoes = AvaliacoesAPI();
-    final response = await api_avaliacoes.criarAvaliacaoEstabelecimento(
-        estabelecimentoId, idUtilizador, classificacao, comentario);
-
-    if (response.statusCode == 200) {
-      // Sucesso
-      Fluttertoast.showToast(
-          msg: 'Avaliação enviada com sucesso!',
-          backgroundColor: successColor,
-          fontSize: 12);
-    } else {
-      // Falha
-      Fluttertoast.showToast(
-          msg: 'Falha ao enviar a avaliação.',
-          backgroundColor: errorColor,
-          fontSize: 12);
-    }
+  if(response.statusCode == 200){
+            Fluttertoast.showToast(
+            msg: 'Preço médio enviado!',
+            backgroundColor: successColor,
+            fontSize: 12);
   }
+  else{
+    Fluttertoast.showToast(
+            msg: 'Erro ao enviar preço médio.',
+            backgroundColor: errorColor,
+            fontSize: 12);
+  }
+ }
 
   void selectImage() async {
-  final ImagePicker _picker = ImagePicker();
-  
-  // Seleciona uma imagem da galeria
-  final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-  if (image != null) {
-    final file = File(image.path);
-    final api = FotosAPI();
-    final response = await api.adicionarFotoEvento(estabelecimento!.id, myUser!.id, file);
+    final ImagePicker _picker = ImagePicker();
 
-    if (response.statusCode == 200){
-Fluttertoast.showToast(
-          msg: 'Foto enviada para aprovação!',
-          backgroundColor: successColor,
-          fontSize: 12);
-    } else{
-      Fluttertoast.showToast(
-          msg: 'Erro ao enviar foto.',
-          backgroundColor: errorColor,
-          fontSize: 12);
+    // Seleciona uma imagem da galeria
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      final file = File(image.path);
+      final api = FotosAPI();
+      final response =
+          await api.adicionarFotoEvento(estabelecimento!.id, myUser!.id, file);
+
+      if (response.statusCode == 200) {
+        Fluttertoast.showToast(
+            msg: 'Foto enviada para aprovação!',
+            backgroundColor: successColor,
+            fontSize: 12);
+      } else {
+        Fluttertoast.showToast(
+            msg: 'Erro ao enviar foto.',
+            backgroundColor: errorColor,
+            fontSize: 12);
+      }
     }
-  
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -262,81 +272,129 @@ Fluttertoast.showToast(
       appBar: AppBar(
         title: Text(widget.NomeEstabelecimento),
         actions: [
-          IconButton(onPressed: selectImage, icon: const Icon(Icons.add_a_photo))
+          IconButton(
+              onPressed: selectImage, icon: const Icon(Icons.add_a_photo))
         ],
       ),
-      body: VerificaConexao(isLoading: isLoading, isServerOff: isServerOff, child: 
-      estabelecimento == null
-              ? const Center(child: Text('Estabelecimento não encontrado.'))
-              : SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            urlFotos.isNotEmpty
-                            ? ImageCarousel(imageUrls: urlFotos, isEstabelecimento: true)
-                            : Container(
-                                      width: double.infinity,
-                                      height: 200,
-                                      color: Colors.grey,
-                                      child: const Icon(
-                                        Icons.image_not_supported,
-                                        color: Colors.white,
-                                        size: 50,
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : VerificaConexao(
+              isLoading: isLoading,
+              isServerOff: isServerOff,
+              child: estabelecimento == null
+                  ? const Center(child: Text('Estabelecimento não encontrado.'))
+                  : SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                urlFotos.isNotEmpty
+                                    ? ImageCarousel(
+                                        imageUrls: urlFotos,
+                                        isEstabelecimento: true)
+                                    : Container(
+                                        width: double.infinity,
+                                        height: 200,
+                                        color: Colors.grey,
+                                        child: const Icon(
+                                          Icons.image_not_supported,
+                                          color: Colors.white,
+                                          size: 50,
+                                        ),
+                                      ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  estabelecimento!.nome,
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                if (estabelecimento!.precoMedio != null || estabelecimento!.precoMedio != 'NaN')
+                                Text(
+                                  'Preço médio : ${estabelecimento!.precoMedio} €'
+                                ),
+                                TextField(
+                                  keyboardType: TextInputType.number,
+                                  controller: _precoController,
+                                  decoration: InputDecoration(
+                                    hintText: "Preço Médio p/pessoa",
+                                    suffixText: '€',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                      borderSide: const BorderSide(
+                                        color: Colors.black,
+                                        width: 1,
+                                        style: BorderStyle.solid,
                                       ),
                                     ),
-                            const SizedBox(height: 10),
-                            Text(
-                              estabelecimento!.nome,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const Text(
-                              'Descrição',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            ReadMoreText(
-                              estabelecimento!.descricao,
-                              trimMode: TrimMode.Line,
-                              trimLines: 7,
-                              colorClickableText: Colors.blue,
-                              trimCollapsedText: 'mostrar mais',
-                              trimExpandedText: 'mostrar menos',
-                            ),
-                            SizedBox(height: 15),
-                            const Text(
-                              'Avaliações',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 5),
-                            if (avaliacoes.isEmpty)
-                              const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 20),
-                                  child: Center(
-                                      child: Text(
-                                          'Ainda não existem avaliações'))),
-                            if (avaliacoes.isNotEmpty)
-                              SumarioAvaliacoesWidget(
-                                  numAvaliacoes: numAvaliacoes,
-                                  mediaAvaliacoes: mediaAvaliacoes,
-                                  avaliacoes: avaliacoes,),
-                            const SizedBox(height: 10),
-                            if(avaliacoes.isNotEmpty)
-                            AvaliacoesWidget(avaliacoes: avaliacoes),
-                            const SizedBox(height: 15),
+                                    suffixIcon: Container(
+                                      margin: EdgeInsets.all(8),
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: primaryColor,
+                                          shape: new RoundedRectangleBorder(
+                                            borderRadius:
+                                                new BorderRadius.circular(30.0),
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.arrow_forward,
+                                          color: Colors.white,
+                                        ),
+                                        onPressed: editarPrecoMedio,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const Text(
+                                  'Descrição',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                ReadMoreText(
+                                  estabelecimento!.descricao,
+                                  trimMode: TrimMode.Line,
+                                  trimLines: 7,
+                                  colorClickableText: Colors.blue,
+                                  trimCollapsedText: 'mostrar mais',
+                                  trimExpandedText: 'mostrar menos',
+                                ),
+                                SizedBox(height: 15),
+                                const Text(
+                                  'Avaliações',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 5),
+                                if (avaliacoes.isEmpty)
+                                  const Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 20),
+                                      child: Center(
+                                          child: Text(
+                                              'Ainda não existem avaliações'))),
+                                if (avaliacoes.isNotEmpty)
+                                  SumarioAvaliacoesWidget(
+                                    numAvaliacoes: numAvaliacoes,
+                                    mediaAvaliacoes: mediaAvaliacoes,
+                                    avaliacoes: avaliacoes,
+                                  ),
+                                const SizedBox(height: 10),
+                                //if(avaliacoes.isNotEmpty)
+                                //AvaliacoesWidget(avaliacoes: avaliacoes),
+                                /*const SizedBox(height: 15),
                             AvaliacaoInput(
                               controller: _avaliacaoController,
                               onRatingUpdate: (rating) {
@@ -346,88 +404,76 @@ Fluttertoast.showToast(
                                 });
                               },
                               validator: isRatingNull,
-                            ),
-                            const SizedBox(height: 10),
-                            Center(
-                              child: SizedBox(
-                                width: 380,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    _alertaConfirmacao(context);
-                                  },
-                                  child: const Text('Enviar Avaliação'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF1D324F),
-                                    foregroundColor: Colors.white,
+                            ),*/
+                                const SizedBox(height: 15),
+                                const Text(
+                                  'Detalhes',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(height: 15),
-                            const Text(
-                              'Detalhes',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              'Morada: ${estabelecimento?.morada}',
-                              style: const TextStyle(
-                                fontSize: 14,
-                              ),
-                            ),
-                            Text(
-                              'Telefone: ${estabelecimento?.telemovel ?? ' -'}',
-                              style: const TextStyle(
-                                fontSize: 14,
-                              ),
-                            ),
-                            Text(
-                              'Email: ${estabelecimento?.email ?? ' -'}',
-                              style: const TextStyle(
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 15),
-                            const Text(
-                              'Localização',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 5),
-                            if (latitude != null &&
-                                longitude != null &&
-                                _localizacao != null)
-                              SizedBox(
-                                width: double.infinity,
-                                height: 200,
-                                child: 
-                                GoogleMap(
-                                  initialCameraPosition: _localizacao!,
-                                  markers: {
-                                    Marker(
-                                      markerId: const MarkerId('marker'),
-                                      position: LatLng(latitude!, longitude!),
-                                    ),
-                                  },
-                                  mapType: MapType.normal,
-                                  onMapCreated:
-                                      (GoogleMapController controller) {
-                                    _controller.complete(controller);
-                                  },
+                                Text(
+                                  'Morada: ${estabelecimento?.morada}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
-                            const SizedBox(height: 15),
-                          ],
-                        ),
+                                Text(
+                                  'Telefone: ${estabelecimento?.telemovel ?? ' -'}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                Text(
+                                  'Email: ${estabelecimento?.email ?? ' -'}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(height: 15),
+                                const Text(
+                                  'Localização',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 5),
+                                if (latitude != null &&
+                                    longitude != null &&
+                                    _localizacao != null)
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 200,
+                                    child: GoogleMap(
+                                      initialCameraPosition: _localizacao!,
+                                      markers: {
+                                        Marker(
+                                          markerId: const MarkerId('marker'),
+                                          position:
+                                              LatLng(latitude!, longitude!),
+                                        ),
+                                      },
+                                      mapType: MapType.normal,
+                                      onMapCreated:
+                                          (GoogleMapController controller) {
+                                        _controller.complete(controller);
+                                      },
+                                    ),
+                                  ),
+                                const SizedBox(height: 15),
+                                AvaliacoesList(
+                                    avaliacoes: todasAvaliacoesOrdenadas,
+                                    estabelecimentoId: widget.estabelecimentoID,
+                                    myUserId: myUser!.id)
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-      ),
+                    ),
+            ),
       bottomNavigationBar: NavBar(postoID: widget.postoID, index: 1),
     );
   }

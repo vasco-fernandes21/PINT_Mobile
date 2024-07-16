@@ -24,9 +24,8 @@ class PerfilPage extends StatefulWidget {
 
 class _PerfilPageState extends State<PerfilPage> {
   bool isLoading = true;
-  bool isServerOff = false;
+  bool isServerOff = true;
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-  late String? token;
   Utilizador? myUser;
   
 
@@ -34,23 +33,23 @@ class _PerfilPageState extends State<PerfilPage> {
   void initState() {
     super.initState();
     loadMyUser();
+    print(isServerOff);
   }
 
   void loadMyUser() async {
-    try {
-      final SharedPreferences prefs = await _prefs;
-      setState(() {
-        token = prefs.getString('token');
-      });
+      try {
       final fetchedUser = await fetchUtilizadorCompleto();
       setState(() {
+        print("deu bom");
         myUser = fetchedUser;
+        isServerOff=false;
         isLoading = false;
       });
     } catch (e) {
+      print("deu erro");
       setState(() {
-        isLoading = false;
         isServerOff = true;
+        isLoading = false;
       });
     }
   }
@@ -81,8 +80,9 @@ class _PerfilPageState extends State<PerfilPage> {
       ),
       body: isLoading
       ? const Center(child: CircularProgressIndicator(),)
-      : VerificaConexao(isLoading: isLoading, isServerOff: isServerOff, child:
-       SingleChildScrollView(
+      : isServerOff
+        ? ErrorServerWidget()
+        : SingleChildScrollView(
         child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
                 child: Column(
@@ -115,7 +115,7 @@ class _PerfilPageState extends State<PerfilPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => editPerfil(postoID: widget.postoID, token: token, myUser: myUser,)),
+                                builder: (context) => editPerfil(postoID: widget.postoID,  myUser: myUser,)),
                           );
                         },
                         style: ElevatedButton.styleFrom(
@@ -188,7 +188,7 @@ class _PerfilPageState extends State<PerfilPage> {
                   ],
                 )),
       ),
-      ),
+      
       bottomNavigationBar: NavBar(postoID: widget.postoID, index: 4),
     );
   }

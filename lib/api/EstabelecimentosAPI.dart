@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'api.dart';
@@ -62,4 +63,23 @@ class EstabelecimentosAPI {
     var response = await request.send();
     return http.Response.fromStream(response);
   }
+
+Future<http.Response> editarPrecoEstabelecimento(int idEstabelecimento, double preco) async {
+  final String url = '${api.baseUrl}/estabelecimentos/$idEstabelecimento/precos';
+  
+  final response = await http.put(
+    Uri.parse(url),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, double>{
+      'preco': preco,
+    }),
+  );
+
+  return response;
 }
+
+}
+
+

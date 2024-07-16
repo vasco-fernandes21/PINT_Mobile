@@ -14,10 +14,9 @@ import 'package:pint/widgets/text_input.dart';
 class editPerfil extends StatefulWidget {
   final int postoID;
   final Utilizador? myUser;
-  final String? token;
 
   editPerfil(
-      {required this.postoID, required this.myUser, required this.token});
+      {required this.postoID, required this.myUser});
 
   @override
   _EditPerfilState createState() => _EditPerfilState();

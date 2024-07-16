@@ -162,6 +162,20 @@ Future<List<Avaliacao>> fetchComentarios(BuildContext context, int eventoId) asy
 
 Future<List<Avaliacao>> fetchRespostasComentario(BuildContext context, int comentarioId) async {
   final api = AvaliacoesAPI();
+  final response = await api.getRespostaComentario(comentarioId);
+  if (response.statusCode == 200) {
+    final List<dynamic> data = json.decode(response.body)['data'];
+    return data.map((json) => Avaliacao.fromJson(json)).toList();
+  } else {
+    /*ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Erro ao carregar eventos: ${response.statusCode}')),
+    );*/
+    return [];
+  }
+}
+
+Future<List<Avaliacao>> fetchRespostasAvaliacoes(BuildContext context, int comentarioId) async {
+  final api = AvaliacoesAPI();
   final response = await api.getRespostaAvaliacao(comentarioId);
   if (response.statusCode == 200) {
     final List<dynamic> data = json.decode(response.body)['data'];

@@ -3,6 +3,7 @@ import 'package:pint/models/avaliacao.dart';
 import 'package:pint/models/evento.dart';
 import 'package:pint/models/inscricao.dart';
 import 'package:pint/models/utilizador.dart';
+import 'package:pint/utils/fetch_functions.dart';
 
 // Função para contar avaliações por estrela
 int contarAvaliacoesPorEstrela(List<Avaliacao> avaliacoes, int estrelas) {
@@ -10,6 +11,7 @@ int contarAvaliacoesPorEstrela(List<Avaliacao> avaliacoes, int estrelas) {
       .where((avaliacao) => avaliacao.classificacao == estrelas)
       .length;
 }
+
 
 List<Evento> filtrarEOrdenarEventosFuturos(List<Evento> eventos) {
   DateTime agora = DateTime.now();
@@ -41,6 +43,17 @@ List<Evento> filtrarEventosPorPreferencia(List<Evento> eventos, Utilizador user)
     return eventos.where((evento) => evento.idArea == user.idAreaPreferencia).toList();
   } else {
     return []; 
+  }
+}
+
+String contarInscricoes(List<Inscricao> inscricoes) {
+  int quantidade = inscricoes.length;
+  if (quantidade == 0) {
+    return 'Ainda não existem pessoas inscritas';
+  } else if (quantidade == 1) {
+    return 'Existe 1 pessoa inscrita';
+  } else {
+    return 'Existem $quantidade pessoas inscritas';
   }
 }
 

@@ -12,21 +12,20 @@ import 'package:pint/widgets/custom_button.dart';
 import 'package:readmore/readmore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ComentariosList extends StatefulWidget {
-  final List<Avaliacao> comentarios;
-  final int eventoId;
+class AvaliacoesList extends StatefulWidget {
+  final List<Avaliacao> avaliacoes;
+  final int estabelecimentoId;
   final int myUserId;
 
-  ComentariosList({required this.comentarios, required this.eventoId, required this.myUserId});
+  AvaliacoesList({required this.avaliacoes, required this.estabelecimentoId, required this.myUserId});
 
   @override
-  _ComentariosListState createState() => _ComentariosListState();
+  _AvaliacoesListState createState() => _AvaliacoesListState();
 }
 
-class _ComentariosListState extends State<ComentariosList> {
+class _AvaliacoesListState extends State<AvaliacoesList> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   List<Avaliacao> respostas = [];
-  List<Avaliacao> todosComentariosOrdenados = [];
   final TextEditingController _comentarioController = TextEditingController();
   final api = AvaliacoesAPI();
   int? _rating;
@@ -43,7 +42,7 @@ class _ComentariosListState extends State<ComentariosList> {
         final SharedPreferences prefs = await _prefs;
 
         try {
-        final response = api.adicionarUpvote(widget.eventoId, prefs.getString('token'));
+        final response = api.adicionarUpvote(widget.estabelecimentoId, prefs.getString('token'));
 
           setState(() {
             isUpvoted = true;
@@ -58,7 +57,7 @@ Future<void> _downvote() async {
         final SharedPreferences prefs = await _prefs;
 
         try {
-        final response = api.adicionarDownvote(widget.eventoId, prefs.getString('token'));
+        final response = api.adicionarDownvote(widget.estabelecimentoId, prefs.getString('token'));
 
           setState(() {
             isUpvoted = false;
@@ -71,36 +70,42 @@ Future<void> _downvote() async {
 
 
   Future<void> _createComentario() async {
-    if (_rating == null) {
+    /*if(_comentarioController.text.isEmpty){
+        Fluttertoast.showToast(
+          msg: 'Escreve um comentário.',
+          backgroundColor: errorColor,
+          fontSize: 12);
+          return;
+    }*/
+        if (_rating == null) {
       setState(() {
         isRatingNull = true;
       });
       return;
     }
-    
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     if (idPai == null)
     {
-    final response = await api.criarComentarioEvento(
-        widget.eventoId, widget.myUserId, 3, _comentarioController.text);
+    final response = await api.criarAvaliacaoEstabelecimento(
+        widget.estabelecimentoId, widget.myUserId, _rating, _comentarioController.text);
 
     if (response.statusCode == 200) {
       // Sucesso
       Fluttertoast.showToast(
-          msg: 'Comentário enviado com sucesso!',
+          msg: 'Avaliação enviado com sucesso!',
           backgroundColor: successColor,
           fontSize: 12);
     } else {
       // Falha
       Fluttertoast.showToast(
-          msg: 'Falha ao enviar comentário.',
+          msg: 'Falha ao enviar avaliação.',
           backgroundColor: errorColor,
           fontSize: 12);
     }
     } else {
       try {
-        await api.criarRespostaComentario(idPai!, 3, _comentarioController.text, prefs.getString('token'));
+        await api.criarRespostaAvaliacao(idPai!, _rating, _comentarioController.text, prefs.getString('token'));
         Fluttertoast.showToast(
           msg: 'Comentário respondido com sucesso!',
           backgroundColor: successColor,
@@ -144,7 +149,22 @@ Future<void> _downvote() async {
     return Column(
     children: [
     const SizedBox(height: 10,),
-    AvaliacaoInput(key: _targetKey, controller: _comentarioController, onRatingUpdate: (rating) {
+    /*TextField(
+          key: _targetKey,
+          controller: _comentarioController,
+          decoration: InputDecoration(
+            hintText: hintText,
+            filled: true,
+            fillColor: Colors.grey[200],
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none,
+            ),
+          ),
+          maxLines: 3,
+        ),*/
+    AvaliacaoInput(key: _targetKey,
+      controller: _comentarioController,  onRatingUpdate: (rating) {
                                 setState(() {
                                   _rating = rating.round();
                                   isRatingNull = false;
@@ -153,14 +173,14 @@ Future<void> _downvote() async {
     const SizedBox(height: 5,),
     CustomButton(onPressed: _createComentario, title: 'Enviar'),
     const SizedBox(height: 20,),
-    widget.comentarios.isEmpty
-    ? const Center(child: Text('Ainda não existem comentários'),)
+    widget.avaliacoes.isEmpty
+    ? const Center(child: Text('Ainda não existem avaliações'),)
     : ListView.builder(
-      itemCount: widget.comentarios.length,
+      itemCount: widget.avaliacoes.length,
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       itemBuilder: (context, index) {
-        final comentario = widget.comentarios[index];
+        final comentario = widget.avaliacoes[index];
         return _buildComentario(comentario);
       },
     ),
@@ -168,37 +188,37 @@ Future<void> _downvote() async {
     );
   }
 
-  Widget _buildComentario(Avaliacao comentario) {
+  Widget _buildComentario(Avaliacao avaliacao) {
     return 
-    Padding(padding: (comentario.idPai!= null)  ? const EdgeInsets.only(left: 15) : EdgeInsets.zero,
+    Padding(padding: (avaliacao.idPai!= null)  ? const EdgeInsets.only(left: 15) : EdgeInsets.zero,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ListTile(
-          leading: userCircleAvatar(imageUrl: comentario.fotoUtilizador, idGoogle: comentario.idGoogle, idFacebook: comentario.idFacebook),
-          title: AutoSizeText(comentario.nomeUtilizador, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14,), maxLines: 1,),
+          leading: userCircleAvatar(imageUrl: avaliacao.fotoUtilizador, idGoogle: avaliacao.idGoogle, idFacebook: avaliacao.idFacebook),
+          title: AutoSizeText(avaliacao.nomeUtilizador, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14,), maxLines: 1,),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
                Row(
                           children: List.generate(
-                            comentario.classificacao,
+                            avaliacao.classificacao,
                             (index) => Icon(Icons.star, color: Colors.amber),
                           ),
               ),
-              ReadMoreText(comentario.comentario ?? '', trimMode: TrimMode.Line,
+              ReadMoreText(avaliacao.comentario ?? '', trimMode: TrimMode.Line,
                               trimLines: 7,
                               colorClickableText: Colors.blue,
                               trimCollapsedText: 'mostrar mais',
                               trimExpandedText: 'mostrar menos',),
               const SizedBox(height: 2),
-              Text(formatDataPublicacao(comentario.data),
+              Text(formatDataPublicacao(avaliacao.data),
                   style: const TextStyle(fontSize: 12, color: Colors.grey)),
               const SizedBox(height: 3,),
               Row(
         children: [
           GestureDetector(
-            onTap: () { _alertaConfirmacaoDenunciar(context, comentario.id); },
+            onTap: () { _alertaConfirmacaoDenunciar(context, avaliacao.id); },
             child: const Icon(
               Icons.warning_amber,
               color: Colors.red, // Pode escolher outra cor se preferir
@@ -208,8 +228,8 @@ Future<void> _downvote() async {
           const SizedBox(width: 10,), // Espaço entre o ícone e o texto
           GestureDetector(
             onTap:() { setState(() {
-              idPai = comentario.id;
-              hintText= 'A responder a ${comentario.nomeUtilizador}...';
+              idPai = avaliacao.id;
+              hintText= 'A responder a ${avaliacao.nomeUtilizador}...';
             });
             final context = _targetKey.currentContext;
              if (context != null) {
@@ -237,7 +257,7 @@ Future<void> _downvote() async {
                 children: [
                   GestureDetector(onTap: _upvote, child:  Icon(Icons.thumb_up, color: Colors.grey, size: 20)),
                   const SizedBox(width: 4),
-                  Text('${comentario.upvotes ?? 0}'),
+                  Text('${avaliacao.upvotes ?? 0}'),
                 ],
               ),
               const SizedBox(height: 6),
@@ -247,7 +267,7 @@ Future<void> _downvote() async {
                   GestureDetector(onTap: _downvote, child: Icon(Icons.thumb_down, color: Colors.grey, size: 20),
    ),
                   SizedBox(width: 4),
-                  Text('${comentario.downvotes ?? 0}'),
+                  Text('${avaliacao.downvotes ?? 0}'),
                 ],
               ),
             ],

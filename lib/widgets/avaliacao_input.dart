@@ -6,12 +6,14 @@ class AvaliacaoInput extends StatefulWidget {
   final TextEditingController controller;
   final void Function(double) onRatingUpdate;
   final bool validator;
+  final String hintText;
 
   const AvaliacaoInput({
     Key? key,
     required this.controller,
     required this.onRatingUpdate,
     required this.validator,
+    this.hintText = 'Escreva a sua avaliação...'
   }) : super(key: key);
 
   @override
@@ -29,7 +31,7 @@ class _AvaliacaoInputState extends State<AvaliacaoInput> {
         TextField(
           controller: widget.controller,
           decoration: InputDecoration(
-            hintText: 'Escreva a sua avaliação...',
+            hintText: widget.hintText,
             filled: true,
             fillColor: Colors.grey[200],
             border: OutlineInputBorder(

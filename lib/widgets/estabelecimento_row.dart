@@ -67,11 +67,13 @@ class EstabelecimentoRow extends StatelessWidget {
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      'Qualquer merda', 
+                      estabelecimento.morada, 
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 10,
+                        overflow: TextOverflow.ellipsis
                       ),
+                      maxLines: 1,
                     ),
                   ],
                 ),
