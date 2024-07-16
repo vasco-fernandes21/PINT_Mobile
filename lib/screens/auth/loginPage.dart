@@ -21,7 +21,6 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  
   void _submit() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
@@ -159,48 +158,59 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _signInWithFacebook() async {
-  try {
-    final LoginResult result = await FacebookAuth.i.login(
-      permissions: ['email', 'public_profile'],
-    );
+    try {
+      final LoginResult result = await FacebookAuth.i.login(
+        permissions: ['email', 'public_profile'],
+      );
 
-    if (result.status == LoginStatus.success) {
-      final userData = await FacebookAuth.instance.getUserData();
+      if (result.status == LoginStatus.success) {
+        final userData = await FacebookAuth.instance.getUserData();
 
-      final String email = userData['email'];
-      final String nome = userData['name'];
-      final String foto = userData['picture']['data']['url'];
-      final String id = userData['id'].toString(); 
+        final String email = userData['email'];
+        final String nome = userData['name'];
+        final String foto = userData['picture']['data']['url'];
+        final String id = userData['id'].toString(); 
 
-      print('Email: $email');
-      print('Name: $nome');
-      print('Foto: $foto');
-      print('ID: $id');
+        print('Email: $email');
+        print('Name: $nome');
+        print('Foto: $foto');
+        print('ID: $id');
 
-      final response = await authApi.facebookLogin(id,nome, email, foto);
+        final response = await authApi.facebookLogin(id,nome, email, foto);
 
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        print('Response Data: $data');
+        if (response.statusCode == 200) {
+          var data = jsonDecode(response.body);
+          print('Response Data: $data');
 
-        if (data['token'] != null) {
-          // Armazena o token e detalhes do usuário
-          String token = data['token'];
+          if (data['token'] != null) {
+            // Armazena o token e detalhes do usuário
+            String token = data['token'];
 
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setBool('isLoggedIn', true);
-          await prefs.setString('token', token);
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            await prefs.setBool('isLoggedIn', true);
+            await prefs.setString('token', token);
 
-          // Navega para a página desejada
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SelectPosto(),
-            ),
-          );
+            // Navega para a página desejada
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SelectPosto(),
+              ),
+            );
+          } else {
+            Fluttertoast.showToast(
+              msg: 'Erro ao fazer login. Verifique se a conta foi criada corretamente.',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              backgroundColor: Colors.red,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+          }
         } else {
+          var errorData = jsonDecode(response.body);
           Fluttertoast.showToast(
-            msg: 'Erro ao fazer login. Verifique se a conta foi criada corretamente.',
+            msg: errorData['error'] ?? 'Erro ao fazer login com o Facebook',
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.CENTER,
             backgroundColor: Colors.red,
@@ -209,9 +219,8 @@ class _LoginPageState extends State<LoginPage> {
           );
         }
       } else {
-        var errorData = jsonDecode(response.body);
         Fluttertoast.showToast(
-          msg: errorData['error'] ?? 'Erro ao fazer login com o Facebook',
+          msg: 'Erro ao fazer login com o Facebook',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.CENTER,
           backgroundColor: Colors.red,
@@ -219,7 +228,8 @@ class _LoginPageState extends State<LoginPage> {
           fontSize: 16.0,
         );
       }
-    } else {
+    } catch (error) {
+      print('Erro ao fazer login com o Facebook: $error');
       Fluttertoast.showToast(
         msg: 'Erro ao fazer login com o Facebook',
         toastLength: Toast.LENGTH_SHORT,
@@ -229,18 +239,8 @@ class _LoginPageState extends State<LoginPage> {
         fontSize: 16.0,
       );
     }
-  } catch (error) {
-    print('Erro ao fazer login com o Facebook: $error');
-    Fluttertoast.showToast(
-      msg: 'Erro ao fazer login com o Facebook',
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.CENTER,
-      backgroundColor: Colors.red,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
   }
-}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
