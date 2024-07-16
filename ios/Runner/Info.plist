@@ -71,6 +71,12 @@
     <key>UIApplicationSupportsIndirectInputEvents</key>
     <true/>
 
+    <key>NSAppTransportSecurity</key>
+    <dict>
+    <key>NSAllowsArbitraryLoads</key>
+    <true/>
+    </dict>
+
     <key>FacebookAutoLogAppEventsEnabled</key>
     <false/>
     <key>NSCameraUsageDescription</key>

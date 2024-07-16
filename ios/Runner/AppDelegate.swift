@@ -11,13 +11,7 @@ import FBSDKCoreKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    GeneratedPluginRegistrant.register(with: self)
-      if let url = AppLinks.shared.getLink(launchOptions: launchOptions) {
-      // We have a link, propagate it to your Flutter app or not
-      AppLinks.shared.handleLink(url: url)
-      return true // Returning true will stop the propagation to other packages
-    }
-
+    // Configuração do Google Maps
     GMSServices.provideAPIKey("AIzaSyA69sIkASD2CYFNbzNV_7XOCR-3L1Fcqps")
     
     // Configuração do Facebook SDK
