@@ -17,6 +17,7 @@ import 'package:pint/widgets/avaliacao_input.dart';
 import 'package:pint/widgets/image_carousel.dart';
 import 'package:pint/widgets/show_avaliacoes.dart';
 import 'package:pint/widgets/sumario_avaliacoes.dart';
+import 'package:pint/widgets/verifica_conexao.dart';
 import 'package:readmore/readmore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
@@ -41,6 +42,7 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   String? token;
   bool isLoading = true;
+  bool isServerOff = false;
   Estabelecimento? estabelecimento;
   List<Avaliacao> avaliacoes = [];
   int numAvaliacoes = 1;
@@ -85,12 +87,8 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
     } catch (e) {
       setState(() {
         isLoading = false;
+        isServerOff = true;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-        ),
-      );
     }
   }
 
@@ -267,9 +265,8 @@ Fluttertoast.showToast(
           IconButton(onPressed: selectImage, icon: const Icon(Icons.add_a_photo))
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : estabelecimento == null
+      body: VerificaConexao(isLoading: isLoading, isServerOff: isServerOff, child: 
+      estabelecimento == null
               ? const Center(child: Text('Estabelecimento não encontrado.'))
               : SingleChildScrollView(
                   child: Column(
@@ -430,6 +427,7 @@ Fluttertoast.showToast(
                     ],
                   ),
                 ),
+      ),
       bottomNavigationBar: NavBar(postoID: widget.postoID, index: 1),
     );
   }

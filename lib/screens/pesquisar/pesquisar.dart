@@ -4,6 +4,7 @@ import 'package:pint/models/area.dart';
 import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/fetch_functions.dart';
 import 'package:pint/widgets/eventos_grid.dart';
+import 'package:pint/widgets/verifica_conexao.dart';
 import 'estabelecimentos/EstabelecimentosPorArea.dart';
 import 'package:pint/navbar.dart';
 
@@ -19,6 +20,7 @@ class _PesquisarState extends State<Pesquisar> {
   List<Area> areas = [];
   bool isLoading = true;
   bool showEstabelecimentos = true;
+  bool isServerOff = false;
 
   @override
   void initState() {
@@ -27,11 +29,18 @@ class _PesquisarState extends State<Pesquisar> {
   }
 
   void loadAreas() async {
+    try{
     final fetchedAreas = await fetchAreas(context);
     setState(() {
       areas = fetchedAreas;
       isLoading = false;
-    });
+    });}
+    catch (e){
+      setState(() {
+        isLoading=false;
+        isServerOff = true;
+      });
+    }
   }
 
   void handleFilterToggle(int item) {
@@ -114,9 +123,7 @@ class _PesquisarState extends State<Pesquisar> {
           ),
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : showEstabelecimentos
+      body: VerificaConexao(isLoading: isLoading, isServerOff: isServerOff, child: showEstabelecimentos
               ? Padding(
                   padding: const EdgeInsets.fromLTRB(
                       20.0, 0.0, 20.0, 8.0), // left, top, right, bottom
@@ -183,6 +190,7 @@ class _PesquisarState extends State<Pesquisar> {
               : EventosGridView(
                   postoID: widget.postoID,
                 ),
+      ),
       bottomNavigationBar: NavBar(postoID: widget.postoID, index: 1),
     );
   }

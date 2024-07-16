@@ -33,6 +33,10 @@ class _ComentariosListState extends State<ComentariosList> {
   bool isDownvoted=false;
   int? idPai;
 
+  String hintText = 'Escreva o seu comentário...';
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _targetKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -146,9 +150,10 @@ Future<void> _downvote() async {
     children: [
     const SizedBox(height: 10,),
     TextField(
+          key: _targetKey,
           controller: _comentarioController,
           decoration: InputDecoration(
-            hintText: 'Escreva o seu comentário...',
+            hintText: hintText,
             filled: true,
             fillColor: Colors.grey[200],
             border: OutlineInputBorder(
@@ -211,8 +216,14 @@ Future<void> _downvote() async {
           GestureDetector(
             onTap:() { setState(() {
               idPai = comentario.id;
-              _comentarioController.text = 'Resposta: ';
-            });},
+              hintText= 'A responder a ${comentario.nomeUtilizador}...';
+            });
+            final context = _targetKey.currentContext;
+             if (context != null) {
+             Scrollable.ensureVisible(context,
+             duration: const Duration(seconds: 1), curve: Curves.easeInOut);
+            }
+            },
             child: const Text(
               'Responder',
               style: TextStyle(

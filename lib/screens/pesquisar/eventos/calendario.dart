@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pint/screens/pesquisar/eventos/paginaEvento.dart';
 import 'package:pint/utils/colors.dart';
+import 'package:pint/widgets/verifica_conexao.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:pint/models/evento.dart';
@@ -28,6 +29,7 @@ class _CalendarioState extends State<Calendario> {
   List<Evento> eventos = [];
   List<Evento> eventosDoDia = [];
   bool isLoading = true;
+  bool isServerOff = false;
 
   @override
   void initState() {
@@ -48,11 +50,8 @@ class _CalendarioState extends State<Calendario> {
     } catch (e) {
       setState(() {
         isLoading = false;
+        isServerOff = true;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao processar os dados: $e')),
-      );
-      print('Erro ao carregar eventos: $e');
     }
   }
 
@@ -94,9 +93,8 @@ class _CalendarioState extends State<Calendario> {
           ),
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
+      body: VerificaConexao(isLoading: isLoading, isServerOff: isServerOff, child: 
+       Column(
               children: [
                 TableCalendar(
                   locale: 'pt_PT',
@@ -157,6 +155,7 @@ class _CalendarioState extends State<Calendario> {
                 ),
               ],
             ),
+      ),
     );
   }
 

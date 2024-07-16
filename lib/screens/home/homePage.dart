@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_offline/flutter_offline.dart';
@@ -8,8 +7,6 @@ import 'package:pint/models/estabelecimento.dart';
 import 'package:pint/models/evento.dart';
 import 'package:pint/models/utilizador.dart';
 import 'package:pint/navbar.dart';
-import 'package:pint/screens/criar/criarEvento.dart';
-import 'package:pint/screens/perfil/meuperfil.dart';
 import 'package:pint/screens/pesquisar/eventos/todosEventos.dart';
 import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/evento_functions.dart';
@@ -17,6 +14,7 @@ import 'package:pint/utils/fetch_functions.dart';
 import 'package:pint/widgets/custom_button.dart';
 import 'package:pint/widgets/estabelecimento_row.dart';
 import 'package:pint/widgets/evento_row.dart';
+import 'package:pint/widgets/verifica_conexao.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
@@ -30,6 +28,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool isLoading = true;
+  bool isServerOff = false;
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   Utilizador? myUser;
   List<Evento> eventos = [];
@@ -41,11 +40,10 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     loadMyUser();
-    loadEventos();
-    loadEstabelecimentos();
   }
 
   void loadMyUser() async {
+    try {
     final SharedPreferences prefs = await _prefs;
     String? token = prefs.getString('token');
     final fetchedUser = await fetchUtilizadorCompleto();
@@ -55,6 +53,14 @@ class _HomePageState extends State<HomePage> {
       print(myUser?.ultimoLogin);
       updateSaudacao();
     });
+    loadEventos();
+    loadEstabelecimentos();
+    } catch (e) {
+      setState(() {
+        isLoading= false;
+        isServerOff = true;
+      });
+    }
   }
 
   void loadEventos() async {
@@ -100,7 +106,7 @@ class _HomePageState extends State<HomePage> {
 
         if (diffDays >= 15) {
           setState(() {
-            saudacao = 'Seja bem-vindo novamente, ${myUser!.nome}';
+            saudacao = 'Seja bem-vindo novamente,\n${myUser!.nome}';
           });
           return;
         }
@@ -108,15 +114,15 @@ class _HomePageState extends State<HomePage> {
 
       if (currentHour >= 6 && currentHour < 13) {
         setState(() {
-          saudacao = 'Bom dia, ${myUser!.nome}';
+          saudacao = 'Bom dia,\n${myUser!.nome}';
         });
       } else if (currentHour >= 13 && currentHour < 20) {
         setState(() {
-          saudacao = 'Boa tarde, ${myUser!.nome}';
+          saudacao = 'Boa tarde,\n${myUser!.nome}';
         });
       } else {
         setState(() {
-          saudacao = 'Boa noite, ${myUser!.nome}';
+          saudacao = 'Boa noite,\n${myUser!.nome}';
         });
       }
     }
@@ -128,10 +134,9 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Início'),
       ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15),
+      body: VerificaConexao(isLoading: isLoading, isServerOff: isServerOff, child:
+           Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,6 +203,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
+      ),
       bottomNavigationBar: NavBar(postoID: widget.postoID, index: 0),
     );
   }

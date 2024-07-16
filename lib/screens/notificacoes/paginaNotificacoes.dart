@@ -7,6 +7,7 @@ import 'package:pint/models/utilizador.dart';
 import 'package:pint/navbar.dart';
 import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/fetch_functions.dart';
+import 'package:pint/widgets/verifica_conexao.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificacoesPage extends StatefulWidget {
@@ -25,13 +26,13 @@ class _NotificacoesPageState extends State<NotificacoesPage> {
   List<Notificacao> notificacoesLidas = [];
   Utilizador? myUser;
   bool isLoading = true;
+  bool isServerOff = false;
   bool mostrarNaoLidas = true;
 
   @override
   void initState() {
     super.initState();
-          loadMyUser();
-    loadNotificacoes();
+    loadMyUser();
   }
 
     void loadMyUser() async {
@@ -44,31 +45,23 @@ class _NotificacoesPageState extends State<NotificacoesPage> {
       setState(() {
         myUser = fetchedUser;
       });
+      loadNotificacoes();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erro user: $e'),
-        ),
-      );
+      setState(() {
+        isLoading = false;
+        isServerOff = true;
+      });
     }
   }
 
   Future<void> loadNotificacoes() async {
-    try {
       final fetchedNotificacoes = await fetchNotificacoes(context);
       setState(() {
         notificacoes = filtrarNotificacoesPorEstado(fetchedNotificacoes, false);
         notificacoesLidas = filtrarNotificacoesPorEstado(fetchedNotificacoes, true);
         isLoading = false;
       });
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      // Tratar erro ao carregar notificações, se necessário
-      print('Erro ao carregar notificações: $e');
-    }
-  }
+    } 
 
   List<Notificacao> filtrarNotificacoesPorEstado(
       List<Notificacao> listaNotificacoes, bool estadoFiltrar) {
@@ -141,9 +134,8 @@ class _NotificacoesPageState extends State<NotificacoesPage> {
                   : Icons.remove_red_eye))
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : notificacoes.isEmpty && notificacoesLidas.isEmpty
+      body: VerificaConexao(isLoading: isLoading, isServerOff: isServerOff, child: 
+      notificacoes.isEmpty && notificacoesLidas.isEmpty
               ? const Center(child: Text('Nenhuma notificação encontrada'))
               : Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -234,6 +226,7 @@ class _NotificacoesPageState extends State<NotificacoesPage> {
                     ],
                   ),
                 ),
+      ),
       bottomNavigationBar: NavBar(postoID: widget.postoID, index: 3),
     );
   }

@@ -12,6 +12,7 @@ import 'package:pint/utils/form_validators.dart';
 import 'package:pint/widgets/dropdown_input.dart';
 import 'package:pint/widgets/image_input.dart';
 import 'package:pint/widgets/text_input.dart';
+import 'package:pint/widgets/verifica_conexao.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CriarEstabelecimentoPage extends StatefulWidget {
@@ -24,6 +25,9 @@ class CriarEstabelecimentoPage extends StatefulWidget {
 }
 
 class _CriarEstabelecimentoPageState extends State<CriarEstabelecimentoPage> {
+  bool isLoading = true;
+  bool isServerOff = false;
+
   List<Area> areas = [];
   List<Subarea> subareas = [];
   int? selectedAreaId;
@@ -48,17 +52,33 @@ class _CriarEstabelecimentoPageState extends State<CriarEstabelecimentoPage> {
   }
 
     void loadAreas() async {
+    try {
     final fetchedAreas = await fetchAreas(context);
     setState(() {
       areas = fetchedAreas;
+      isLoading=false;
     });
+    } catch (e) {
+      setState(() {
+        isLoading=false;
+        isServerOff=true;
+      });
+    }
+
   }
   
     void loadSubareas(int areaId) async {
-    final fetchedSubareas = await fetchSubareas(context, areaId);
-    setState(() {
-      subareas = fetchedSubareas;
-    });
+      try {
+      final fetchedSubareas = await fetchSubareas(context, areaId);
+      setState(() {
+        subareas = fetchedSubareas;
+      });
+      } catch (e) {
+        setState(() {
+          isServerOff = true;
+        });
+      }
+
   }
 
     Future<void> _pickImage() async {
@@ -119,7 +139,8 @@ Future<void> _createEstabelecimento() async {
       appBar: AppBar(
         title: const Text('Criar Estabelecimento'),
       ),
-      body: Padding(
+      body: VerificaConexao(isLoading: isLoading, isServerOff: isServerOff, child: 
+      Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Form(
           key: _formKey,
@@ -193,6 +214,7 @@ Future<void> _createEstabelecimento() async {
           ),
           ),
         ),
+      ),
       ),
       bottomNavigationBar: NavBar(postoID: widget.postoID, index: 2),
     );

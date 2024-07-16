@@ -10,6 +10,7 @@ import 'package:pint/screens/pesquisar/eventos/minhasInscricoes.dart';
 import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/fetch_functions.dart';
 import 'package:pint/widgets/alert_confirmation.dart';
+import 'package:pint/widgets/verifica_conexao.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PerfilPage extends StatefulWidget {
@@ -23,6 +24,7 @@ class PerfilPage extends StatefulWidget {
 
 class _PerfilPageState extends State<PerfilPage> {
   bool isLoading = true;
+  bool isServerOff = false;
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   late String? token;
   Utilizador? myUser;
@@ -46,13 +48,9 @@ class _PerfilPageState extends State<PerfilPage> {
         isLoading = false;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erro comments: $e'),
-        ),
-      );
       setState(() {
         isLoading = false;
+        isServerOff = true;
       });
     }
   }
@@ -81,12 +79,11 @@ class _PerfilPageState extends State<PerfilPage> {
       appBar: AppBar(
         title: const Text('Perfil'),
       ),
-      body: SingleChildScrollView(
-        child: isLoading
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : Padding(
+      body: isLoading
+      ? const Center(child: CircularProgressIndicator(),)
+      : VerificaConexao(isLoading: isLoading, isServerOff: isServerOff, child:
+       SingleChildScrollView(
+        child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -105,7 +102,7 @@ class _PerfilPageState extends State<PerfilPage> {
                     Text(
                       myUser!.nome,
                       style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                          const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                     ),
                     Text(
                       myUser!.email ?? '-',
@@ -190,6 +187,7 @@ class _PerfilPageState extends State<PerfilPage> {
                         }),
                   ],
                 )),
+      ),
       ),
       bottomNavigationBar: NavBar(postoID: widget.postoID, index: 4),
     );

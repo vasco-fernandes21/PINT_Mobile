@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-
+import 'package:app_links/app_links.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -19,11 +19,11 @@ import 'package:pint/navbar.dart';
 import 'package:pint/screens/pesquisar/eventos/editarEvento.dart';
 import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/fetch_functions.dart';
-import 'package:pint/utils/image_picker.dart';
 import 'package:pint/widgets/alert_confirmation.dart';
 import 'package:pint/widgets/comentarios_evento.dart';
 import 'package:pint/widgets/custom_button.dart';
 import 'package:pint/widgets/image_carousel.dart';
+import 'package:pint/widgets/verifica_conexao.dart';
 import 'package:readmore/readmore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pint/utils/evento_functions.dart';
@@ -46,6 +46,7 @@ class _EventoPageState extends State<EventoPage> {
   late String? token;
   final api = ApiClient();
   bool isLoading = true;
+  bool isServerOff = false;
   Evento? evento;
   Utilizador? myUser;
   List<Inscricao> inscricoes = [];
@@ -62,12 +63,20 @@ class _EventoPageState extends State<EventoPage> {
   double? latitude;
   double? longitude;
 
+  final _appLinks = AppLinks();
+    final _navigatorKey = GlobalKey<NavigatorState>();
+
+
 
 
   @override
   void initState() {
     super.initState();
     loadMyUser();
+  }
+
+    void openAppLink(Uri uri) {
+    _navigatorKey.currentState?.pushNamed(uri.fragment);
   }
 
   void loadMyUser() async {
@@ -82,11 +91,10 @@ class _EventoPageState extends State<EventoPage> {
       });
       loadEvento();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erro user: $e'),
-        ),
-      );
+      setState(() {
+        isLoading=false;
+        isServerOff = true;
+      });
     }
   }
 
@@ -309,17 +317,20 @@ Fluttertoast.showToast(
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: isLoading
+      appBar: 
+       AppBar(
+        title: isServerOff
+        ? const Text('Evento')
+        : isLoading
             ? const Text('Evento')
             : AutoSizeText(
                 evento!.titulo,
               ),
         actions: [
-          if (isLoading == false)
+          if (isLoading == false && isServerOff==false)
             IconButton(
                 onPressed: selectImage, icon: const Icon(Icons.add_a_photo)),
-          if (isLoading == false)
+          if (isLoading == false && isServerOff==false)
             if (evento!.estado == false && isMyUserTheOwner)
               IconButton(
                   onPressed: () {
@@ -333,9 +344,8 @@ Fluttertoast.showToast(
                   icon: const Icon(Icons.edit))
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : evento == null
+      body: VerificaConexao(isLoading: isLoading, isServerOff: isServerOff, child: 
+      evento == null
               ? const Center(
                   child: Text('Nenhum evento encontrado.'),
                 )
@@ -426,7 +436,7 @@ Fluttertoast.showToast(
                                 ),
                               ),
                               const SizedBox(height: 5),
-                              if (latitude != null &&
+                              /*if (latitude != null &&
                                 longitude != null &&
                                 _localizacao != null)
                               SizedBox(
@@ -447,7 +457,7 @@ Fluttertoast.showToast(
                                     _controller.complete(controller);
                                   },
                                 ),
-                              ),
+                              ),*/
                               const SizedBox(
                                 height: 15,
                               ),
@@ -482,6 +492,7 @@ Fluttertoast.showToast(
                     ],
                   ),
                 ),
+      ),
       bottomNavigationBar: NavBar(postoID: widget.postoID, index: 1),
     );
   }

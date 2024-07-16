@@ -5,6 +5,7 @@ import 'package:pint/screens/pesquisar/eventos/paginaEvento.dart';
 import 'package:pint/utils/evento_functions.dart';
 import 'package:pint/utils/fetch_functions.dart';
 import 'package:pint/widgets/evento_card.dart';
+import 'package:pint/widgets/verifica_conexao.dart';
 
 class TodosEventosPage extends StatefulWidget {
   final int postoID;
@@ -17,6 +18,7 @@ class TodosEventosPage extends StatefulWidget {
 
 class _TodosEventosPageState extends State<TodosEventosPage> {
   bool isLoading = true;
+  bool isServerOff = false;
   List<Evento> eventos = [];
 
   @override
@@ -26,11 +28,19 @@ class _TodosEventosPageState extends State<TodosEventosPage> {
   }
 
   void loadEventos() async {
-    final fetchedEventos = await fetchEventos(context, widget.postoID);
-    setState(() {
+    try {
+      final fetchedEventos = await fetchEventos(context, widget.postoID);
+      setState(() {
       eventos = filtrarEOrdenarEventosFuturos(fetchedEventos);
       isLoading = false;
-    });
+    }); 
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        isServerOff = true;
+      });
+    }
+
   }
 
   @override
@@ -39,10 +49,9 @@ class _TodosEventosPageState extends State<TodosEventosPage> {
         appBar: AppBar(
           title: Text('Próximos Eventos'),
         ),
-        body: isLoading
-            ? Center(child: CircularProgressIndicator())
-            : eventos.isEmpty
-                ? Center(
+        body: VerificaConexao(isLoading: isLoading, isServerOff: isServerOff, child: 
+        eventos.isEmpty
+                ? const Center(
                     child: Text('Nenhum evento encontrado.'),
                   )
                 : SingleChildScrollView(
@@ -65,6 +74,7 @@ class _TodosEventosPageState extends State<TodosEventosPage> {
                       }).toList(),
                     ),
                   ),
+        ),
                   bottomNavigationBar: NavBar(postoID: widget.postoID, index: 1),
                   );
   }

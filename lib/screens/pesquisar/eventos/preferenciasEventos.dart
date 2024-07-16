@@ -6,6 +6,7 @@ import 'package:pint/screens/pesquisar/eventos/paginaEvento.dart';
 import 'package:pint/utils/evento_functions.dart';
 import 'package:pint/utils/fetch_functions.dart';
 import 'package:pint/widgets/evento_card.dart';
+import 'package:pint/widgets/verifica_conexao.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PreferenciasEventosPage extends StatefulWidget {
@@ -21,6 +22,7 @@ class PreferenciasEventosPage extends StatefulWidget {
 class _PreferenciasEventosPageState extends State<PreferenciasEventosPage> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   bool isLoading = true;
+  bool isServerOff = false;
   List<Evento> eventos = [];
   Utilizador? myUser;
 
@@ -40,11 +42,10 @@ class _PreferenciasEventosPageState extends State<PreferenciasEventosPage> {
       });
       loadEventos();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erro user: $e'),
-        ),
-      );
+      setState(() {
+        isLoading = false;
+        isServerOff = true;
+      });
     }
   }
 
@@ -62,9 +63,8 @@ class _PreferenciasEventosPageState extends State<PreferenciasEventosPage> {
       appBar: AppBar(
         title: Text('Para Ti'),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : (myUser?.idAreaPreferencia == null &&
+      body: VerificaConexao(isLoading: isLoading, isServerOff: isServerOff, child: 
+      (myUser?.idAreaPreferencia == null &&
                   myUser?.idSubareaPreferencia == null)
               ? Center(child: Text('Não tens nenhuma preferência'))
               : eventos.isEmpty
@@ -99,6 +99,7 @@ class _PreferenciasEventosPageState extends State<PreferenciasEventosPage> {
                         }).toList(),
                       ),
                     ),
+      ),
       bottomNavigationBar: NavBar(postoID: widget.postoID, index: 1),
     );
   }

@@ -6,6 +6,7 @@ import 'package:pint/screens/pesquisar/eventos/paginaEvento.dart';
 import 'package:pint/utils/evento_functions.dart';
 import 'package:pint/utils/fetch_functions.dart';
 import 'package:pint/widgets/evento_card.dart';
+import 'package:pint/widgets/verifica_conexao.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MeusEventosPage extends StatefulWidget {
@@ -20,6 +21,7 @@ class MeusEventosPage extends StatefulWidget {
 class _MeusEventosPagePageState extends State<MeusEventosPage> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   bool isLoading = true;
+  bool isServerOff = false;
   List<Evento> eventos = [];
   Utilizador? myUser;
 
@@ -39,11 +41,10 @@ class _MeusEventosPagePageState extends State<MeusEventosPage> {
       });
       loadEventos();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erro user: $e'),
-        ),
-      );
+        setState(() {
+          isLoading = false;
+          isServerOff = true;
+        });
     }
   }
 
@@ -61,10 +62,9 @@ class _MeusEventosPagePageState extends State<MeusEventosPage> {
       appBar: AppBar(
         title: Text('Meus Eventos'),
       ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : eventos.isEmpty
-              ? Center(
+      body: VerificaConexao(isLoading: isLoading, isServerOff: isServerOff, child: 
+       eventos.isEmpty
+              ? const Center(
                   child: Text('Nenhum evento encontrado.'),
                 )
               : SingleChildScrollView(
@@ -87,6 +87,7 @@ class _MeusEventosPagePageState extends State<MeusEventosPage> {
                     }).toList(),
                   ),
                 ),
+      ),
       bottomNavigationBar: NavBar(postoID: widget.postoID, index: 1),
     );
   }

@@ -14,6 +14,7 @@ import 'package:pint/widgets/image_input.dart';
 import 'package:pint/widgets/text_input.dart';
 import 'package:pint/navbar.dart';
 import 'package:pint/api/EventosAPI.dart';
+import 'package:pint/widgets/verifica_conexao.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CriarEventosPage extends StatefulWidget {
@@ -27,6 +28,8 @@ class CriarEventosPage extends StatefulWidget {
 
 class _CriarEventosPageState extends State<CriarEventosPage> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  bool isLoading = true;
+  bool isServerOff = false;
 
   List<Area> areas = [];
   List<Subarea> subareas = [];
@@ -53,10 +56,19 @@ class _CriarEventosPageState extends State<CriarEventosPage> {
   }
 
      void loadAreas() async {
-    final fetchedAreas = await fetchAreas(context);
+      try {
+      final fetchedAreas = await fetchAreas(context);
     setState(() {
       areas = fetchedAreas;
-    });
+      isLoading = false;
+    }); 
+      } catch (e) {
+        setState(() {
+          isLoading = false;
+          isServerOff = true;
+        });
+      }
+      
   }
   
 
@@ -72,10 +84,17 @@ class _CriarEventosPageState extends State<CriarEventosPage> {
   }
 
   void loadSubareas(int areaId) async {
+    try {
     final fetchedSubareas = await fetchSubareas(context, areaId);
     setState(() {
       subareas = fetchedSubareas;
     });
+    } catch (e) {
+      setState(() {
+        isServerOff = true;
+      });
+    }
+
   }
 
   Future<void> _createEvent() async {
@@ -140,7 +159,8 @@ class _CriarEventosPageState extends State<CriarEventosPage> {
       appBar: AppBar(
         title: const Text('Criar Evento'),
       ),
-      body: Padding(
+      body: VerificaConexao(isLoading: isLoading, isServerOff: isServerOff, child: 
+      Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Form(
         key: _formKeyEvento,
@@ -223,6 +243,7 @@ class _CriarEventosPageState extends State<CriarEventosPage> {
         ),
         ),
         ),
+      ),
       ),
       bottomNavigationBar: NavBar(
         index: 2,

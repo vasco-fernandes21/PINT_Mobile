@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:pint/models/utilizador.dart';
 import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/fetch_functions.dart';
+import 'package:pint/widgets/verifica_conexao.dart';
 import 'screens/auth/loginPage.dart';
 import 'screens/auth/registarPage.dart';
 import 'screens/auth/recuperarPage.dart';
@@ -12,6 +13,7 @@ import 'screens/auth/novapassPage.dart';
 import 'screens/selectPosto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:go_router/go_router.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env.dev"); 
@@ -19,20 +21,54 @@ Future<void> main() async {
   Intl.defaultLocale = 'pt_PT';
   SharedPreferences prefs = await SharedPreferences.getInstance();
   var isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  bool isServerOff = false;
   if (isLoggedIn){
+    try {
     Utilizador? myUser;
     myUser = await fetchUtilizadorCompleto();
     if (myUser == null){
       isLoggedIn = false;
+    } 
+    } catch (e) {
+      isServerOff = true;
     }
-  }
-  runApp(MyApp(isLoggedIn: isLoggedIn));
 
+  }
+  runApp(MyApp(isLoggedIn: isLoggedIn, isServerOff: isServerOff,));
+
+}
+
+GoRouter createRouter(bool isLoggedIn, bool isServerOff) {
+  return GoRouter(
+    initialLocation: isServerOff ? '/error'
+    : isLoggedIn ? '/selectposto' : '/',
+    routes: <RouteBase>[
+      GoRoute(
+        path: '/',
+        builder: (BuildContext context, GoRouterState state) {
+          return LoginPage();
+        },
+      ),
+      GoRoute(
+        path: '/selectposto',
+        builder: (BuildContext context, GoRouterState state) {
+          return SelectPosto();
+        },
+      ),
+      GoRoute(
+        path: '/error',
+        builder: (BuildContext context, GoRouterState state) {
+          return ErrorServerWidget();
+        },
+      ),
+    ],
+  );
 }
 
 class MyApp extends StatelessWidget {
   var isLoggedIn;
-  MyApp({required this.isLoggedIn});
+  bool isServerOff;
+  MyApp({required this.isLoggedIn, required this.isServerOff});
 
   @override
   Widget build(BuildContext context) { 
@@ -40,9 +76,11 @@ class MyApp extends StatelessWidget {
         DeviceOrientation.portraitUp,
         DeviceOrientation.portraitDown,
       ]);
-    return MaterialApp(
+    final GoRouter _router = createRouter(isLoggedIn, isServerOff);
+
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'My Flutter App',
+      title: 'The Softshares',
       theme: ThemeData(
         primaryColor: primaryColor,
         scaffoldBackgroundColor: backgroundColor,
@@ -58,15 +96,7 @@ class MyApp extends StatelessWidget {
           )
         )
       ),
-      home: isLoggedIn == true ? SelectPosto() : LoginPage(), 
-      routes: {
-        '/login': (context) => LoginPage(), // Define the '/login' route
-        '/registar': (context) => RegisterPage(), // Define the '/registar' route
-        '/recuperar': (context) => RecuperarPage(), // Define the '/recuperar' route
-        //'/': (context) => NavBar(postoID: 1), // Define the '/' route
-        '/novapass': (context) => NovaPassPage(), // Define the '/novapass' route
-        '/selecionarposto': (context) => SelectPosto(),
-      },
+      routerConfig: _router,
     );
   }
 }

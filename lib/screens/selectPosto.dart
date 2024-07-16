@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_offline/flutter_offline.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pint/api/postosAreasAPI.dart';
@@ -6,6 +7,7 @@ import 'dart:convert';
 import 'package:pint/navbar.dart';
 import 'package:pint/screens/home/homePage.dart';
 import 'package:pint/utils/colors.dart';
+import 'package:pint/widgets/verifica_conexao.dart';
 
 class SelectPosto extends StatefulWidget {
   @override
@@ -17,7 +19,9 @@ class _SelectPostoState extends State<SelectPosto> {
   Map<String, dynamic>? selectedPosto;
   int selectedPostoId = 0;
   String selectedPostoNome = '';
-
+  bool isLoading = true;
+  bool isServerOff = false;
+  
   @override
   void initState() {
     super.initState();
@@ -25,6 +29,7 @@ class _SelectPostoState extends State<SelectPosto> {
   }
 
   void fetchOptions() async {
+    try {
     final api = PostosAreasAPI();
     final response = await api.listarPostos();
 
@@ -43,6 +48,7 @@ class _SelectPostoState extends State<SelectPosto> {
               'id': item['id'],
               'nome': item['nome'],
             }).cast<Map<String, dynamic>>().toList();
+            isLoading = false;
           });
         } else {
           // Se 'data' não estiver presente na resposta
@@ -62,12 +68,18 @@ class _SelectPostoState extends State<SelectPosto> {
         SnackBar(content: Text('Erro ao carregar dados: ${response.statusCode}')),
       );
     }
+    } catch (e){
+      isLoading = false;
+      isServerOff = true;
+    }
+
   }
 
 @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
+      body: VerificaConexao(isLoading: isLoading, isServerOff: isServerOff, child: 
+      Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children:
@@ -126,6 +138,7 @@ class _SelectPostoState extends State<SelectPosto> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

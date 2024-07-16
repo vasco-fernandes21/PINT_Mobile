@@ -11,6 +11,7 @@ import 'package:pint/utils/fetch_functions.dart';
 import 'package:pint/utils/form_validators.dart';
 import 'package:pint/widgets/custom_button.dart';
 import 'package:pint/widgets/dropdown_input.dart';
+import 'package:pint/widgets/verifica_conexao.dart';
 
 
 class PreferenciasPage extends StatefulWidget {
@@ -29,6 +30,7 @@ class _PreferenciasPageState extends State<PreferenciasPage> {
   int? selectedAreaId;
   int? selectedSubareaId;
   bool isLoading = true;
+  bool isServerOff = false;
 
   @override
   void initState() {
@@ -44,23 +46,38 @@ class _PreferenciasPageState extends State<PreferenciasPage> {
         loadSubareas(selectedAreaId!);
         selectedSubareaId = widget.myUser!.idSubareaPreferencia;
       }
-      
     });
   }
 
   void loadAreas() async {
+    try {
     final fetchedAreas = await fetchAreas(context);
     setState(() {
       areas = fetchedAreas;
       isLoading = false;
     });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        isServerOff = true;
+      });
+    }
+
   }
 
   void loadSubareas(int areaId) async {
+    try {
     final fetchedSubareas = await fetchSubareas(context, areaId);
     setState(() {
       subareas = fetchedSubareas;
-    });
+    }); 
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        isServerOff = true;
+      });
+    }
+
   }
 
   Future<void> savePreferences() async {
@@ -108,9 +125,8 @@ class _PreferenciasPageState extends State<PreferenciasPage> {
       appBar: AppBar(
         title: const Text('Selecionar Preferência'),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
+      body: VerificaConexao(isLoading: isLoading, isServerOff: isServerOff, child: 
+       Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -166,6 +182,7 @@ class _PreferenciasPageState extends State<PreferenciasPage> {
                 ],
               ),
             ),
+          ),
             bottomNavigationBar: NavBar(postoID: widget.postoID, index: 4),
     );
   }

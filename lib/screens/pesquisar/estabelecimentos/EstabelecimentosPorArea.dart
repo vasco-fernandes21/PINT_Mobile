@@ -8,6 +8,7 @@ import 'package:pint/navbar.dart';
 import 'package:pint/api/postosAreasAPI.dart';
 import 'package:pint/utils/fetch_functions.dart';
 import 'package:pint/widgets/estabelecimento_card.dart';
+import 'package:pint/widgets/verifica_conexao.dart';
 import 'paginaEstabelecimento.dart';
 
 class AreaEstabelecimentos extends StatefulWidget {
@@ -29,6 +30,7 @@ class _AreaEstabelecimentosState extends State<AreaEstabelecimentos> {
   List<String> subareas = ['Todas'];
   int selectedOrder = 0;
   bool isLoading = true;
+  bool isServerOff = false;
   double? classificacaoMedia;
 
   @override
@@ -53,12 +55,8 @@ class _AreaEstabelecimentosState extends State<AreaEstabelecimentos> {
     } catch (e) {
       setState(() {
         isLoading = false;
+        isServerOff = true;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-        ),
-      );
     }
   }
 
@@ -130,9 +128,8 @@ class _AreaEstabelecimentosState extends State<AreaEstabelecimentos> {
           ),
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : estabelecimentosFiltrados.isEmpty
+      body: VerificaConexao(isLoading: isLoading, isServerOff: isServerOff, child:
+      estabelecimentosFiltrados.isEmpty
               ? const Center(child: Text('Nenhum estabelecimento encontrado.'))
               : SingleChildScrollView(
                   child: Column(
@@ -155,6 +152,7 @@ class _AreaEstabelecimentosState extends State<AreaEstabelecimentos> {
                     }).toList(),
                   ),
                 ),
+      ),
       bottomNavigationBar: NavBar(postoID: widget.postoID, index: 1),
     );
   }

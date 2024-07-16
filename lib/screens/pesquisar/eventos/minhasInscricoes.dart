@@ -8,6 +8,7 @@ import 'package:pint/screens/pesquisar/eventos/paginaEvento.dart';
 import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/evento_functions.dart';
 import 'package:pint/utils/fetch_functions.dart';
+import 'package:pint/widgets/verifica_conexao.dart';
 
 class MinhasInscricoesPage extends StatefulWidget {
   final int postoID;
@@ -20,6 +21,7 @@ class MinhasInscricoesPage extends StatefulWidget {
 
  class _MinhasInscricoesPageState extends State<MinhasInscricoesPage> {
   bool isLoading = true;
+  bool isServerOff = false;
   List<Inscricao> inscricoes = [];
   Utilizador? myUser;
 
@@ -37,11 +39,10 @@ class MinhasInscricoesPage extends StatefulWidget {
       });
       loadInscricoes();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erro user: $e'),
-        ),
-      );
+      setState(() {
+        isLoading = false;
+        isServerOff = true;
+      });
     }
   }
 
@@ -62,9 +63,8 @@ class MinhasInscricoesPage extends StatefulWidget {
       appBar: AppBar(
         title: const Text('Inscrições'),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : inscricoes.isEmpty
+      body: VerificaConexao(isLoading: isLoading, isServerOff: isServerOff, child: 
+       inscricoes.isEmpty
               ? const Center(
                   child: Text('Nenhuma inscrição encontrada.'),
                 )
@@ -154,6 +154,7 @@ class MinhasInscricoesPage extends StatefulWidget {
                     ],
                   ),
                 ),
+      ),
                 bottomNavigationBar: NavBar(postoID: widget.postoID, index: 1),
     );
   }
