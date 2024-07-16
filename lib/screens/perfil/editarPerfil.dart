@@ -72,7 +72,7 @@ class _EditPerfilState extends State<editPerfil> {
 
     if (response.statusCode == 200) {
       Fluttertoast.showToast(
-          msg: 'Evento editado com sucesso',
+          msg: 'Utilizador editado com sucesso',
           backgroundColor: successColor,
           fontSize: 12);
       Navigator.push(

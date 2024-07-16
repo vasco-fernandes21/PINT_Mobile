@@ -32,7 +32,7 @@ class ApiClient {
     final url = Uri.parse('$baseUrl$endpoint');
     final combinedHeaders = await _getHeaders();
     final encodedBody = jsonEncode(body);
-    print("A enviar pedido para $url com body: $encodedBody");
+    
     return http.post(url, headers: combinedHeaders, body: encodedBody);
   }
 

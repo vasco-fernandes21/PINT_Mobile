@@ -265,16 +265,19 @@ Future<List<Foto>> fetchFotosEvento(BuildContext context, int eventoID) async {
     return [];
   }
 }
-
-
-Widget buildUserAvatar(String? imageUrl, String? idGoogle, {double width = 120, double height = 120}) {
+Widget buildUserAvatar(String? imageUrl, String? idGoogle, String? idFacebook, {double width = 120, double height = 120}) {
   String? finalImageUrl;
 
-  if (idGoogle != null) {
+  // Verifica se há um idGoogle ou idFacebook e usa diretamente o URL fornecido
+  if (idGoogle != null || idFacebook != null) {
     finalImageUrl = imageUrl ?? 'assets/images/default-avatar.jpg';
-  } else if (imageUrl != null) {
+  }
+  // Caso contrário, usa o caminho para /uploads/utilizador/
+  else if (imageUrl != null) {
     finalImageUrl = '${api.baseUrl}/uploads/utilizador/$imageUrl';
-  } else {
+  }
+  // Se nenhum URL estiver disponível, usa a imagem padrão
+  else {
     finalImageUrl = 'assets/images/default-avatar.jpg';
   }
 
@@ -294,26 +297,27 @@ Widget buildUserAvatar(String? imageUrl, String? idGoogle, {double width = 120, 
   );
 }
 
-ImageProvider<Object> buildUserAvatarImageProvider(String? imageUrl, String? idGoogle) {
-  if (idGoogle != null) {
+ImageProvider<Object> buildUserAvatarImageProvider(String? imageUrl, String? idGoogle, String? idFacebook) {
+  // Verifica se há um idGoogle ou idFacebook e usa diretamente o URL fornecido
+  if (idGoogle != null || idFacebook != null) {
     return NetworkImage(imageUrl ?? 'assets/images/default-avatar.jpg');
-  } else if (imageUrl != null) {
+  }
+  // Caso contrário, usa o caminho para /uploads/utilizador/
+  else if (imageUrl != null) {
     return NetworkImage('${api.baseUrl}/uploads/utilizador/$imageUrl');
-  } else {
+  }
+  // Se nenhum URL estiver disponível, usa a imagem padrão
+  else {
     return const AssetImage('assets/images/default-avatar.jpg');
   }
 }
 
-Widget userCircleAvatar({required String? imageUrl, required String? idGoogle, double radius = 20}) {
+Widget userCircleAvatar({required String? imageUrl, required String? idGoogle, required String? idFacebook, double radius = 20}) {
   return CircleAvatar(
     radius: radius,
-    backgroundImage: buildUserAvatarImageProvider(imageUrl, idGoogle),
-    onBackgroundImageError: (exception, stackTrace) =>
-       Image.asset(
-        'assets/images/default-avatar.jpg',
-        fit: BoxFit.cover,
-        width: radius * 2,
-        height: radius * 2,
-      )
+    backgroundImage: buildUserAvatarImageProvider(imageUrl, idGoogle, idFacebook),
+    onBackgroundImageError: (exception, stackTrace) {
+      const AssetImage('assets/images/default-avatar.jpg');
+    },
   );
 }

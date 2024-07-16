@@ -94,7 +94,7 @@ class _PerfilPageState extends State<PerfilPage> {
                       height: 120,
                       child: ClipRRect(
                           borderRadius: BorderRadius.circular(100),
-                          child: buildUserAvatar(myUser?.foto, myUser?.idGoogle)
+                          child: buildUserAvatar(myUser?.foto, myUser?.idGoogle, myUser?.idFacebook)
                            
                     ),
                     ),

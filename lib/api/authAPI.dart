@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'api.dart';
 
 class AuthApi {
@@ -16,13 +16,9 @@ class AuthApi {
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      print(data);
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', data['token']);
       await prefs.setBool('isLoggedIn', true);
-      if (data['recoveryToken'] != null) {
-        await prefs.setString('recoveryToken', data['recoveryToken']);
-      }
       if (data['recoveryToken'] != null) {
         await prefs.setString('recoveryToken', data['recoveryToken']);
       }
@@ -50,6 +46,15 @@ class AuthApi {
     });
   }
 
+  Future<http.Response> facebookLogin(String id, String nome, String email, String foto) {
+    return api.post('/login/facebook', body: {
+      'id': id,
+      'nome': nome, 
+      'email': email,
+      'foto': foto,
+    });
+  }
+
   Future<http.Response> recuperarPasse(String email) {
     return api.post('/recuperar-passe', body: {
       'email': email,
@@ -62,12 +67,60 @@ class AuthApi {
       'token': recoveryToken,
     });
   }
+
+Future<void> fetchFacebookUserInfo(String accessToken) async {
+  final url = 'https://graph.facebook.com/me?fields=id,name,picture&access_token=$accessToken';
+  
+  try {
+    final response = await http.get(Uri.parse(url));
+    
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      print('User Info: $data');
+      
+      // Acesse o userId do mapa decodificado
+      final userId = data['id'];
+      print('User ID: $userId');
+      
+      // Caso queira acessar outros campos como nome ou imagem:
+      final name = data['name'];
+      final picture = data['picture']['data']['url'];
+      print('Name: $name');
+      print('Picture URL: $picture');
+    } else {
+      print('Erro na solicitação: ${response.statusCode}');
+      print('Resposta: ${response.body}');
+    }
+  } catch (error) {
+    print('Erro ao fazer a solicitação: $error');
+  }
+}
 }
 
+
 class Google {
-  static final _googleSignIn = GoogleSignIn();
+  static final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   static Future<GoogleSignInAccount?> login() => _googleSignIn.signIn();
 
-  static Future logout() => _googleSignIn.signOut();
+  static Future<void> logout() => _googleSignIn.signOut();
+}
+
+
+class Facebook {
+  static Future<String?> login() async {
+    final LoginResult result = await FacebookAuth.i.login(
+      permissions: ['email', 'public_profile'],
+    );
+
+    if (result.status == LoginStatus.success) {
+      return result.message;
+    } else {
+      throw Exception('Failed to login with Facebook: ${result.message}');
+    }
+  }
+
+  static Future<void> logout() async {
+    await FacebookAuth.i.logOut();
+  }
 }

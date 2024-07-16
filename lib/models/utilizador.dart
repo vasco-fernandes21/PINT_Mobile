@@ -11,6 +11,7 @@ class Utilizador {
   final int? idAreaPreferencia;
   final int? idSubareaPreferencia;
   final String? idGoogle;
+  final String? idFacebook;
 
   Utilizador({
     required this.id,
@@ -25,6 +26,7 @@ class Utilizador {
     this.idAreaPreferencia,
     this.idSubareaPreferencia,
     this.idGoogle,
+    this.idFacebook
      });
 
   factory Utilizador.fromJson(Map<String, dynamic> json) {
@@ -40,7 +42,8 @@ class Utilizador {
       ultimoLogin: json['ultimoLogin'],
       idAreaPreferencia: json['idArea'],
       idSubareaPreferencia: json['idSubarea'],
-      idGoogle: json['id_google']
+      idGoogle: json['id_google'],
+      idFacebook: json['id_facebook']
     );
   }
 }

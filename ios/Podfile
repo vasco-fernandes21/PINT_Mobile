@@ -33,11 +33,16 @@ target 'Runner' do
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 
-  # Adicione a dependência do Google Sign-In
+  # Google Maps
+  pod 'GoogleMaps', '~> 9.0'
+  
+  # Google Sign-In
   pod 'GoogleSignIn', '~> 7.1'
   
-  # Adicione a dependência do Google Maps
-  pod 'GoogleMaps'
+  # Facebook SDK
+  pod 'FBSDKCoreKit', '~> 17.0.2'
+  pod 'FBSDKLoginKit', '~> 17.0.2'
+
 
   target 'RunnerTests' do
     inherit! :search_paths
