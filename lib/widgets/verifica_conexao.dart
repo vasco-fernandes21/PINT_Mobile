@@ -5,7 +5,7 @@ import 'package:pint/utils/colors.dart';
 class OfflineIndicator extends StatelessWidget {
   final Widget child;
 
-  const OfflineIndicator({required this.child});
+  OfflineIndicator({required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -21,13 +21,14 @@ class OfflineIndicator extends StatelessWidget {
         return Stack(
           fit: StackFit.expand,
           children: [
+            child,
             if (!connected)
               Positioned(
                 left: 0,
                 right: 0,
                 bottom: 0,
                 child: Container(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: EdgeInsets.all(8.0),
                   color: errorColor,
                   child: const Center(
                     child: Text(
@@ -52,10 +53,10 @@ class ErrorServerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: const Text(
           'Erro ao comunicar com o servidor',
-          style: TextStyle(color: Colors.red),
+          style: TextStyle(color: Colors.red,),
           textAlign: TextAlign.center,
         ),
       ),
@@ -68,7 +69,7 @@ class VerificaConexao extends StatelessWidget {
   final bool isServerOff;
   final Widget child;
 
-  const VerificaConexao({
+  VerificaConexao({
     required this.isLoading,
     required this.isServerOff,
     required this.child,
