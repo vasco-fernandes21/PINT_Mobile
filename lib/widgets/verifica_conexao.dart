@@ -4,8 +4,12 @@ import 'package:pint/utils/colors.dart';
 
 class OfflineIndicator extends StatelessWidget {
   final Widget child;
+  final Duration checkInterval;
 
-  OfflineIndicator({required this.child});
+  OfflineIndicator({
+    required this.child,
+    this.checkInterval = const Duration(seconds: 1),
+  });
 
   @override
   Widget build(BuildContext context) {
