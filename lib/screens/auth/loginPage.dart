@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:pint/screens/auth/novapassPage.dart';
+import 'package:pint/screens/auth/recuperarPage.dart';
+import 'package:pint/screens/auth/registarPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
@@ -31,10 +34,11 @@ class _LoginPageState extends State<LoginPage> {
           var data = response['body'];
           var recoveryToken = data['recoveryToken'] ?? '';
           if (recoveryToken.isNotEmpty) {
-            Navigator.pushReplacementNamed(
+            Navigator.pushReplacement(
               context,
-              '/novapass',
-              arguments: {'recoveryToken': recoveryToken},
+              MaterialPageRoute(
+                builder: (context) => NovaPassPage(),
+              ),
             );
           } else {
             Fluttertoast.showToast(
@@ -334,7 +338,12 @@ class _LoginPageState extends State<LoginPage> {
                         height: 40,
                         child: ElevatedButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, '/registar');
+                            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => RegisterPage(),
+              ),
+            );
                           },
                           child: Text('CRIAR CONTA'),
                           style: ElevatedButton.styleFrom(
@@ -379,7 +388,12 @@ class _LoginPageState extends State<LoginPage> {
                       Container(
                         child: TextButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, '/recuperar');
+                            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => RecuperarPage()
+              ),
+            );
                           },
                           child: const Text(
                             'Esqueceste-te da palavra-passe?',
