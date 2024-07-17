@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pint/api/AvaliacoesAPI.dart';
 import 'package:pint/models/avaliacao.dart';
+import 'package:pint/screens/perfil/outroPerfil.dart';
 import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/evento_functions.dart';
 import 'package:pint/utils/fetch_functions.dart';
@@ -16,8 +17,9 @@ class ComentariosList extends StatefulWidget {
   final List<Avaliacao> comentarios;
   final int eventoId;
   final int myUserId;
+  final int postoId;
 
-  ComentariosList({required this.comentarios, required this.eventoId, required this.myUserId});
+  ComentariosList({required this.comentarios, required this.eventoId, required this.myUserId, required this.postoId});
 
   @override
   _ComentariosListState createState() => _ComentariosListState();
@@ -171,7 +173,16 @@ Future<void> _downvote(int idComentario) async {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ListTile(
-          leading: userCircleAvatar(imageUrl: comentario.fotoUtilizador, idGoogle: comentario.idGoogle, idFacebook: comentario.idFacebook),
+          leading: InkWell(child: userCircleAvatar(imageUrl: comentario.fotoUtilizador, idGoogle: comentario.idGoogle, idFacebook: comentario.idFacebook),
+          onTap: () {
+             Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => OutroPerfilPage(userId: comentario.idUtilizador, postoID: widget.postoId,)
+                            ),
+                          );
+          },
+          ),
           title: AutoSizeText(comentario.nomeUtilizador, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14,), maxLines: 1,),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

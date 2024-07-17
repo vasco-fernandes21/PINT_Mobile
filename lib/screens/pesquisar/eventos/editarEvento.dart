@@ -140,7 +140,6 @@ class _EditarEventoPageState extends State<EditarEventoPage> {
                               MaterialPageRoute(
                                 builder: (context) => EventoPage(
                                   eventoID: widget.evento.id,
-                                  postoID: widget.postoID,
                                 ),
                               ),
                             );

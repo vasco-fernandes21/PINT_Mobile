@@ -65,7 +65,7 @@ class _TodosEventosPageState extends State<TodosEventosPage> {
                               MaterialPageRoute(
                                 builder: (context) => EventoPage(
                                   eventoID: evento.id,
-                                  postoID: widget.postoID,
+                                  
                                 ),
                               ),
                             );

@@ -78,7 +78,6 @@ class _MeusEventosPagePageState extends State<MeusEventosPage> {
                             MaterialPageRoute(
                               builder: (context) => EventoPage(
                                 eventoID: evento.id,
-                                postoID: widget.postoID,
                               ),
                             ),
                           );

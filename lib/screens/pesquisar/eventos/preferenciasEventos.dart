@@ -90,7 +90,7 @@ class _PreferenciasEventosPageState extends State<PreferenciasEventosPage> {
                                 MaterialPageRoute(
                                   builder: (context) => EventoPage(
                                     eventoID: evento.id,
-                                    postoID: widget.postoID,
+                                    
                                   ),
                                 ),
                               );

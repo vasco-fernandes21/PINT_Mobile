@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pint/api/AvaliacoesAPI.dart';
 import 'package:pint/models/avaliacao.dart';
+import 'package:pint/screens/perfil/outroPerfil.dart';
 import 'package:pint/utils/colors.dart';
 import 'package:pint/utils/evento_functions.dart';
 import 'package:pint/utils/fetch_functions.dart';
@@ -15,9 +16,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AvaliacoesList extends StatefulWidget {
   final List<Avaliacao> avaliacoes;
   final int estabelecimentoId;
-  final int myUserId;
+  final int myUserId, postoID;
 
-  AvaliacoesList({required this.avaliacoes, required this.estabelecimentoId, required this.myUserId});
+  AvaliacoesList({required this.avaliacoes, required this.estabelecimentoId, required this.myUserId, required this.postoID});
 
   @override
   _AvaliacoesListState createState() => _AvaliacoesListState();
@@ -191,7 +192,16 @@ class _AvaliacoesListState extends State<AvaliacoesList> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ListTile(
-          leading: userCircleAvatar(imageUrl: avaliacao.fotoUtilizador, idGoogle: avaliacao.idGoogle, idFacebook: avaliacao.idFacebook),
+          leading: InkWell(child: userCircleAvatar(imageUrl: avaliacao.fotoUtilizador, idGoogle: avaliacao.idGoogle, idFacebook: avaliacao.idFacebook),
+          onTap: () {
+             Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => OutroPerfilPage(userId: avaliacao.idUtilizador, postoID: widget.postoID,)
+                            ),
+                          );
+          },
+          ),
           title: AutoSizeText(avaliacao.nomeUtilizador, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14,), maxLines: 1,),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

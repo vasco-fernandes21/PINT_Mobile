@@ -32,11 +32,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pint/utils/evento_functions.dart';
 
 class EventoPage extends StatefulWidget {
-  final int postoID;
   final int eventoID;
 
   EventoPage({
-    required this.postoID,
     required this.eventoID,
   });
 
@@ -353,7 +351,7 @@ Fluttertoast.showToast(
                       context,
                       MaterialPageRoute(
                           builder: (context) => EditarEventoPage(
-                              postoID: widget.postoID, evento: evento!)),
+                              postoID: evento!.idPosto, evento: evento!)),
                     );
                   },
                   icon: const Icon(Icons.edit))
@@ -456,6 +454,32 @@ Fluttertoast.showToast(
                                 height: 15,
                               ),
                               const Text(
+                                  'Detalhes',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  'Morada: ${evento?.morada}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                Text(
+                                  'Telefone: ${evento?.telemovel ?? ' -'}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                Text(
+                                  'Email: ${evento?.email ?? ' -'}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(height: 15),
+                              const Text(
                                 'Localização',
                                 style: TextStyle(
                                   fontSize: 20,
@@ -524,14 +548,14 @@ Fluttertoast.showToast(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              ComentariosList(comentarios: todosComentariosOrdenados, eventoId: evento!.id, myUserId: myUser!.id,),
+                              ComentariosList(comentarios: todosComentariosOrdenados, eventoId: evento!.id, myUserId: myUser!.id, postoId: evento!.idPosto,),
                             ]),
                       )
                     ],
                   ),
                 ),
       ),
-      bottomNavigationBar: NavBar(postoID: widget.postoID, index: 1),
+      bottomNavigationBar: isLoading ? null : NavBar(postoID: evento!.idPosto, index: 1),
     );
   }
 }

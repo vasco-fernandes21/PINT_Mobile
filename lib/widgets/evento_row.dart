@@ -21,7 +21,6 @@ class EventoRow extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (context) => EventoPage(
-                postoID: postoID,
                 eventoID: evento.id,
               ),
             ),

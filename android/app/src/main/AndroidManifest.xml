@@ -48,6 +48,20 @@
                     android:host="192.168.1.13"
                     android:port="3001"
                     android:pathPattern="/estabelecimentos/..*" />
+                <data
+                    android:scheme="https"
+                    android:host="192.168.1.13"
+                    android:port="3001"
+                    android:pathPattern="/eventos/..*" />
+                <data android:scheme="https" />
+                <data
+                    android:scheme="https"
+                    android:host="pint-softinsa.vercel.app"
+                    android:pathPattern="/eventos/..*" />
+                <data
+                    android:scheme="https"
+                    android:host="pint-softinsa.vercel.app"
+                    android:pathPattern="/estabelecimentos/..*" />   
                 <data android:scheme="https" />
             </intent-filter>
         </activity>

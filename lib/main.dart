@@ -59,10 +59,17 @@ GoRouter createRouter(bool isLoggedIn, bool isServerOff) {
         },
       ),
       GoRoute(
-        path: '/estabelecimento/:id',
+        path: '/estabelecimentos/:id',
         builder: (BuildContext context, GoRouterState state) {
           int? estabelecimentoID = int.tryParse(state.pathParameters['id'] ?? '');
           return EstabelecimentoPage(estabelecimentoID: estabelecimentoID ?? 0,);
+        },
+      ),
+      GoRoute(
+        path: '/eventos/:id',
+        builder: (BuildContext context, GoRouterState state) {
+          int? eventoID = int.tryParse(state.pathParameters['id'] ?? '');
+          return EventoPage(eventoID: eventoID ?? 0,);
         },
       ),
     ],

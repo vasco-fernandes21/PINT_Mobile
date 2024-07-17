@@ -6,6 +6,7 @@ import 'package:pint/api/api.dart';
 import 'package:pint/models/estabelecimento.dart';
 import 'package:pint/navbar.dart';
 import 'package:pint/api/postosAreasAPI.dart';
+import 'package:pint/screens/pesquisar/estabelecimentos/albuns.dart';
 import 'package:pint/utils/fetch_functions.dart';
 import 'package:pint/widgets/estabelecimento_card.dart';
 import 'package:pint/widgets/verifica_conexao.dart';
@@ -78,6 +79,14 @@ class _AreaEstabelecimentosState extends State<AreaEstabelecimentos> {
       appBar: AppBar(
         title: Text(widget.NomeArea),
         actions: [
+          IconButton(onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ListAlbumPage(idArea: widget.areaID, idPosto: widget.postoID,),
+              ),
+            );
+          }, icon: const Icon(Icons.photo_album)),
           PopupMenuButton<int>(
             onSelected: (int result) {
               setState(() {

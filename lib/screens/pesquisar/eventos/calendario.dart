@@ -185,7 +185,6 @@ class _CalendarioState extends State<Calendario> {
                               MaterialPageRoute(
                                 builder: (context) => EventoPage(
                                   eventoID: evento.id,
-                                  postoID: widget.postoID,
                                 ),
                               ),
                             );

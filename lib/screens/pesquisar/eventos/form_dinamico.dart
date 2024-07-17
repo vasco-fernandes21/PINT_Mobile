@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class DynamicForm extends StatefulWidget {
   final List<Formulario> formulario;
@@ -95,7 +96,7 @@ class _DynamicFormState extends State<DynamicForm> {
       if (success) {
         print('Respostas enviadas com sucesso!');
         resetForm();
-        Toast.show('Respostas enviadas com sucesso!', context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+        Fluttertoast.showToast('Respostas enviadas com sucesso!', context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
       } else {
         print('Erro ao enviar respostas');
         Toast.show('Erro ao enviar respostas!', context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
@@ -175,7 +176,7 @@ class _DynamicFormState extends State<DynamicForm> {
                                   );
                                 }).toList(),
                                 onChanged: (value) => handleChange(field.id, value),
-                                enabled: form.estado,
+                                enableFeedback: form.estado,
                               );
                             }
                             return SizedBox.shrink();
@@ -229,4 +230,4 @@ class Resposta {
   final DateTime data;
 
   Resposta({required this.id, this.formulario, required this.respostas, this.utilizador, required this.data});
-}
+}*/

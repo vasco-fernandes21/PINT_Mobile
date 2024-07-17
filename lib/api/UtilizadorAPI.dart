@@ -10,6 +10,10 @@ class UtilizadorAPI {
     return api.get('/utilizador/completo');
   }
 
+    Future<http.Response> getUtilizador(int idUtilizador) {
+    return api.get('/utilizador/$idUtilizador');
+  }
+
   Future<http.Response> editarUtilizador(
       int userId,
       String? nome,

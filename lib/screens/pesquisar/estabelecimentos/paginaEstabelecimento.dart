@@ -417,20 +417,6 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                                     mediaAvaliacoes: mediaAvaliacoes,
                                     avaliacoes: avaliacoes,
                                   ),
-                                const SizedBox(height: 10),
-                                //if(avaliacoes.isNotEmpty)
-                                //AvaliacoesWidget(avaliacoes: avaliacoes),
-                                /*const SizedBox(height: 15),
-                            AvaliacaoInput(
-                              controller: _avaliacaoController,
-                              onRatingUpdate: (rating) {
-                                setState(() {
-                                  _rating = rating.round();
-                                  isRatingNull = false;
-                                });
-                              },
-                              validator: isRatingNull,
-                            ),*/
                                 const SizedBox(height: 15),
                                 const Text(
                                   'Detalhes',
@@ -489,10 +475,19 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                                     ),
                                   ),
                                 const SizedBox(height: 15),
+                                const Text(
+                                  'Comentários',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 5,),
                                 AvaliacoesList(
                                     avaliacoes: todasAvaliacoesOrdenadas,
                                     estabelecimentoId: widget.estabelecimentoID,
-                                    myUserId: myUser!.id)
+                                    myUserId: myUser!.id,
+                                    postoID: estabelecimento!.idPosto,)
                               ],
                             ),
                           ),

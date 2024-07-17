@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:pint/api/AlbumAPi.dart';
 import 'package:pint/api/AvaliacoesAPI.dart';
 import 'package:pint/api/EstabelecimentosAPI.dart';
 import 'package:pint/api/EventosAPI.dart';
@@ -9,6 +10,7 @@ import 'package:pint/api/NotificacoesAPI.dart';
 import 'package:pint/api/UtilizadorAPI.dart';
 import 'package:pint/api/api.dart';
 import 'package:pint/api/postosAreasAPI.dart';
+import 'package:pint/models/album.dart';
 import 'package:pint/models/avaliacao.dart';
 import 'package:pint/models/estabelecimento.dart';
 import 'package:pint/models/evento.dart';
@@ -230,6 +232,34 @@ Future<List<Notificacao>> fetchNotificacoes(BuildContext context) async {
   }
 }
 
+Future<List<Album>> fetchAlbuns(BuildContext context, int idPosto, int idArea) async {
+  final api = AlbumAPI();
+  final response = await api.listarAlbuns(idArea, idPosto);
+  if (response.statusCode == 200) {
+    final List<dynamic> data = json.decode(response.body)['data'];
+    return data.map((json) => Album.fromJson(json)).toList();
+  } else {
+    /*ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Erro ao carregar eventos: ${response.statusCode}')),
+    );*/
+    return [];
+  }
+}
+
+Future<List<Foto>> fetchFotosAlbuns(BuildContext context, int idAlbum) async {
+  final api = AlbumAPI();
+  final response = await api.getAlbumFotos(idAlbum);
+  if (response.statusCode == 200) {
+    final List<dynamic> data = json.decode(response.body)['data'];
+    return data.map((json) => Foto.fromJson(json)).toList();
+  } else {
+    /*ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Erro ao carregar eventos: ${response.statusCode}')),
+    );*/
+    return [];
+  }
+}
+
 Future<int> fetchContadorNotificacoes() async {
   try {
     final api = NotificacoesAPI();
@@ -256,6 +286,19 @@ Future<int> fetchContadorNotificacoes() async {
 Future<Utilizador?> fetchUtilizadorCompleto() async {
   final api = UtilizadorAPI();
   final response = await api.getUtilizadorCompleto();
+
+  if (response.statusCode == 200) {
+    final jsonResponse = json.decode(response.body);
+    return Utilizador.fromJson(jsonResponse);
+  } else {
+    print ('Erro ao carregar utilizador: ${response.statusCode}');
+    return null;
+  }
+}
+
+Future<Utilizador?> fetchUtilizador(int idUser) async {
+  final api = UtilizadorAPI();
+  final response = await api.getUtilizador(idUser);
 
   if (response.statusCode == 200) {
     final jsonResponse = json.decode(response.body);

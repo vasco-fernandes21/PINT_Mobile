@@ -1,6 +1,7 @@
 class Evento {
   final int id;
   final int idCriador;
+  final int idPosto;
   final int idArea;
   final int idSubarea;
   final String? nomeArea;
@@ -20,6 +21,7 @@ class Evento {
   Evento({
     required this.id,
     required this.idCriador,
+    required this.idPosto,
     required this.idArea,
     required this.idSubarea,
     required this.estado,
@@ -41,6 +43,7 @@ class Evento {
     return Evento(
       id: json['id'],
       idCriador: json['idCriador'],
+      idPosto: json['idPosto'],
       idArea: json['idArea'],
       idSubarea: json['idSubarea'],
       nomeArea: json['area']['nome'],

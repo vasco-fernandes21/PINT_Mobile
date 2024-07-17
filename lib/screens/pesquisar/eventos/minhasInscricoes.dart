@@ -117,8 +117,7 @@ class MinhasInscricoesPage extends StatefulWidget {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => EventoPage(
-                                          postoID:
-                                              1, // Passe o postoID correto aqui
+                                           // Passe o postoID correto aqui
                                           eventoID: inscricao.idEvento,
                                         ),
                                       ),
