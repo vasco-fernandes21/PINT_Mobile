@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:pint/screens/auth/loginPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../api/api.dart'; // Certifique-se de que o caminho está correto
 
@@ -56,7 +57,12 @@ class _NovaPassPageState extends State<NovaPassPage> {
       );
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.remove('recoveryToken');
-        Navigator.pushReplacementNamed(context, '/');
+        Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => LoginPage(),
+              ),
+            );
     } catch (e) {
       Fluttertoast.showToast(
         msg: e.toString(),

@@ -104,7 +104,7 @@ class _PerfilPageState extends State<PerfilPage> {
                           const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                     ),
                     Text(
-                      myUser!.email ?? '-',
+                      myUser?.email ?? '-',
                     ),
                     const SizedBox(height: 20),
                     SizedBox(

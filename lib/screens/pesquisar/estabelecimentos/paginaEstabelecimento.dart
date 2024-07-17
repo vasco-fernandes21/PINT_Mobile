@@ -339,8 +339,8 @@ class _EstabelecimentoPageState extends State<EstabelecimentoPage> {
                                       );
                                     },
                                     icon: const Icon(Icons.share)),
-                                if (estabelecimento!.precoMedio != null &&
-                                    estabelecimento!.precoMedio != 'NaN')
+                                if (estabelecimento?.precoMedio != null &&
+                                    estabelecimento?.precoMedio != 'NaN')
                                   Text(
                                       'Preço médio : ${estabelecimento!.precoMedio} €'),
                                 TextField(

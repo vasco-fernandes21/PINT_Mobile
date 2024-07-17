@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:pint/screens/auth/loginPage.dart';
 import '../../api/authAPI.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -22,9 +23,10 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  Future<void> _register(String nome, String email) async {
+   Future<void> _register(String nome, String email) async {
     try {
       var response = await authApi.criarConta(nome, email);
+      print('Response Status Code: ${response.statusCode}');
       if (response.statusCode == 201) {
         Fluttertoast.showToast(
           msg: "Registo bem-sucedido!",
@@ -34,7 +36,12 @@ class _RegisterPageState extends State<RegisterPage> {
           textColor: Colors.white,
           fontSize: 16.0,
         );
-        Navigator.pushReplacementNamed(context, '/login');
+        Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => LoginPage(),
+              ),
+            );
       } else if (response.statusCode == 400) {
         var error = jsonDecode(response.body)['error'];
         Fluttertoast.showToast(
