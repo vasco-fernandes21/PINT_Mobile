@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pint/models/inscricao.dart'; // Para formatar a data
 
-
 class TabelaInscricoes extends StatelessWidget {
   final List<Inscricao> inscricoes;
 
@@ -10,6 +9,7 @@ class TabelaInscricoes extends StatelessWidget {
 
   String formatarData(String data) {
     DateTime dateTime = DateTime.parse(data);
+    dateTime = dateTime.add(Duration(hours: 1)); // Adiciona 1 hora
     return DateFormat('dd/MM/yy HH:mm').format(dateTime);
   }
 
@@ -20,13 +20,13 @@ class TabelaInscricoes extends StatelessWidget {
         DataColumn(
           label: Text(
             'Nome',
-            style: TextStyle(fontWeight:FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
         DataColumn(
           label: Text(
             'Data',
-            style: TextStyle(fontWeight:FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
       ],

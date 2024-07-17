@@ -24,7 +24,7 @@ class AlbumAPI {
   }
 
       Future<Response> criarAlbum(
-      String? nome, String? descricao, int idArea,File foto, String? token) async {
+      String? nome, String? descricao, int idArea,File foto, String? token, int idPosto) async {
     final url = '${api.baseUrl}/album/';
 
     var formData = FormData.fromMap({
@@ -32,6 +32,7 @@ class AlbumAPI {
       'descricao' : descricao,
       'idArea' : idArea,
       'foto': await MultipartFile.fromFile(foto.path),
+      'idPosto': idPosto
     });
     var response = await dio.post(url, data: formData, options: Options(
       headers: {

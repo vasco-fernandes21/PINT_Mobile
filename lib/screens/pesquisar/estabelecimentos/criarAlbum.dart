@@ -53,6 +53,7 @@ class _CreateAlbumPageState extends State<CreateAlbumPage> {
       final SharedPreferences prefs = await _prefs;
       setState(() {
         token = prefs.getString('token');
+        print(token);
       });
       final fetchedUser = await fetchUtilizadorCompleto();
       setState(() {
@@ -109,7 +110,7 @@ class _CreateAlbumPageState extends State<CreateAlbumPage> {
       if (_formKey.currentState?.validate() ?? false) {
       try {
       final api_album = AlbumAPI();
-      await api_album.criarAlbum(_nomeController.text, _descriptionController.text, selectedAreaId!, _image!, token);
+      await api_album.criarAlbum(_nomeController.text, _descriptionController.text, selectedAreaId!, _image!, token, widget.idPosto);
       Fluttertoast.showToast(msg: 'Álbum enviado para aprovação!', fontSize: 12, backgroundColor: successColor);
       } catch (e) {
         Fluttertoast.showToast(msg: 'Erro ao criar álbum', fontSize: 12, backgroundColor: errorColor);
